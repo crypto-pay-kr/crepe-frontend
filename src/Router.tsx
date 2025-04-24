@@ -10,6 +10,7 @@ import PhoneVerificationPage from "@/app/verification/page";
 import AdditionalInfoPage from "@/app/additional-info/page";
 import SignupCompletePage from "@/app/signup-complete/page";
 import LoginHomePage from "@/app/login/page";
+import AdditionalStoreInfoPage from "./app/additional-store-info/page";
 
 function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gray"; toggleButtonColor: () => void }) {
   useEffect(() => {
@@ -35,6 +36,7 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/additional-info" element={<AdditionalInfoPage />} />
         <Route path="/signup-complete" element={<SignupCompletePage />} />
         <Route path="/login" element={<LoginHomePage />} />
+        <Route path="/store-info" element={<AdditionalStoreInfoPage />} />
       </Routes>
     </BrowserRouter>
   )

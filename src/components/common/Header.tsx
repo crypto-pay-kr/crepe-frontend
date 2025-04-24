@@ -4,9 +4,10 @@ import ProgressBar from "./ProgressBar";
 interface HeaderProps {
   title: string
   progress?: number // 0-3 for progress bar
+  isStore?: boolean
 }
 
-export default function Header({ title, progress }: HeaderProps) {
+export default function Header({ title, progress, isStore = false }: HeaderProps) {
   return (
     <>
       <div className={`bg-[${COLORS.blue}] text-white`}>
@@ -29,7 +30,7 @@ export default function Header({ title, progress }: HeaderProps) {
           <h1 className="text-lg font-medium flex-1 text-center pr-8 text-white">{title}</h1>
         </div>
       </div>
-      {progress !== undefined && <ProgressBar progress={progress} />}
+      {progress !== undefined && <ProgressBar progress={progress} isStore={isStore} />}
     </>
-  )
+  );
 }

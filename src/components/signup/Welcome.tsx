@@ -5,10 +5,11 @@ import Button from "../common/Button"
 interface WelcomeProps {
   onLogin: () => void
   onSignup: () => void
+  onStoreSignup: () => void
   buttonClassName?: string
 }
 
-export default function Welcome({ onLogin, onSignup, buttonClassName = "" }: WelcomeProps) {
+export default function Welcome({ onLogin, onSignup, onStoreSignup, buttonClassName = "" }: WelcomeProps) {
   return (
     <div className="h-full flex flex-col">
       <div className="text-center mb-10 mt-20">
@@ -31,7 +32,7 @@ export default function Welcome({ onLogin, onSignup, buttonClassName = "" }: Wel
         </div>
         <div className="text-center">
           <span>사장님이신가요? </span>
-          <button className="text-[#0a5ca8] font-medium" onClick={onSignup}>
+          <button className="text-[#0a5ca8] font-medium" onClick={onStoreSignup}>
             가맹점 회원가입하기
           </button>
         </div>

@@ -1,10 +1,20 @@
 "use client"
 
 import TermsAgreement from "@/components/signup/TermsAgreement"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 
 export default function TermsAgreementPage() {
   const navigate = useNavigate()
+  const location = useLocation()
 
-  return <TermsAgreement onNext={() => navigate("/email")} />
+  const handleNext = () => {
+    const params = new URLSearchParams(location.search)
+    if (params.get("store") === "true") {
+      navigate("/email?store=true") 
+    } else {
+      navigate("/email") 
+    }
+  }
+
+  return <TermsAgreement onNext={handleNext} />
 }

@@ -1,10 +1,19 @@
 "use client"
 
 import EmailPasswordFilled from "@/components/signup/EmailPasswordFilled"
-import { useNavigate } from "react-router-dom"
+import { useNavigate,useLocation } from "react-router-dom"
 
 export default function EmailPasswordFilledPage() {
   const navigate = useNavigate()
+  const location = useLocation()
 
-  return <EmailPasswordFilled onNext={() => navigate("/phone-verification")} />
+  const handleNext = () => {
+    const params = new URLSearchParams(location.search)
+    if (params.get("store") === "true") {
+      navigate("/phone-verification?store=true")
+    } else {
+      navigate("/phone-verification")
+    }
+  }
+  return <EmailPasswordFilled onNext={handleNext} />
 }
