@@ -11,6 +11,9 @@ import AdditionalInfoPage from "@/app/additional-info/page";
 import SignupCompletePage from "@/app/signup-complete/page";
 import LoginHomePage from "@/app/login/page";
 import AdditionalStoreInfoPage from "./app/additional-store-info/page";
+import MyPage from "./app/mypage/page";
+import EditInfo from "./app/edit-info/page";
+import SettlementReport from "./app/store-report/page";
 
 function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gray"; toggleButtonColor: () => void }) {
   useEffect(() => {
@@ -27,6 +30,10 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<SplashPage />} />
+        <Route path= "/home/my" element={<MyPage />} />
+        <Route path="/home/my/edit-info" element={<EditInfo />} />
+        <Route path= "/store/my" element={<MyPage />} />
+        <Route path="/store/my/settlement-report" element={<SettlementReport />} />
         <Route path="/welcome" element={<WelcomePage />} />
         <Route path="/terms" element={<TermsAgreementPage />} />
         <Route path="/email" element={<EmailPasswordPage />} />
