@@ -25,6 +25,7 @@ export const ButtonVariants = cva(
     },
   }
 )
+
 interface ButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof ButtonVariants> {
@@ -32,11 +33,25 @@ interface ButtonProps
   value?: string | number | readonly string[] | undefined
   customContent?: ReactNode
   shadow?: boolean
+  type?: 'submit' | 'button'
 }
 
-const Button: FC<ButtonProps> = ({ theme, size, shadow, ...props }) => {
+const Button: FC<ButtonProps> = ({ 
+  theme, 
+  size, 
+  shadow, 
+  onClick, 
+  disabled, 
+  value, 
+  type = 'button',
+  customContent,
+  ...props 
+}) => {
   return (
     <button
+      onClick={onClick}
+      disabled={disabled}
+      type={type}
       {...props}
       className={cn(ButtonVariants({ theme, size }), props.className)}
       style={{
@@ -45,32 +60,9 @@ const Button: FC<ButtonProps> = ({ theme, size, shadow, ...props }) => {
         ...props.style,
       }}
     >
-      {props.customContent ? props.customContent : props.value}
+      {customContent ? customContent : value}
     </button>
   )
 }
 
 export default Button
-
-export function Buttonn({
-  onClick,
-  disabled,
-  value,
-  type,
-}: {
-  onClick?: () => void
-  disabled?: boolean
-  value: string
-  type?: 'submit' | 'button'
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="height-[38px] w-full rounded-[10px] bg-pink03 py-[10.5px] text-[18px] font-bold text-white disabled:bg-gray09"
-      disabled={disabled}
-      type={type ?? 'button'}
-    >
-      {value}
-    </button>
-  )
-}

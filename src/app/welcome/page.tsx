@@ -10,6 +10,7 @@ export default function WelcomePage() {
     <Welcome
       onLogin={() => navigate("/login")}
       onSignup={() => navigate("/terms")}
+      onStoreSignup={() => navigate("/terms?store=true")}
       buttonClassName="mx-auto px-4"
     />
   )
