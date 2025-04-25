@@ -1,19 +1,18 @@
-"use client"
-
 import EmailPassword from "@/components/signup/EmailPassword"
-import { useNavigate,useLocation } from "react-router-dom" 
+import { useNavigate, useLocation } from "react-router-dom" 
 
 export default function EmailPasswordPage() {
   const navigate = useNavigate() 
   const location = useLocation()
+  const isStore = location.search.includes("store=true")
 
   const handleNext = () => {
-    const params = new URLSearchParams(location.search)
-    if (params.get("store") === "true") {
-      navigate("/email-filled?store=true") 
+    if (!isStore) {
+      navigate("/phone-number")
     } else {
-      navigate("/email-filled") 
+      navigate("/phone-number?store=true")
     }
   }
-  return <EmailPassword onNext={handleNext} /> 
+
+  return <EmailPassword onNext={handleNext} isStore={isStore} /> 
 }

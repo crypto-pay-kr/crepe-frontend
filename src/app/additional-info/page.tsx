@@ -1,7 +1,7 @@
 "use client"
 
 import AdditionalInfo from "@/components/signup/AdditionalInfo"
-import { useNavigate } from "react-router-dom" // Updated import
+import { useNavigate } from "react-router-dom" 
 
 export default function AdditionalInfoPage() {
   const navigate = useNavigate() // Updated hook

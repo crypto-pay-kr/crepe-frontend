@@ -1,18 +1,15 @@
-"use client"
-
 import PhoneVerification from "@/components/signup/PhoneVerification"
-import { useNavigate,useLocation } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 
 export default function PhoneVerificationPage() {
   const navigate = useNavigate()
   const location = useLocation()
-
+  const isStore = location.search.includes("store=true")
   const handleNext = () => {
-    const params = new URLSearchParams(location.search)
-    if (params.get("store") === "true") {
-      navigate("/store-info")
-    } else {
+    if (!isStore) {
       navigate("/additional-info")
+    } else {
+      navigate("/store-info")
     }
   }
 

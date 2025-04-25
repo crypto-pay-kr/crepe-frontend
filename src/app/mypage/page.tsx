@@ -2,8 +2,8 @@ import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Home, ShoppingBag, User } from "lucide-react";
 import Header from "@/components/common/Header";
-import ProfileHeader from "@/components/profile/ProfileHeader";
-import MenuList, { MenuOption } from "@/components/profile/MenuList";
+import ProfileHeader from "@/components/profile/ProfileHeader";
+import MenuList, { MenuOption } from "@/components/profile/MenuList";
 import BottomNav from "@/components/common/BottomNavigate";
 
 export default function MyPage(): React.ReactElement {

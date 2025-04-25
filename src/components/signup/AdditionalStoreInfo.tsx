@@ -1,13 +1,11 @@
-"use client"
-
 import type React from "react"
-
 import { useState } from "react"
-import { ChevronDown, ChevronLeft, Camera } from "lucide-react"
+import { useNavigate } from "react-router-dom" // React Router 사용
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../common/select"
 import Button from "../common/Button"
 import Input from "../common/TextInput"
 import Header from "../common/Header"
+import ImageUploader from "../common/ImageUploader"
 
 interface StoreFormData {
   storeType: string
@@ -17,13 +15,14 @@ interface StoreFormData {
 }
 
 export default function StoreRegistrationForm() {
+  const navigate = useNavigate() 
   const [formData, setFormData] = useState<StoreFormData>({
     storeType: "",
     storeName: "",
     address: "",
     image: null,
   })
-
+  
   const [isButtonDisabled, setIsButtonDisabled] = useState(true)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,11 +36,9 @@ export default function StoreRegistrationForm() {
     validateForm({ ...formData, storeType: value })
   }
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFormData((prev) => ({ ...prev, image: e.target.files![0] }))
-      validateForm({ ...formData, image: e.target.files![0] })
-    }
+  const handleImageChange = (file: File) => {
+    setFormData((prev) => ({ ...prev, image: file }))
+    validateForm({ ...formData, image: file })
   }
 
   const validateForm = (data: StoreFormData) => {
@@ -51,17 +48,20 @@ export default function StoreRegistrationForm() {
 
   const onNext = () => {
     console.log("Form submitted:", formData)
-    // Handle navigation or API call here
+    // 필요한 데이터 처리 후
+    
+    // 다음 페이지로 이동
+    navigate("/store/verification")
   }
 
   return (
     <div className="flex flex-col h-screen bg-white">
-      {/* Header */}
-      <Header title="회원가입" progress={3} isStore={true} />
+      
+      <Header title="회원가입" progress={4} isStore={true} />
 
       {/* Form content */}
       <div className="flex-1 p-6 flex flex-col">
-        <div className="mb-8">
+        <div className="mb-6">
           <h2 className="text-2xl font-bold">가게 정보를</h2>
           <h2 className="text-2xl font-bold">입력해주세요</h2>
         </div>
@@ -72,7 +72,6 @@ export default function StoreRegistrationForm() {
             <Select onValueChange={handleSelectChange}>
               <SelectTrigger className="w-full border-t-0 border-x-0 border-b border-gray-300 rounded-none py-3 focus:ring-0">
                 <SelectValue placeholder="음식점" />
-
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="restaurant">음식점</SelectItem>
@@ -94,6 +93,7 @@ export default function StoreRegistrationForm() {
           </div>
 
           {/* Address */}
+          <div>
             <Input
               name="address"
               value={formData.address}
@@ -103,25 +103,26 @@ export default function StoreRegistrationForm() {
             />
           </div>
 
-          {/* Image Upload */}
-          <div className="mt-8">
-            <p className="text-sm text-gray-500 mb-2">대표 이미지</p>
-            <label htmlFor="image-upload" className="cursor-pointer">
-              <div className="border border-gray-300 rounded-lg p-3 flex items-center justify-center">
-                <div className="flex items-center text-gray-500">
-                  <Camera className="mr-2" size={20} />
-                  <span>컴퓨터에서 업로드</span>
-                </div>
-              </div>
-              <input id="image-upload" type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-            </label>
+          {/* Image Upload Component */}
+          <div className="mt-4 mb-1">
+            <ImageUploader 
+              value={formData.image}
+              onChange={handleImageChange}
+              label="대표 이미지"
+              previewLabel="첨부된 이미지"
+            />
           </div>
         </div>
 
         {/* Next Button */}
         <div className="mt-auto mb-4">
-          <Button text="다음" onClick={onNext} color={isButtonDisabled ? "gray" : "blue"}  />
+          <Button 
+            text="다음" 
+            onClick={onNext} 
+            color={isButtonDisabled ? "gray" : "blue"} 
+          />
         </div>
       </div>
+    </div>
   )
 }

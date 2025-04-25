@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import Header from "../common/Header"
 import Button from "../common/Button"
@@ -10,7 +8,11 @@ interface PhoneVerificationProps {
   onToggleColor: () => void
 }
 
-export default function PhoneVerification({ onNext, buttonColor, onToggleColor }: PhoneVerificationProps) {
+export default function PhoneVerification({ 
+  onNext, 
+  buttonColor, 
+  onToggleColor,
+}: PhoneVerificationProps) {
   const [verificationCode, setVerificationCode] = useState(["", "", "", "", "", ""])
 
   const handleCodeChange = (index: number, value: string) => {
@@ -33,7 +35,7 @@ export default function PhoneVerification({ onNext, buttonColor, onToggleColor }
 
   return (
     <div className="h-full flex flex-col">
-      <Header title="회원가입" progress={2} />
+      <Header title="회원가입" progress={3}/>
       <div className="flex-1 flex flex-col p-5">
         <div className="mb-4">
           <h2 className="text-2xl font-bold mb-2">휴대폰 번호 인증</h2>
