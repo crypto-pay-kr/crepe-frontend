@@ -6,12 +6,14 @@ interface PhoneVerificationProps {
   onNext: () => void
   buttonColor: "blue" | "gray"
   onToggleColor: () => void
+  isStore?: boolean
 }
 
 export default function PhoneVerification({ 
   onNext, 
   buttonColor, 
   onToggleColor,
+  isStore,
 }: PhoneVerificationProps) {
   const [verificationCode, setVerificationCode] = useState(["", "", "", "", "", ""])
 
@@ -34,8 +36,8 @@ export default function PhoneVerification({
   const isButtonDisabled = verificationCode.some((digit) => !digit)
 
   return (
-    <div className="h-full flex flex-col">
-      <Header title="회원가입" progress={3}/>
+    <div className="h-full flex flex-col ">
+      <Header title="회원가입" progress={3} isStore={isStore}/>
       <div className="flex-1 flex flex-col p-5">
         <div className="mb-4">
           <h2 className="text-2xl font-bold mb-2">휴대폰 번호 인증</h2>

@@ -35,13 +35,11 @@ const BusinessVerification: React.FC = () => {
   return (
     <div className="flex flex-col h-screen bg-white">
       {/* Header */}
-      <Header title="회원 가입" progress={5} isStore={true} />
+      <Header title="회원 가입" progress={4} isStore={false} />
 
       {/* Main content */}
-      <main className="flex-1 p-4 flex flex-col">
-        <h2 className="text-xl font-bold mb-2">사업자 인증</h2>
-        
-        {/* 사업자 등록번호 입력 필드를 wrapper로 감싸 margin 추가 */}
+      <main className="flex-1 flex flex-col p-6">
+        <h2 className="text-2xl font-bold mb-2">사업자 인증</h2>  
         <div className="mb-6">
           <Input
             label="사업자 등록번호"

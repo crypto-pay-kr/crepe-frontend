@@ -17,6 +17,7 @@ export default function PhoneVerificationPage() {
     <PhoneVerification
       onNext={handleNext}
       buttonColor="blue"
+      isStore={isStore}
       onToggleColor={() => {}}
     />
   )

@@ -47,7 +47,6 @@ export default function StoreRegistrationForm() {
   }
 
   const onNext = () => {
-    console.log("Form submitted:", formData)
     // 필요한 데이터 처리 후
     
     // 다음 페이지로 이동
@@ -60,6 +59,7 @@ export default function StoreRegistrationForm() {
       <Header title="회원가입" progress={4} isStore={true} />
 
       {/* Form content */}
+      
       <div className="flex-1 p-6 flex flex-col">
         <div className="mb-6">
           <h2 className="text-2xl font-bold">가게 정보를</h2>
