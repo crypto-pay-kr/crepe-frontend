@@ -11,11 +11,14 @@ import AdditionalInfoPage from "@/app/additional-info/page";
 import SignupCompletePage from "@/app/signup-complete/page";
 import LoginHomePage from "@/app/login/page";
 import AdditionalStoreInfoPage from "./app/additional-store-info/page";
+import ShoppingMallPage from "@/app/shoppingmall/page";
+import ShoppingMallDetailPage from "@/app/shoppingmall/store/page";
 import MyPage from "./app/mypage/page";
 import EditInfo from "./app/edit-info/page";
 import SettlementReport from "./app/store-report/page";
 import StoreEditInfo from "./app/store-edit-info/page";
 import MenuEdit from "./app/menu-add/page";
+
 
 function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gray"; toggleButtonColor: () => void }) {
   useEffect(() => {
@@ -47,8 +50,11 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/signup-complete" element={<SignupCompletePage />} />
         <Route path="/login" element={<LoginHomePage />} />
         <Route path="/store-info" element={<AdditionalStoreInfoPage />} />
+        <Route path="/shoppingmall" element={<ShoppingMallPage/>} />
+        <Route path="/shoppingmall/store/:id" element={<ShoppingMallDetailPage />} />
         <Route path="/store/menu/add" element={<MenuEdit/>} />
         <Route path="/store/menu/edit" element={<MenuEdit/>} />
+
       </Routes>
     </BrowserRouter>
   )
