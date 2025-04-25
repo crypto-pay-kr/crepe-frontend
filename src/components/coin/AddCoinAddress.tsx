@@ -16,26 +16,6 @@ export default function AddCoinAddress() {
   const [tagAddress, setTagAddress] = useState("")
   const isSeller = location.pathname.includes('/store');
 
-  const navItems = [
-    {
-      icon: <Home className="w-6 h-6" color="white" />,
-      label: "홈",
-      isActive: false,
-      onClick: () => navigate("/home")
-    },
-    {
-      icon: <ShoppingBag className="w-6 h-6" color="white" />,
-      label: "쇼핑몰",
-      isActive: false,
-      onClick: () => navigate("/shop")
-    },
-    {
-      icon: <User className="w-6 h-6" color="white" />,
-      label: "마이페이지",
-      isActive: true,
-      onClick: () => navigate(isSeller ? "/store/my" : "/home/my")
-    }
-  ];
 
   const onNext = () => {
     if (!symbol) {
@@ -104,7 +84,7 @@ export default function AddCoinAddress() {
       </div>
 
       {/* Bottom Navigation */}
-      <BottomNav navItems={navItems} />
+      <BottomNav />
     </div>
   )
 }
