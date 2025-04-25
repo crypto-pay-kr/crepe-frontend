@@ -1,22 +1,50 @@
 "use client"
 
-import { useState } from "react"
-import { ChevronLeft, Clock, Copy, Home, Info, ShoppingBag, User, ChevronDown } from "lucide-react"
+import { Home, ShoppingBag, User} from "lucide-react"
 import Header from '@/components/common/Header'
 import Button from '@/components/common/Button'
-import { useNavigate } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
+import BottomNav from '@/components/common/BottomNavigate'
 
-export default function TransactionDetails() {
-  const [copied, setCopied] = useState(false)
-  const navigate = useNavigate()
+export default function ShowTransationId() {
+  const navigate = useNavigate();
+  const { symbol } = useParams();
 
+  const isSeller = location.pathname.includes('/store');
 
+  const navItems = [
+    {
+      icon: <Home className="w-6 h-6" color="white" />,
+      label: "홈",
+      isActive: false,
+      onClick: () => navigate("/home")
+    },
+    {
+      icon: <ShoppingBag className="w-6 h-6" color="white" />,
+      label: "쇼핑몰",
+      isActive: false,
+      onClick: () => navigate("/shop")
+    },
+    {
+      icon: <User className="w-6 h-6" color="white" />,
+      label: "마이페이지",
+      isActive: true,
+      onClick: () => navigate(isSeller ? "/store/my" : "/home/my")
+    }
+  ];
 
   const isButtonDisabled = false
 
   const onNext = () => {
-    navigate('/home-coin-transaction') // 다음 페이지로 수정 필요
+    if (!symbol) {
+      alert("코인 심볼이 없습니다.");
+      return;
+    }
+    navigate(`/coin-detail/${symbol}`, {
+      state: { isUser: true, symbol:symbol } // 필요 시 isUser 등도 같이 전달
+    });
   }
+
 
   return (
     <div className="flex flex-col h-screen bg-white">
@@ -68,20 +96,7 @@ export default function TransactionDetails() {
 
 
       {/* Bottom Navigation */}
-      <div className="flex justify-around items-center py-3 border-t border-gray-200 bg-white">
-        <button className="flex flex-col items-center text-[#0a2158]">
-          <Home size={24} />
-          <span className="text-xs mt-1">홈</span>
-        </button>
-        <button className="flex flex-col items-center text-gray-500">
-          <ShoppingBag size={24} />
-          <span className="text-xs mt-1">쇼핑몰</span>
-        </button>
-        <button className="flex flex-col items-center text-gray-500">
-          <User size={24} />
-          <span className="text-xs mt-1">마이페이지</span>
-        </button>
-      </div>
+      <BottomNav navItems={navItems} />
     </div>
   )
 }

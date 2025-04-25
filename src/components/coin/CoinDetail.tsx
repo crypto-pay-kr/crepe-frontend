@@ -1,8 +1,10 @@
-import { Wifi, X } from "lucide-react"
-import BottomNavigation from "@/components/common/BottomNavigate"
+import { Home, ShoppingBag, User, X } from 'lucide-react'
 import Header from "@/components/common/Header"
 import { useNavigate, useParams, useLocation } from "react-router-dom"
-import { useState } from "react"
+import React, { useState } from "react"
+import BottomNav from '@/components/common/BottomNavigate'
+
+
 
 export default function CoinDetailPage() {
   const { symbol } = useParams()
@@ -12,11 +14,32 @@ export default function CoinDetailPage() {
 
 
 // 예시 상태: "not_registered" | "pending" | "registered"
-  const accountStatus = "registered"
+  const accountStatus = "pending" as "registered" | "not_registered" | "pending";
   const [showModal, setShowModal] = useState(false)
 
   const navigate = useNavigate()
+  const isSeller = location.pathname.includes('/store');
 
+  const navItems = [
+    {
+      icon: <Home className="w-6 h-6" color="white" />,
+      label: "홈",
+      isActive: false,
+      onClick: () => navigate("/home")
+    },
+    {
+      icon: <ShoppingBag className="w-6 h-6" color="white" />,
+      label: "쇼핑몰",
+      isActive: false,
+      onClick: () => navigate("/shop")
+    },
+    {
+      icon: <User className="w-6 h-6" color="white" />,
+      label: "마이페이지",
+      isActive: true,
+      onClick: () => navigate(isSeller ? "/store/my" : "/home/my")
+    }
+  ];
   const coinMeta = {
     XRP: {
       name: "리플",
@@ -53,7 +76,9 @@ export default function CoinDetailPage() {
 
   return (
     <div className="h-full flex flex-col bg-gray-50">
-      <Header title={`${coin.name} 상세`} onBack={() => navigate(-1)} />
+      <Header title={`${coin.name} 상세`}   onBackClick={() => {
+        navigate(isUser ? "/user-coin" : "/store-coin")
+      }} />
 
       <main className="flex-1 overflow-auto p-5">
         {/* 보유 자산 카드 */}
@@ -78,10 +103,12 @@ export default function CoinDetailPage() {
             className="w-full bg-[#0a2e64] text-white py-4 rounded-xl text-lg font-semibold shadow"
             onClick={() => {
               if (isUser) {
-                navigate("/chargeCoin", { state: { isUser } })
+                navigate(`/home-coin-address/${symbol}`, { state: { isUser,symbol } })
               } else {
-                if (accountStatus=="registered") {
+                if (accountStatus==="registered") {
                   navigate("/adjustmentCoin", { state: { isUser ,symbol } })
+                }else if (accountStatus==="not_registered") {
+                  navigate("/add-coin-address", { state: { isUser ,symbol } })
                 }
               }
             }}
@@ -91,40 +118,69 @@ export default function CoinDetailPage() {
               : accountStatus === "registered"
                 ? "정산 요청"
                 : accountStatus === "pending"
-                  ? "계좌가 등록중입니다. 기다려주세요"
+                  ? "계좌 등록중입니다..."
                   : "계좌 등록"
             }
           </button>
 
           {/* 회색 비활성 텍스트 박스 */}
           {!isUser && (
-          <div className="w-full bg-gray-200 text-gray-500 text-center py-3 rounded-xl text-base font-medium mt-3"
-          onClick={() => {accountStatus === "registered"? setShowModal(true):setShowModal(false)}}>
-
-            {accountStatus === "registered"
-              ? "계좌가 등록되었습니다"
-              : accountStatus === "pending"
-                ? "계좌가 등록중입니다"
-                : "계좌가 등록되지 않았습니다"}
-          </div>
-            )}
+            <div
+              className="w-full bg-gray-200 text-center py-3 rounded-xl text-base font-medium mt-3"
+              style={{ boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.1)' }}
+              onClick={() => {
+                if (accountStatus === "registered" || accountStatus === "pending") {
+                  setShowModal(true)
+                } else {
+                  setShowModal(false)
+                }
+              }}
+            >
+    <span className={
+      accountStatus === "registered"
+        ? "text-gray-500"
+        : accountStatus === "pending"
+          ? "text-gray-500"
+          : "text-red-500"
+    }>
+      {accountStatus === "registered"
+        ? "계좌가 등록되었습니다"
+        : accountStatus === "pending"
+          ? "계좌가 등록중입니다"
+          : "계좌가 등록되지 않았습니다"}
+    </span>
+            </div>
+          )}
         </div>
-
 
         {showModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-            <div className="bg-white rounded-2xl p-6 text-center w-[320px] shadow-xl">
-              {/* 주소 1 */}
-              <p className="text-base font-semibold mb-2">나의 입금 주소</p>
-              <p className="text-sm text-red-500 break-words">TNgzweoDR23DDKFodjkfn20d</p>
-              <hr className="my-4 border-t border-gray-200" />
+            <div className="bg-white rounded-2xl px-6 py-8 text-center w-[320px] shadow-lg">
+              {/* 제목 */}
+              <h2 className="text-lg font-bold mb-6">{coin?.name} 코인 입금 주소 </h2>
 
-              {/* 주소 2 */}
-              <p className="text-base font-semibold mb-2">나의 태그 주소</p>
-              <p className="text-sm text-red-500 break-words">1312412432</p>
+              {/* 내 주소 */}
+              <div className="mb-6">
+                <p className="text-sm font-medium mb-1 text-gray-600">내 주소</p>
+                <div className="w-full border border-gray-200 rounded-xl py-3 px-4 text-blue-900 font-semibold text-sm bg-gray-50">
+                  TNgzweoDR23DDKFodjkfn20d
+                </div>
+              </div>
+
+              {/* 태그 주소 - XRP일 때만 표시 */}
+              {symbol === "XRP" && (
+                <div className="mb-6">
+                  <p className="text-sm font-medium mb-1 text-gray-600">태그 주소</p>
+                  <div className="w-full border border-gray-200 rounded-xl py-3 px-4 text-blue-900 font-semibold text-sm bg-gray-50">
+                    1312412432
+                  </div>
+                </div>
+              )}
 
               {/* 안내 문구 */}
-              <p className="text-sm text-gray-500 mt-6 mb-4">계좌를 잘못 입력했다면? 재등록하기</p>
+              <p className="text-sm text-gray-500 mb-6">
+                계좌를 잘못 입력했다면? <span className="underline cursor-pointer">재등록하기</span>
+              </p>
 
               {/* 닫기 버튼 */}
               <button
@@ -175,7 +231,7 @@ export default function CoinDetailPage() {
         </div>
       </main>
 
-      <BottomNavigation activeTab="home" />
+      <BottomNav navItems={navItems} />
     </div>
   )
 }

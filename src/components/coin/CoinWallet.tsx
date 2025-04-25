@@ -1,18 +1,43 @@
-import { ChevronRight, ShoppingBag, Check, X } from "lucide-react"
-import BottomNavigation from '@/components/common/BottomNavigate'
+import { ChevronRight, ShoppingBag, Check, X, Home, User } from 'lucide-react'
+
+
 import Header from '@/components/common/Header'
 import { useNavigate } from "react-router-dom"
+import BottomNav from '@/components/common/BottomNavigate'
+import React from 'react'
 
 interface CryptoWalletProps {
   isUser: boolean
 }
 
-export default function CryptoWallet({ isUser }: CryptoWalletProps) {
+export default function CoinWallet({ isUser }: CryptoWalletProps) {
   const navigate = useNavigate();
 
   const handleCoinClick = (symbol: string) => {
     navigate(`/coin-detail/${symbol}`, { state: { isUser } });
   };
+  const isSeller = location.pathname.includes('/store');
+
+  const navItems = [
+    {
+      icon: <Home className="w-6 h-6" color="white" />,
+      label: "홈",
+      isActive: false,
+      onClick: () => navigate("/home")
+    },
+    {
+      icon: <ShoppingBag className="w-6 h-6" color="white" />,
+      label: "쇼핑몰",
+      isActive: false,
+      onClick: () => navigate("/shop")
+    },
+    {
+      icon: <User className="w-6 h-6" color="white" />,
+      label: "마이페이지",
+      isActive: true,
+      onClick: () => navigate(isSeller ? "/store/my" : "/home/my")
+    }
+  ];
 
   const coins = [
     {
@@ -50,7 +75,7 @@ export default function CryptoWallet({ isUser }: CryptoWalletProps) {
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <Header title={'나의자산 확인하기'} onBack={() => navigate(-1)} />
+      <Header title={'나의자산 확인하기'} onBackClick={() => navigate(-1)} />
 
       <main className="flex-1 overflow-auto bg-gray-100">
         {/* Balance Card */}
@@ -156,7 +181,7 @@ export default function CryptoWallet({ isUser }: CryptoWalletProps) {
       </main>
 
       {/* Bottom Navigation */}
-      <BottomNavigation activeTab={'home'} />
+      <BottomNav navItems={navItems} />
     </div>
   )
 }

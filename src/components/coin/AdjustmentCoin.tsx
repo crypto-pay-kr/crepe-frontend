@@ -1,7 +1,8 @@
-import { useState } from 'react'
-import BottomNavigation from "@/components/common/BottomNavigate"
+import React, { useState } from 'react'
 import Header from "@/components/common/Header"
 import { useLocation, useNavigate } from 'react-router-dom'
+import BottomNav from '@/components/common/BottomNavigate'
+import { Home, ShoppingBag, User } from 'lucide-react'
 
 export default function adjustmentCoin() {
   const [amount, setAmount] = useState("3.45")
@@ -19,9 +20,32 @@ export default function adjustmentCoin() {
 
   const handleSubmit = () => {
     navigate(`/coin-detail/${symbol}`, {
-      state: { isUser: false } // 필요 시 사용자 상태도 같이 넘길 수 있음
+      state: {symbol:symbol } // 필요 시 사용자 상태도 같이 넘길 수 있음
     })
   }
+
+  const isSeller = location.pathname.includes('/store');
+
+  const navItems = [
+    {
+      icon: <Home className="w-6 h-6" color="white" />,
+      label: "홈",
+      isActive: false,
+      onClick: () => navigate("/home")
+    },
+    {
+      icon: <ShoppingBag className="w-6 h-6" color="white" />,
+      label: "쇼핑몰",
+      isActive: false,
+      onClick: () => navigate("/shop")
+    },
+    {
+      icon: <User className="w-6 h-6" color="white" />,
+      label: "마이페이지",
+      isActive: true,
+      onClick: () => navigate(isSeller ? "/store/my" : "/home/my")
+    }
+  ];
 
   return (
     <div className="h-full flex flex-col">
@@ -84,7 +108,8 @@ export default function adjustmentCoin() {
         </button>
       </main>
 
-      <BottomNavigation activeTab="home" />
+
+      <BottomNav navItems={navItems} />
     </div>
   )
 }

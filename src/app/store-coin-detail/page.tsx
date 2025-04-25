@@ -3,8 +3,8 @@ interface CryptoWalletProps {
   isUser?: boolean;
 }
 
-import CoinDetailPage from "@/components/common/CoinDetail";
+import CoinDetailPage from "@/components/coin/CoinDetail";
 
-export default function Page({ isUser }: CryptoWalletProps) {
-  return <CoinDetailPage isUser={isUser} />;
+export default function Page() {
+  return <CoinDetailPage />;
 }

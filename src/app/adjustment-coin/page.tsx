@@ -1,4 +1,4 @@
-import AdjustmentCoin from "@/components/common/AdjustmentCoin"
+import AdjustmentCoin from "@/components/coin/AdjustmentCoin"
 
 
 

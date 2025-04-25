@@ -1,3 +1,4 @@
+'use client'
 import Header from "@/components/common/Header";
 import Modal from "@/components/common/Modal";
 import BusinessCertificateForm from "@/components/edit-info/BusinessCertificationForm";

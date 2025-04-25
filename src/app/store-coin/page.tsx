@@ -1,6 +1,6 @@
-import CryptoWallet from"@/components/common/CryptoWallet"
+import CoinWallet from "@/components/coin/CoinWallet"
 
 
 export default function Page() {
-  return <CryptoWallet isUser={false} />
+  return <CoinWallet isUser={false} />
 }

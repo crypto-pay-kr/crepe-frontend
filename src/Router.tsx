@@ -9,10 +9,9 @@ import PhoneNumberPage from "@/app/phone/page";
 import PhoneVerificationPage from "@/app/verification/page";
 import AdditionalInfoPage from "@/app/additional-info/page";
 import SignupCompletePage from "@/app/signup-complete/page";
-import CoinHomeAddressPage from "@/app/home-coin-address/page";
-import CoinHomeSolarPage from "@/app/home-coin-soladdress/page";
-import CoinHomeXrpPage from "@/app/home-coin-xrpaddress/page";
-import CoinHomeTransactionPage from "@/app/home-coin-transaction/page";
+import CoinHomeAddressPage from "@/app/show-coin-address/page";
+import AddCoinAddress from "@/app/add-coin-address/page";
+import CoinHomeTransactionPage from "@/app/show-coin-transaction/page";
 import LoginHomePage from "@/app/login/page";
 import AdditionalStoreInfoPage from "./app/additional-store-info/page";
 import MyPage from "./app/mypage/page";
@@ -20,7 +19,6 @@ import EditInfo from "./app/edit-info/page";
 import SettlementReport from "./app/store-report/page";
 import StoreEditInfo from "./app/store-edit-info/page";
 import MenuEdit from "./app/menu-add/page";
-
 import StoreCoin from '@/app/store-coin/page';
 import UserCoin from  '@/app/user-coin/page';
 import CoinDetailPage from '@/app/store-coin-detail/page';
@@ -55,17 +53,27 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/phone-verification" element={<PhoneVerificationPage />} />
         <Route path="/additional-info" element={<AdditionalInfoPage />} />
         <Route path="/signup-complete" element={<SignupCompletePage />} />
-        <Route path="/home-coin-address" element={<CoinHomeAddressPage />} />
-        <Route path="/home-coin-soladdress" element={<CoinHomeSolarPage />} />
-        <Route path="/home-coin-xrpaddress" element={<CoinHomeXrpPage />} />
-        <Route path="/home-coin-transaction" element={<CoinHomeTransactionPage />} />
+
         <Route path="/login" element={<LoginHomePage />} />
         <Route path="/store-info" element={<AdditionalStoreInfoPage />} />
         <Route path="/store/menu/add" element={<MenuEdit/>} />
         <Route path="/store/menu/edit" element={<MenuEdit/>} />
+
+
+
+        {/*가맹점코인 내역*/}
         <Route path="/store-coin" element={<StoreCoin />} />
+        {/*유저 코인 내역*/}
         <Route path="/user-coin" element={<UserCoin/>} />
+        {/*코인 상세내역 보여주는 페이지*/}
         <Route path="/coin-detail/:symbol" element={<CoinDetailPage/>} />
+        {/*입금주소 보여주는 페이지*/}
+        <Route path="/home-coin-address/:symbol" element={<CoinHomeAddressPage />} />
+        {/*거래ID 입력 페이지*/}
+        <Route path="/home-coin-transaction/:symbol" element={<CoinHomeTransactionPage />} />
+        {/*입금 계좌 등록 페이지*/}
+        <Route path="/add-coin-address" element={<AddCoinAddress />} />
+        {/*가맹점 코인 정산 페이지*/}
         <Route path="/adjustmentCoin" element={<AdjustmentCoin />} />
       </Routes>
     </BrowserRouter>
