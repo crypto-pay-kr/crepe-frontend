@@ -72,7 +72,7 @@ export default function SettlementReport(): React.ReactElement {
 
   return (
     <div className="flex flex-col h-screen">
-      <Header title="결산 리포트" />
+      <Header title="결산 리포트"/>
       
       <PeriodFilter 
         selectedPeriod={selectedPeriod}

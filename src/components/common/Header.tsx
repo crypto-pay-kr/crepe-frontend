@@ -30,8 +30,8 @@ export default function Header({
 
   return (
     <>
-      <div className={`bg-[${COLORS.blue}] text-white`}>
-        <div className="h-14 flex items-center px-4">
+      <div style={{ backgroundColor: COLORS.blue }} className="text-white">
+        <div className="h-14 flex items-center px-6">
           <button className="mr-4" onClick={handleBackClick}>
             <svg
               xmlns="http://www.w3.org/2000/svg"

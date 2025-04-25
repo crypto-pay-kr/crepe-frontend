@@ -4,8 +4,7 @@ import React from 'react';
 export default function AdditionalStoreInfoPage() {
   return (
     <div>
-      <StoreRegistrationForm />
+      <StoreRegistrationForm isStore={true} />
     </div>
   );
 }
-

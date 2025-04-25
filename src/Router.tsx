@@ -4,7 +4,6 @@ import SplashPage from "@/app/splash/page";
 import WelcomePage from "@/app/welcome/page";
 import TermsAgreementPage from "@/app/terms/page";
 import EmailPasswordPage from "@/app/email/page";
-import EmailPasswordFilledPage from "@/app/email-filled/page";
 import PhoneNumberPage from "@/app/phone/page";
 import PhoneVerificationPage from "@/app/verification/page";
 import AdditionalInfoPage from "@/app/additional-info/page";
@@ -21,6 +20,7 @@ import EditInfo from "./app/edit-info/page";
 import SettlementReport from "./app/store-report/page";
 import StoreEditInfo from "./app/store-edit-info/page";
 import MenuEdit from "./app/menu-add/page";
+import BusinessVerification from "./app/store-verification/page";
 import CartItemPage from "./app/shoppingmall/store/cart/page";
 import OrderPage from "./app/shoppingmall/store/order/page";
 import LoadingPage from "./app/loading/page";
@@ -48,30 +48,28 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/" element={<SplashPage />} />
         <Route path="/home/my" element={<MyPage />} />
         <Route path="/home/my/edit-info" element={<EditInfo />} />
+        <Route path="/store/verification" element={<BusinessVerification/>} />
         <Route path="/store/my" element={<MyPage />} />
         <Route path="/store/my/settlement-report" element={<SettlementReport />} />
         <Route path="/store/my/edit-info" element={<StoreEditInfo />} />
         <Route path="/welcome" element={<WelcomePage />} />
         <Route path="/terms" element={<TermsAgreementPage />} />
         <Route path="/email" element={<EmailPasswordPage />} />
-        <Route path="/email-filled" element={<EmailPasswordFilledPage />} />
         <Route path="/phone" element={<PhoneNumberPage />} />
         <Route path="/phone-verification" element={<PhoneVerificationPage />} />
         <Route path="/additional-info" element={<AdditionalInfoPage />} />
         <Route path="/signup-complete" element={<SignupCompletePage />} />
-
         <Route path="/login" element={<LoginHomePage />} />
         <Route path="/store-info" element={<AdditionalStoreInfoPage />} />
         <Route path="/shoppingmall" element={<ShoppingMallPage/>} />
         <Route path="/shoppingmall/store/:id" element={<ShoppingMallDetailPage />} />
         <Route path="/store/menu/add" element={<MenuEdit/>} />
         <Route path="/store/menu/edit" element={<MenuEdit/>} />
+        <Route path="/phone-number" element={<PhoneNumberPage />} />
         <Route path="/shoppingmall/store/cart" element={<CartItemPage/>} />
         <Route path="/shoppingmall/store/order" element={<OrderPage/>} />
         <Route path="/shoppingmall/store/order-pending" element={<LoadingPage/>} />
         <Route path="/shoppingmall/store/pay-complete" element={<PayCompletePage/>} />
-
-
         {/*가맹점코인 내역*/}
         <Route path="/store-coin" element={<StoreCoin />} />
         {/*유저 코인 내역*/}

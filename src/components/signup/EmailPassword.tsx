@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import Header from "../common/Header"
 import Button from "../common/Button"
@@ -7,9 +5,10 @@ import Input from "../common/Input"
 
 interface EmailPasswordProps {
   onNext: () => void
+  isStore?: boolean
 }
 
-export default function EmailPassword({ onNext }: EmailPasswordProps) {
+export default function EmailPassword({ onNext, isStore }: EmailPasswordProps) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -22,9 +21,9 @@ export default function EmailPassword({ onNext }: EmailPasswordProps) {
 
   return (
     <div className="h-full flex flex-col">
-      <Header title="회원가입" progress={0} />
-      <div className="flex-1 flex flex-col p-5">
-        <div className="mb-8">
+      <Header title="회원가입" progress={1} isStore={isStore} />
+      <div className="flex-1 flex flex-col p-5 mt-2">
+        <div className="mb-6">
           <h2 className="text-2xl font-bold mb-2">회원가입을 위한</h2>
           <p className="text-2xl font-bold mb-8">정보를 입력해주세요</p>
         </div>
