@@ -18,6 +18,10 @@ import EditInfo from "./app/edit-info/page";
 import SettlementReport from "./app/store-report/page";
 import StoreEditInfo from "./app/store-edit-info/page";
 import MenuEdit from "./app/menu-add/page";
+import CartItemPage from "./app/shoppingmall/store/cart/page";
+import OrderPage from "./app/shoppingmall/store/order/page";
+import LoadingPage from "./app/loading/page";
+import PayCompletePage from "./app/shoppingmall/store/pay-complete/page";
 
 
 function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gray"; toggleButtonColor: () => void }) {
@@ -54,6 +58,11 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/shoppingmall/store/:id" element={<ShoppingMallDetailPage />} />
         <Route path="/store/menu/add" element={<MenuEdit/>} />
         <Route path="/store/menu/edit" element={<MenuEdit/>} />
+        <Route path="/shoppingmall/store/cart" element={<CartItemPage/>} />
+        <Route path="/shoppingmall/store/order" element={<OrderPage/>} />
+        <Route path="/shoppingmall/store/order-pending" element={<LoadingPage/>} />
+        <Route path="/shoppingmall/store/pay-complete" element={<PayCompletePage/>} />
+
 
       </Routes>
     </BrowserRouter>

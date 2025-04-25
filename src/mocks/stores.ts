@@ -41,3 +41,48 @@ export const menuItems = [
     image: "/menu.png",
   },
 ];
+
+export const cartItems = [
+  {
+    id: 1,
+    name: "얼큰칼국수",
+    price: 9000,
+    quantity: 2,
+    image: "/menu.png",
+  },
+  {
+    id: 2,
+    name: "얼큰칼국수",
+    price: 10000,
+    quantity: 1,
+    image: "/menu.png",
+  },
+  {
+    id: 3,
+    name: "얼큰칼국수",
+    price: 10000,
+    quantity: 1,
+    image: "/menu.png",
+  },
+  {
+    id: 4,
+    name: "얼큰칼국수",
+    price: 10000,
+    quantity: 1,
+    image: "/menu.png",
+  },
+  {
+    id: 5,
+    name: "얼큰칼국수",
+    price: 10000,
+    quantity: 1,
+    image: "/menu.png",
+  },
+  {
+    id: 6,
+    name: "얼큰칼국수",
+    price: 10000,
+    quantity: 1,
+    image: "/menu.png",
+  },
+];
