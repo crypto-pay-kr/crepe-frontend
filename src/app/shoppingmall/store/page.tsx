@@ -65,40 +65,40 @@ function ShoppingMallDetailPage() {
     return (
         <>
             <Header title="가게상세" isStore={false} />
-            <div className="overflow-auto bg-white pb-36"> {/* added bottom padding */}
-                <ShopInfo storeId={Number(id)} />
-                <img
-                    src="/store-image.png"
-                    alt="명동칼국수 가게사진"
-                    className="object-contain mt-6 w-full aspect-[0.8]"
-                />
-                <MenuList menuItems={menuItems} addToCart={addToCart} />
-            </div>
-            {/* New container with horizontal padding */}
-            <div className="px-10 py-4">
-                <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm text-gray-600">
-                        {cartItems.reduce((total, item) => total + item.quantity, 0)}개 항목
-                    </span>
-                    <span className="font-bold">
-                        {cartItems.reduce((total, item) => total + item.price * item.quantity, 0).toLocaleString()} KRW
-                    </span>
-                </div>
-                <div className="flex justify-center gap-4 mb-2">
-                    <Button
-                        text="취소하기"
-                        onClick={() => {
-                            setCartItems([]); // reset cart items count
-                        }}
-                        className="w-1/2 rounded-[9px] font-medium bg-gray-300 text-white shadow-inner"
+            <div className="overflow-auto bg-white pb-36">
+                    <ShopInfo storeId={Number(id)} />
+                    <img
+                        src="/store-image.png"
+                        alt="명동칼국수 가게사진"
+                        className="object-contain mt-6 w-full aspect-[0.8]"
                     />
-                    <Button
-                        text="장바구니로 이동"
-                        onClick={() => navigate("/cart")}
-                        className="w-1/2 rounded-[9px] font-medium bg-[#0C2B5F] text-white"
-                    />
+                    <MenuList menuItems={menuItems} addToCart={addToCart} />
                 </div>
-            </div>
+                {/* New container with horizontal padding */}
+                <div className="px-10 py-4">
+                    <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm text-gray-600">
+                            {cartItems.reduce((total, item) => total + item.quantity, 0)}개 항목
+                        </span>
+                        <span className="font-bold">
+                            {cartItems.reduce((total, item) => total + item.price * item.quantity, 0).toLocaleString()} KRW
+                        </span>
+                    </div>
+                    <div className="flex justify-center gap-4 mb-2">
+                        <Button
+                            text="취소하기"
+                            onClick={() => {
+                                setCartItems([]); // reset cart items count
+                            }}
+                            className="w-1/2 rounded-[9px] font-medium bg-gray-300 text-white shadow-inner"
+                        />
+                        <Button
+                            text="장바구니로 이동"
+                            onClick={() => navigate("/shoppingmall/store/cart")}
+                            className="w-1/2 rounded-[9px] font-medium bg-[#0C2B5F] text-white"
+                        />
+                    </div>
+                </div>
             <BottomNav navItems={navItems} />
         </>
     );
