@@ -9,11 +9,11 @@ interface HeaderProps {
   onBackClick?: () => void; // 커스텀 뒤로가기 함수 추가
 }
 
-export default function Header({ 
-  title, 
-  progress, 
-  isStore = false, 
-  onBackClick 
+export default function Header({
+  title,
+  progress,
+  isStore = false,
+  onBackClick
 }: HeaderProps) {
   const navigate = useNavigate();
 
