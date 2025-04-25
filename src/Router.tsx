@@ -14,6 +14,8 @@ import AddCoinAddress from "@/app/add-coin-address/page";
 import CoinHomeTransactionPage from "@/app/show-coin-transaction/page";
 import LoginHomePage from "@/app/login/page";
 import AdditionalStoreInfoPage from "./app/additional-store-info/page";
+import ShoppingMallPage from "@/app/shoppingmall/page";
+import ShoppingMallDetailPage from "@/app/shoppingmall/store/page";
 import MyPage from "./app/mypage/page";
 import EditInfo from "./app/edit-info/page";
 import SettlementReport from "./app/store-report/page";
@@ -23,6 +25,7 @@ import StoreCoin from '@/app/store-coin/page';
 import UserCoin from  '@/app/user-coin/page';
 import CoinDetailPage from '@/app/store-coin-detail/page';
 import AdjustmentCoin from "@/app/adjustment-coin/page";
+
 
 
 function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gray"; toggleButtonColor: () => void }) {
@@ -56,10 +59,10 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
 
         <Route path="/login" element={<LoginHomePage />} />
         <Route path="/store-info" element={<AdditionalStoreInfoPage />} />
+        <Route path="/shoppingmall" element={<ShoppingMallPage/>} />
+        <Route path="/shoppingmall/store/:id" element={<ShoppingMallDetailPage />} />
         <Route path="/store/menu/add" element={<MenuEdit/>} />
         <Route path="/store/menu/edit" element={<MenuEdit/>} />
-
-
 
         {/*가맹점코인 내역*/}
         <Route path="/store-coin" element={<StoreCoin />} />

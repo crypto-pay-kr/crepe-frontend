@@ -8,9 +8,11 @@ interface NavButtonProps {
   onClick?: () => void;
 }
 
-const NavButton: React.FC<NavButtonProps> = ({
-  icon,
-  label,
+
+
+const NavButton: React.FC<NavButtonProps> = ({ 
+  icon, 
+  label, 
   isActive,
   onClick
 }) => (

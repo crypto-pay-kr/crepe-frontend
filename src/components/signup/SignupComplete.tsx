@@ -15,8 +15,8 @@ export default function SignupComplete({ onNext }: SignupCompleteProps) {
         </div>
 
         <div className="flex-1 flex items-center justify-center">
-          <div className="relative w-32 h-40">
-            <img src="/crepe-logo.png" alt="Crepe Logo" className="w-full h-full" />
+          <div className="relative w-45 h-40">
+            <img src="/crepe_newlogo.png" alt="Crepe Logo" className="w-full h-full" />
           </div>
         </div>
       <div className="p-5">
