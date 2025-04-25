@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Home, ShoppingBag, User } from "lucide-react";
