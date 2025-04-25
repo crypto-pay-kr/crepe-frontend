@@ -17,7 +17,26 @@ export default function CoinWallet({ isUser }: CryptoWalletProps) {
     navigate(`/coin-detail/${symbol}`, { state: { isUser } });
   };
 
-
+  const navItems = [
+    {
+      icon: <Home className="w-6 h-6" color="white" />,
+      label: "홈",
+      isActive: false,
+      onClick: () => navigate("/home")
+    },
+    {
+      icon: <ShoppingBag className="w-6 h-6" color="white" />,
+      label: "쇼핑몰",
+      isActive: false,
+      onClick: () => navigate("/store")
+    },
+    {
+      icon: <User className="w-6 h-6" color="white" />,
+      label: "마이페이지",
+      isActive: true,
+      onClick: () => navigate(isSeller ? "/store/my" : "/home/my")
+    }
+  ];
 
 
   const coins = [

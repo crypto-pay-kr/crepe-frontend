@@ -59,7 +59,7 @@ export default function MyPage(): React.ReactElement {
       icon: <Home className="w-6 h-6" color="white" />,
       label: "홈",
       isActive: false,
-      onClick: () => navigate("/home")
+      onClick: () => navigate("/")
     },
     {
       icon: <ShoppingBag className="w-6 h-6" color="white" />,
