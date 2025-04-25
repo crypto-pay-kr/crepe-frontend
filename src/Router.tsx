@@ -29,7 +29,7 @@ import StoreCoin from '@/app/store-coin/page';
 import UserCoin from  '@/app/user-coin/page';
 import CoinDetailPage from '@/app/store-coin-detail/page';
 import AdjustmentCoin from "@/app/adjustment-coin/page";
-
+import StoreSettings from "@/app/store-settings/page";
 
 function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gray"; toggleButtonColor: () => void }) {
   useEffect(() => {
@@ -70,6 +70,7 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/shoppingmall/store/order" element={<OrderPage/>} />
         <Route path="/shoppingmall/store/order-pending" element={<LoadingPage/>} />
         <Route path="/shoppingmall/store/pay-complete" element={<PayCompletePage/>} />
+        <Route path="/store-settings" element={<StoreSettings />} />
         {/*가맹점코인 내역*/}
         <Route path="/store-coin" element={<StoreCoin />} />
         {/*유저 코인 내역*/}
