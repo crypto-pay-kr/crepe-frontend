@@ -7,6 +7,7 @@ interface ButtonProps {
   onClick: () => void
   color?: "blue" | "gray"
   className?: string
+  disabled?: boolean;
 }
 
 export default function Button({ text, onClick, color = "blue", className = "" }: ButtonProps) {
