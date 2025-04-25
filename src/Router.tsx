@@ -15,6 +15,7 @@ import MyPage from "./app/mypage/page";
 import EditInfo from "./app/edit-info/page";
 import SettlementReport from "./app/store-report/page";
 import StoreEditInfo from "./app/store-edit-info/page";
+import MenuEdit from "./app/menu-add/page";
 
 function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gray"; toggleButtonColor: () => void }) {
   useEffect(() => {
@@ -46,6 +47,8 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/signup-complete" element={<SignupCompletePage />} />
         <Route path="/login" element={<LoginHomePage />} />
         <Route path="/store-info" element={<AdditionalStoreInfoPage />} />
+        <Route path="/store/menu/add" element={<MenuEdit/>} />
+        <Route path="/store/menu/edit" element={<MenuEdit/>} />
       </Routes>
     </BrowserRouter>
   )
