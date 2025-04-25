@@ -29,11 +29,9 @@ import StoreCoin from '@/app/store-coin/page';
 import UserCoin from  '@/app/user-coin/page';
 import CoinDetailPage from '@/app/store-coin-detail/page';
 import AdjustmentCoin from "@/app/adjustment-coin/page";
-import StoreSettings from "./app/order-status/page";
+import StoreSettings from "@/app/store-settings/page";
 import OrderStatus from "./app/order-status/page";
 import MyStoreManagePage from "./app/store-manage/page";
-
-
 
 function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gray"; toggleButtonColor: () => void }) {
   useEffect(() => {
@@ -72,6 +70,7 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/store/menu/add" element={<MenuEdit/>} />
         <Route path="/store/menu/edit" element={<MenuEdit/>} />
         <Route path="/phone-number" element={<PhoneNumberPage />} />
+        <Route path="/store-settings" element={<StoreSettings />} />
 
         {/* 유저 쇼핑몰 페이지 */}
         <Route path="/shoppingmall" element={<ShoppingMallPage/>} />
@@ -80,6 +79,7 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/shoppingmall/store/order" element={<OrderPage/>} />
         <Route path="/shoppingmall/store/order-pending" element={<LoadingPage/>} />
         <Route path="/shoppingmall/store/pay-complete" element={<PayCompletePage/>} />
+
 
         {/*가맹점코인 내역*/}
         <Route path="/store-coin" element={<StoreCoin />} />

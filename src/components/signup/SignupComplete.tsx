@@ -18,11 +18,11 @@ export default function SignupComplete({ onNext }: SignupCompleteProps) {
               alt="Crepe Logo"
               className="w-[120px] h-[100px] object-contain"
             />
-            <span className="text-xl font-bold text-slate-700 leading-none pb-[3px]">에</span>
+            <span className="text-2xl font-bold text-slate-700 leading-none pb-[3px]">에</span>
           </div>
 
           {/* 아래 텍스트 */}
-          <p className="text-xl font-bold text-slate-700 leading-none ml-4 leading-tight">오신 것을 환영합니다</p>
+          <p className="text-2xl font-bold text-slate-700 leading-none ml-4 leading-tight">오신 것을 환영합니다</p>
         </div>
       </div>
 
