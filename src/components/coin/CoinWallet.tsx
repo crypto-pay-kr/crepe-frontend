@@ -29,7 +29,7 @@ export default function CoinWallet({ isUser }: CryptoWalletProps) {
       icon: <ShoppingBag className="w-6 h-6" color="white" />,
       label: "쇼핑몰",
       isActive: false,
-      onClick: () => navigate("/shop")
+      onClick: () => navigate("/store")
     },
     {
       icon: <User className="w-6 h-6" color="white" />,
