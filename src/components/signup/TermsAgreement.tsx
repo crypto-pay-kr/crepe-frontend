@@ -8,6 +8,7 @@ import ChevronRight from "../common/ChevronRight"
 
 interface TermsAgreementProps {
   onNext: () => void
+  isStore?: boolean
 }
 
 export default function TermsAgreement({ onNext }: TermsAgreementProps) {

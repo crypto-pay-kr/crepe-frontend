@@ -1,33 +1,51 @@
-import { useNavigate } from "react-router-dom";
-interface BottomNavigationProps {
-    activeTab: "home" | "shopping" | "mypage";
+import React from "react";
+import { COLORS } from "../../constants/colors";
+
+interface NavButtonProps {
+  icon: React.ReactNode;
+  label: string;
+  isActive: boolean;
+  onClick?: () => void;
 }
 
-export default function BottomNavigation({ activeTab }: BottomNavigationProps) {
-    const navigate = useNavigate();
+const NavButton: React.FC<NavButtonProps> = ({
+  icon,
+  label,
+  isActive,
+  onClick
+}) => (
+  <button
+    onClick={onClick}
+    className={`flex flex-col items-center ${isActive ? "text-blue-900" : "text-gray-500"}`}
+  >
+    {icon}
+    <span className="text-xs mt-1 text-white">{label}</span>
+  </button>
+);
 
-    return (
-        <div className="h-16 bg-[#0a2158] flex items-center justify-around text-white">
-            <button
-                className={`flex flex-col items-center justify-center w-1/3 ${activeTab === "home" ? "opacity-100" : "opacity-70"}`}
-                onClick={() => console.log("홈으로 이동")}
-            >
-                <span className="text-xs mt-1 text-white">홈</span>
-            </button>
-
-            <button
-                className={`flex flex-col items-center justify-center w-1/3 ${activeTab === "shopping" ? "opacity-100" : "opacity-70"}`}
-                onClick={() => console.log("쇼핑으로 이동")}
-            >
-                <span className="text-xs mt-1 text-white">쇼핑몰</span>
-            </button>
-
-            <button
-                className={`flex flex-col items-center justify-center w-1/3 ${activeTab === "mypage" ? "opacity-100" : "opacity-70"}`}
-                onClick={() => navigate("/mypage")}
-            >
-                <span className="text-xs mt-1 text-white">마이페이지</span>
-            </button>
-        </div>
-    );
+interface BottomNavProps {
+  navItems: Array<{
+    icon: React.ReactNode;
+    label: string;
+    isActive: boolean;
+    onClick?: () => void;
+  }>;
 }
+
+const BottomNav: React.FC<BottomNavProps> = ({ navItems }) => {
+  return (
+    <nav className={`bg-[${COLORS.blue}] border-t flex justify-around py-3`}>
+      {navItems.map((item, index) => (
+        <NavButton
+          key={index}
+          icon={item.icon}
+          label={item.label}
+          isActive={item.isActive}
+          onClick={item.onClick}
+        />
+      ))}
+    </nav>
+  );
+};
+
+export default BottomNav;
