@@ -29,6 +29,8 @@ import StoreCoin from '@/app/store-coin/page';
 import UserCoin from  '@/app/user-coin/page';
 import CoinDetailPage from '@/app/store-coin-detail/page';
 import AdjustmentCoin from "@/app/adjustment-coin/page";
+import StoreSettings from "./app/order-status/page";
+import OrderStatus from "./app/order-status/page";
 
 
 function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gray"; toggleButtonColor: () => void }) {
@@ -84,6 +86,7 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/add-coin-address" element={<AddCoinAddress />} />
         {/*가맹점 코인 정산 페이지*/}
         <Route path="/adjustmentCoin" element={<AdjustmentCoin />} />
+        <Route path="/store" element={<OrderStatus />} />
       </Routes>
     </BrowserRouter>
   )
