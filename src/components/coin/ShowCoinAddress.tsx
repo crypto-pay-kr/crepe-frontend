@@ -16,29 +16,6 @@ export default function CoinDeposit() {
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
-  const isSeller = location.pathname.includes('/store');
-
-  const navItems = [
-    {
-      icon: <Home className="w-6 h-6" color="white" />,
-      label: "홈",
-      isActive: false,
-      onClick: () => navigate("/home")
-    },
-    {
-      icon: <ShoppingBag className="w-6 h-6" color="white" />,
-      label: "쇼핑몰",
-      isActive: false,
-      onClick: () => navigate("/shop")
-    },
-    {
-      icon: <User className="w-6 h-6" color="white" />,
-      label: "마이페이지",
-      isActive: true,
-      onClick: () => navigate(isSeller ? "/store/my" : "/home/my")
-    }
-  ];
-
 
   const onNext = () => {
     navigate(`/home-coin-transaction/${symbol}`, {
@@ -92,7 +69,7 @@ export default function CoinDeposit() {
 
       {/* Bottom Navigation */}
 
-      <BottomNav navItems={navItems} />
+      <BottomNav/>
     </div>
   )
 }

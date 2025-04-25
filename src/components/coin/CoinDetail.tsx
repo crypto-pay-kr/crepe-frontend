@@ -14,7 +14,7 @@ export default function CoinDetailPage() {
 
 
 // 예시 상태: "not_registered" | "pending" | "registered"
-  const accountStatus = "pending" as "registered" | "not_registered" | "pending";
+  const accountStatus = "registered" as "registered" | "not_registered" | "pending";
   const [showModal, setShowModal] = useState(false)
 
   const navigate = useNavigate()
@@ -179,7 +179,9 @@ export default function CoinDetailPage() {
 
               {/* 안내 문구 */}
               <p className="text-sm text-gray-500 mb-6">
-                계좌를 잘못 입력했다면? <span className="underline cursor-pointer">재등록하기</span>
+                계좌를 잘못 입력했다면? <span className="underline cursor-pointer"
+                                    onClick={() => navigate("/add-coin-address", { state: { isUser, symbol } })}
+              >재등록하기</span>
               </p>
 
               {/* 닫기 버튼 */}
@@ -231,7 +233,7 @@ export default function CoinDetailPage() {
         </div>
       </main>
 
-      <BottomNav navItems={navItems} />
+      <BottomNav />
     </div>
   )
 }

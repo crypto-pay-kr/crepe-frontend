@@ -16,7 +16,6 @@ export default function CoinWallet({ isUser }: CryptoWalletProps) {
   const handleCoinClick = (symbol: string) => {
     navigate(`/coin-detail/${symbol}`, { state: { isUser } });
   };
-  const isSeller = location.pathname.includes('/store');
 
   const navItems = [
     {
@@ -38,6 +37,7 @@ export default function CoinWallet({ isUser }: CryptoWalletProps) {
       onClick: () => navigate(isSeller ? "/store/my" : "/home/my")
     }
   ];
+
 
   const coins = [
     {
@@ -181,7 +181,7 @@ export default function CoinWallet({ isUser }: CryptoWalletProps) {
       </main>
 
       {/* Bottom Navigation */}
-      <BottomNav navItems={navItems} />
+      <BottomNav />
     </div>
   )
 }
