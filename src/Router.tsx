@@ -16,6 +16,11 @@ import CoinHomeTransactionPage from "@/app/home-coin-transaction/page";
 import LoginHomePage from "@/app/login/page";
 import AdditionalStoreInfoPage from "./app/additional-store-info/page";
 
+import StoreCoin from '@/app/store-coin/page';
+import UserCoin from  '@/app/user-coin/page';
+import CoinDetailPage from '@/app/store-coin-detail/page';
+import AdjustmentCoin from "@/app/adjustment-coin/page";
+
 
 function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gray"; toggleButtonColor: () => void }) {
   useEffect(() => {
@@ -46,6 +51,10 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/home-coin-transaction" element={<CoinHomeTransactionPage />} />
         <Route path="/login" element={<LoginHomePage />} />
         <Route path="/store-info" element={<AdditionalStoreInfoPage />} />
+        <Route path="/store-coin" element={<StoreCoin />} />
+        <Route path="/user-coin" element={<UserCoin/>} />
+        <Route path="/coin-detail/:symbol" element={<CoinDetailPage/>} />
+        <Route path="/adjustmentCoin" element={<AdjustmentCoin />} />
       </Routes>
     </BrowserRouter>
   )

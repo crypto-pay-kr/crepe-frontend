@@ -5,14 +5,15 @@ interface HeaderProps {
   title: string
   progress?: number // 0-3 for progress bar
   isStore?: boolean
+  onBack?: () => void
 }
 
-export default function Header({ title, progress, isStore = false }: HeaderProps) {
-  return (
+export default function Header({ title, progress, isStore = false, onBack}: HeaderProps) {
+    return (
     <>
       <div className={`bg-[${COLORS.blue}] text-white`}>
         <div className="h-14 flex items-center px-4">
-          <button className="mr-4">
+          <button className="mr-4" onClick={onBack}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
