@@ -14,9 +14,9 @@ const NavButton: React.FC<NavButtonProps> = ({
   icon, 
   label, 
   isActive,
-  onClick 
+  onClick
 }) => (
-  <button 
+  <button
     onClick={onClick}
     className={`flex flex-col items-center ${isActive ? "text-blue-900" : "text-gray-500"}`}
   >
