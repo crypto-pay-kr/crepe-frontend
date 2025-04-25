@@ -31,6 +31,8 @@ import CoinDetailPage from '@/app/store-coin-detail/page';
 import AdjustmentCoin from "@/app/adjustment-coin/page";
 import StoreSettings from "./app/order-status/page";
 import OrderStatus from "./app/order-status/page";
+import MyStoreManagePage from "./app/store-manage/page";
+
 
 
 function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gray"; toggleButtonColor: () => void }) {
@@ -62,16 +64,23 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/additional-info" element={<AdditionalInfoPage />} />
         <Route path="/signup-complete" element={<SignupCompletePage />} />
         <Route path="/login" element={<LoginHomePage />} />
+
+
+        {/* 가맹점 가게 및 주문 관리 페이지 */}
         <Route path="/store-info" element={<AdditionalStoreInfoPage />} />
-        <Route path="/shoppingmall" element={<ShoppingMallPage/>} />
-        <Route path="/shoppingmall/store/:id" element={<ShoppingMallDetailPage />} />
+        <Route path="/store/manage" element={<MyStoreManagePage/>} />
         <Route path="/store/menu/add" element={<MenuEdit/>} />
         <Route path="/store/menu/edit" element={<MenuEdit/>} />
         <Route path="/phone-number" element={<PhoneNumberPage />} />
+
+        {/* 유저 쇼핑몰 페이지 */}
+        <Route path="/shoppingmall" element={<ShoppingMallPage/>} />
+        <Route path="/shoppingmall/store/:id" element={<ShoppingMallDetailPage />} />
         <Route path="/shoppingmall/store/cart" element={<CartItemPage/>} />
         <Route path="/shoppingmall/store/order" element={<OrderPage/>} />
         <Route path="/shoppingmall/store/order-pending" element={<LoadingPage/>} />
         <Route path="/shoppingmall/store/pay-complete" element={<PayCompletePage/>} />
+
         {/*가맹점코인 내역*/}
         <Route path="/store-coin" element={<StoreCoin />} />
         {/*유저 코인 내역*/}
