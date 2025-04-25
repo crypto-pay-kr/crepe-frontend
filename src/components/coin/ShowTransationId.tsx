@@ -1,72 +1,58 @@
 "use client"
 
-import { Home, ShoppingBag, User} from "lucide-react"
 import Header from '@/components/common/Header'
 import Button from '@/components/common/Button'
 import { useParams, useNavigate } from 'react-router-dom'
 import BottomNav from '@/components/common/BottomNavigate'
+import { useState } from 'react'
 
 export default function ShowTransationId() {
   const navigate = useNavigate();
   const { symbol } = useParams();
+  const [transactionId, setTransactionId] = useState("")
 
-  const isSeller = location.pathname.includes('/store');
-
-  const navItems = [
-    {
-      icon: <Home className="w-6 h-6" color="white" />,
-      label: "홈",
-      isActive: false,
-      onClick: () => navigate("/home")
-    },
-    {
-      icon: <ShoppingBag className="w-6 h-6" color="white" />,
-      label: "쇼핑몰",
-      isActive: false,
-      onClick: () => navigate("/shop")
-    },
-    {
-      icon: <User className="w-6 h-6" color="white" />,
-      label: "마이페이지",
-      isActive: true,
-      onClick: () => navigate(isSeller ? "/store/my" : "/home/my")
-    }
-  ];
-
-  const isButtonDisabled = false
+  const isButtonDisabled = !transactionId
 
   const onNext = () => {
     if (!symbol) {
       alert("코인 심볼이 없습니다.");
       return;
     }
+
+    if (!transactionId) {
+      alert("거래 ID를 입력해주세요.");
+      return;
+    }
+
+    console.log("입력된 거래 ID:", transactionId) // 필요하면 API 호출 또는 상태 전송
     navigate(`/coin-detail/${symbol}`, {
-      state: { isUser: true, symbol:symbol } // 필요 시 isUser 등도 같이 전달
+      state: { isUser: true, symbol, transactionId },
     });
   }
-
 
   return (
     <div className="flex flex-col h-screen bg-white">
       <Header title="코인 입금" />
 
-      {/* Main Content */}
       <div className="flex-1 px-4 py-4 overflow-auto">
         <div className="mb-6">
           <h2 className="text-2xl font-bold mb-10">거래 ID 입력</h2>
 
           <div className="mb-8">
             <p className="text-lg font-semibold mb-3">거래 ID</p>
-            <div className="flex items-center justify-between border-b border-gray-300 pb-2">
-              <span className="text-red-500 text-base font-medium">TNgzwecDR23DDKFodjkfn20d</span>
-            </div>
+            <input
+              type="text"
+              value={transactionId}
+              onChange={(e) => setTransactionId(e.target.value)}
+              placeholder="예: TNgzwecDR23DDKFodjkfn20d"
+              className="w-full border-b border-gray-300 py-2 text-base focus:outline-none focus:border-[#0a2158]"
+            />
           </div>
 
           <ol className="list-decimal pl-5 text-base space-y-2 mb-8">
             <li>Upbit 내 출금 완료 후 해당 코인 내역에 접속 후 거래 내역 클릭</li>
-            <li className="text-red-500 font-bold">출금 완료되지 않 확인 후 클릭</li>
+            <li className="text-red-500 font-bold">출금 완료되었는지 확인 후 클릭</li>
           </ol>
-
 
           <div className="mb-10">
             <img
@@ -88,15 +74,15 @@ export default function ShowTransationId() {
         </div>
       </div>
 
-
-      {/* Bottom Button */}
       <div className="p-5">
-        <Button text="확인" onClick={onNext} color={isButtonDisabled ? "gray" : "blue"} />
+        <Button
+          text="확인"
+          onClick={onNext}
+          color={isButtonDisabled ? "gray" : "blue"}
+        />
       </div>
 
-
-      {/* Bottom Navigation */}
-      <BottomNav navItems={navItems} />
+      <BottomNav />
     </div>
   )
 }

@@ -16,7 +16,6 @@ export default function CoinWallet({ isUser }: CryptoWalletProps) {
   const handleCoinClick = (symbol: string) => {
     navigate(`/coin-detail/${symbol}`, { state: { isUser } });
   };
-  const isSeller = location.pathname.includes('/store');
 
   const navItems = [
     {
@@ -29,7 +28,7 @@ export default function CoinWallet({ isUser }: CryptoWalletProps) {
       icon: <ShoppingBag className="w-6 h-6" color="white" />,
       label: "쇼핑몰",
       isActive: false,
-      onClick: () => navigate("/shop")
+      onClick: () => navigate("/store")
     },
     {
       icon: <User className="w-6 h-6" color="white" />,
@@ -38,6 +37,7 @@ export default function CoinWallet({ isUser }: CryptoWalletProps) {
       onClick: () => navigate(isSeller ? "/store/my" : "/home/my")
     }
   ];
+
 
   const coins = [
     {
@@ -181,7 +181,7 @@ export default function CoinWallet({ isUser }: CryptoWalletProps) {
       </main>
 
       {/* Bottom Navigation */}
-      <BottomNav navItems={navItems} />
+      <BottomNav />
     </div>
   )
 }

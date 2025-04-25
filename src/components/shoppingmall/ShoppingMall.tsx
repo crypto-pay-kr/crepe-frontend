@@ -13,28 +13,6 @@ export default function ShoppingMall() {
   const [activeTab, setActiveTab] = useState("전체");
   const navigate = useNavigate();
 
-  const isSeller = false; // 판매자인지 여부를 확인하는 변수 (예시)
-
-  const navItems = [
-    {
-      icon: <Home className="w-6 h-6" color="white" />,
-      label: "홈",
-      isActive: false,
-      onClick: () => navigate("/home"),
-    },
-    {
-      icon: <ShoppingBag className="w-6 h-6" color="white" />,
-      label: "쇼핑몰",
-      isActive: true, // 현재 활성화된 탭
-      onClick: () => navigate("/shoppingmall"),
-    },
-    {
-      icon: <User className="w-6 h-6" color="white" />,
-      label: "마이페이지",
-      isActive: false,
-      onClick: () => navigate(isSeller ? "/my/store" : "/my"),
-    },
-  ];
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,7 +124,7 @@ export default function ShoppingMall() {
           </div>
         </div>
       </div>
-      <BottomNav navItems={navItems} />
+      <BottomNav />
 
     </>
   );
