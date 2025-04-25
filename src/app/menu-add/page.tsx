@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
-import {  Home, ShoppingBag, User } from "lucide-react";
+import { Home, ShoppingBag, User } from "lucide-react";
 import Header from "@/components/common/Header";
 import BottomNav from "@/components/common/BottomNavigate";
+import ImageUploader from "@/components/common/ImageUploader"; // Import the ImageUploader component
 
 interface CryptoCurrency {
   code: string;
@@ -20,7 +21,7 @@ interface MenuItemData {
 export default function MenuEdit(): React.ReactElement {
   const navigate = useNavigate();
   const location = useLocation();
-  const { id } = useParams<{ id?: string }>(); // URL 경로 파라미터를 통해 id 가져오기
+  const { id } = useParams<{ id?: string }>(); 
   
   // 현재 경로가 /menu/add인지 /menu/edit인지 확인
   const isAddMode = location.pathname === "/store/menu/add";
@@ -46,11 +47,12 @@ export default function MenuEdit(): React.ReactElement {
         name: "불고기 버거",
         price: "8000",
         cryptoPrices: [
-          { code: "XRP", amount: 3.3 },
-          { code: "SOL", amount: 3.3 },
+          { code: "XRP", amount: 3.2 },
+          { code: "SOL", amount: 3.2 },
         ],
         image: null,
       });
+      // 실제로는 가격에 따라 자동으로 계산되기 때문에 cryptoPrices 값은 중요하지 않습니다
     }
   }, [isEditMode, id]);
 
@@ -65,20 +67,9 @@ export default function MenuEdit(): React.ReactElement {
     setMenuItem({ ...menuItem, price: value });
   };
 
-  const handleCryptoPriceChange = (code: string, value: string) => {
-    const numValue = Number.parseFloat(value) || 0;
-    setMenuItem({
-      ...menuItem,
-      cryptoPrices: menuItem.cryptoPrices.map((crypto) =>
-        crypto.code === code ? { ...crypto, amount: numValue } : crypto
-      ),
-    });
-  };
 
-  const handleImageAttach = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setMenuItem({ ...menuItem, image: e.target.files[0] });
-    }
+  const handleImageChange = (file: File) => {
+    setMenuItem({ ...menuItem, image: file });
   };
 
   const handleSubmit = () => {
@@ -98,13 +89,14 @@ export default function MenuEdit(): React.ReactElement {
       navigate(-1);
     }
   };
+  
   const isSeller = location.pathname.includes('/store');
   const navItems = [
       {
         icon: <Home className="w-6 h-6" color="white" />,
         label: "홈",
         isActive: false,
-        onClick: () => navigate("/home")
+        onClick: () => navigate("/")
       },
       {
         icon: <ShoppingBag className="w-6 h-6" color="white" />,
@@ -129,14 +121,14 @@ export default function MenuEdit(): React.ReactElement {
       {/* 메인 콘텐츠 */}
       <main className="flex-1 p-4 bg-gray-50 overflow-auto">
         {/* 음식명 */}
-        <div className="mb-4">
+        <div className="mb-4 mt-5">
           <label className="block text-lg font-medium mb-2">음식명</label>
           <input
             type="text"
             value={menuItem.name}
             onChange={handleNameChange}
             className="w-full border-b border-gray-300 p-2 bg-transparent focus:outline-none"
-            placeholder="가게명을 입력해주세요."
+            placeholder="음식명을 입력해주세요."
           />
         </div>
 
@@ -152,46 +144,36 @@ export default function MenuEdit(): React.ReactElement {
           />
         </div>
 
-        {/* 각 코인 금액 */}
+        {/* 각 코인 금액 - 자동 계산 */}
         <div className="mb-6">
           <label className="block text-lg font-medium mb-2">각 코인 금액</label>
-          <div className="flex flex-wrap gap-2">
+          <div className="space-y-3">
             {menuItem.cryptoPrices.map((crypto) => (
-              <div key={crypto.code} className="flex items-center">
+              <div key={crypto.code} className="flex items-center justify-between border-b border-gray-100 pb-2">
                 <span
-                  className={`px-2 py-1 rounded text-sm mr-2 ${
-                    crypto.code === "XRP" ? "bg-gray-200" : "bg-purple-200"
+                  className={`px-3 py-1.5 rounded text-sm font-medium ${
+                    crypto.code === "XRP" ? "bg-gray-200 text-blue-700" : "bg-purple-100 text-purple-700"
                   }`}
                 >
                   {crypto.code}
                 </span>
-                <input
-                  type="number"
-                  value={crypto.amount}
-                  onChange={(e) => handleCryptoPriceChange(crypto.code, e.target.value)}
-                  className="w-16 border-b border-gray-300 p-1 bg-transparent focus:outline-none"
-                  step="0.1"
-                />
+                <span className="font-medium">
+                  {menuItem.price ? (parseFloat(menuItem.price) / 2500).toFixed(2) : "0.00"} {crypto.code}
+                </span>
               </div>
             ))}
+            <p className="text-xs text-gray-500 mt-2">* 원화 가격 입력 시 자동으로 코인 가격이 계산됩니다.</p>
           </div>
         </div>
 
-        {/* 음식사진 업로드 */}
-        <div className="mb-4">
-          <label className="block text-lg font-medium mb-2">음식사진 업로드</label>
-          <label htmlFor="food-image" className="block w-full">
-            <div className="w-full bg-gray-300 text-gray-700 py-3 rounded text-center cursor-pointer">첨부하기</div>
-            <input id="food-image" type="file" accept="image/*" onChange={handleImageAttach} className="hidden" />
-          </label>
-          {menuItem.image && (
-            <div className="mt-3">
-              <p className="text-sm text-gray-600 mb-2">선택된 파일: {menuItem.image.name}</p>
-              <div className="w-full h-40 bg-gray-200 rounded flex items-center justify-center text-gray-500">
-                이미지 자리
-              </div>
-            </div>
-          )}
+        {/* 이미지 업로드 - ImageUploader 컴포넌트 사용 */}
+        <div className="mb-6">
+          <ImageUploader
+            label="음식사진 업로드"
+            previewLabel="선택된 이미지"
+            onChange={handleImageChange}
+            value={menuItem.image}
+          />
         </div>
 
         {/* 버튼 영역 */}
