@@ -121,7 +121,7 @@ export default function MenuEdit(): React.ReactElement {
         title={isAddMode ? "메뉴 추가" : "메뉴 수정"}/>
 
       {/* 메인 콘텐츠 */}
-      <main className="flex-1 p-4 bg-gray-50 overflow-auto">
+      <main className="flex-1 p-4 bg-white overflow-auto">
         {/* 음식명 */}
         <div className="mb-4 mt-5">
           <label className="block text-lg font-medium mb-2">음식명</label>
@@ -181,11 +181,11 @@ export default function MenuEdit(): React.ReactElement {
         {/* 버튼 영역 */}
         <div className="space-y-3 mt-6">
           {isEditMode && (
-            <button onClick={handleDelete} className="w-full bg-red-500 text-white py-3 rounded">
+            <button onClick={handleDelete} className="w-full bg-red-500 text-white py-3 rounded-lg">
               삭제하기
             </button>
           )}
-          <button onClick={handleSubmit} className="w-full bg-[#0a2e65] text-white py-3 rounded">
+          <button onClick={handleSubmit} className="w-full bg-[#0a2e65] text-white py-3 rounded-lg">
             {isAddMode ? "추가하기" : "수정하기"}
           </button>
         </div>
