@@ -46,26 +46,6 @@ export default function CartPage() {
 
     const totalPrice = calculateTotalPrice();
 
-    const navItems = [
-        {
-            icon: <Home className="w-6 h-6" color="white" />,
-            label: "홈",
-            isActive: false,
-            onClick: () => navigate("/home"),
-        },
-        {
-            icon: <ShoppingBag className="w-6 h-6" color="white" />,
-            label: "쇼핑몰",
-            isActive: true, // 현재 활성화된 탭
-            onClick: () => navigate("/shoppingmall"),
-        },
-        {
-            icon: <User className="w-6 h-6" color="white" />,
-            label: "마이페이지",
-            isActive: false,
-            onClick: () => navigate(isSeller ? "/my/store" : "/my"),
-        },
-    ];
 
     return (
         <>
@@ -161,7 +141,7 @@ export default function CartPage() {
                     </div>
                     <Button
                         text="결제수단 선택"
-                        onClick={() => navigate("/shoppingmall/store/order")}
+                        onClick={() => navigate("/mall/store/order")}
                         className="w-1/2 rounded-[9px] font-medium bg-[#0C2B5F] text-white"
                     />
 
@@ -171,7 +151,7 @@ export default function CartPage() {
 
             </div>
 
-            <BottomNav navItems={navItems} />
+            <BottomNav />
         </>
     )
 }

@@ -14,31 +14,10 @@ export default function LoadingPage() {
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            navigate("/shoppingmall/store/pay-complete")
+            navigate("/mall/store/pay-complete")
         }, 2000)
         return () => clearTimeout(timer)
     }, [navigate])
-
-    const navItems = [
-        {
-            icon: <Home className="w-6 h-6" color="white" />,
-            label: "홈",
-            isActive: false,
-            onClick: () => navigate("/home"),
-        },
-        {
-            icon: <ShoppingBag className="w-6 h-6" color="white" />,
-            label: "쇼핑몰",
-            isActive: true,
-            onClick: () => navigate("/shoppingmall"),
-        },
-        {
-            icon: <User className="w-6 h-6" color="white" />,
-            label: "마이페이지",
-            isActive: false,
-            onClick: () => navigate(isSeller ? "/my/store" : "/my"),
-        },
-    ]
 
     return (
         <div className="flex flex-col min-h-screen">
@@ -49,7 +28,7 @@ export default function LoadingPage() {
                     <p className="text-gray-600">결제 처리 중...</p>
                 </div>
             </div>
-            <BottomNav navItems={navItems} />
+            <BottomNav />
         </div>
     )
 }

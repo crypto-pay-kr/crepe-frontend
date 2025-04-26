@@ -8,7 +8,7 @@ import { Home, ShoppingBag, User } from "lucide-react";
 import { stores, menuItems } from "@/mocks/stores";
 import Button from "@/components/common/Button";
 
-function ShoppingMallDetailPage() {
+function MallDetailPage() {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
 
@@ -40,27 +40,6 @@ function ShoppingMallDetailPage() {
             </div>
         );
     }
-
-    const navItems = [
-        {
-            icon: <Home className="w-6 h-6" color="white" />,
-            label: "홈",
-            isActive: false,
-            onClick: () => navigate("/home"),
-        },
-        {
-            icon: <ShoppingBag className="w-6 h-6" color="white" />,
-            label: "쇼핑몰",
-            isActive: true, // 현재 활성화된 탭
-            onClick: () => navigate("/shoppingmall"),
-        },
-        {
-            icon: <User className="w-6 h-6" color="white" />,
-            label: "마이페이지",
-            isActive: false,
-            onClick: () => navigate(isSeller ? "/my/store" : "/my"),
-        },
-    ];
 
     return (
         <>
@@ -94,14 +73,14 @@ function ShoppingMallDetailPage() {
                         />
                         <Button
                             text="장바구니로 이동"
-                            onClick={() => navigate("/shoppingmall/store/cart")}
+                            onClick={() => navigate("/mall/store/cart")}
                             className="w-1/2 rounded-[9px] font-medium bg-[#0C2B5F] text-white"
                         />
                     </div>
                 </div>
-            <BottomNav navItems={navItems} />
+            <BottomNav />
         </>
     );
 }
 
-export default ShoppingMallDetailPage;
+export default MallDetailPage;

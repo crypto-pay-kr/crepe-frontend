@@ -11,29 +11,6 @@ export default function ShoppingMallDetail() {
     const [cartItems, setCartItems] = useState<{ id: number; name: string; price: number; quantity: number }[]>([]);
     const [showCartButton, setShowCartButton] = useState(false);
 
-    const isSeller = false; // 판매자인지 여부를 확인하는 변수 (예시)
-
-    const navItems = [
-        {
-            icon: <Home className="w-6 h-6" color="white" />,
-            label: "홈",
-            isActive: false,
-            onClick: () => navigate("/home"),
-        },
-        {
-            icon: <ShoppingBag className="w-6 h-6" color="white" />,
-            label: "쇼핑몰",
-            isActive: true, // 현재 활성화된 탭
-            onClick: () => navigate("/shop"),
-        },
-        {
-            icon: <User className="w-6 h-6" color="white" />,
-            label: "마이페이지",
-            isActive: false,
-            onClick: () => navigate(isSeller ? "/my/store" : "/my"),
-        },
-    ];
-
     const storeId = parseInt(id || "0", 10);
     const storeDetails = menuItems.find((item) => item.id === storeId);
 

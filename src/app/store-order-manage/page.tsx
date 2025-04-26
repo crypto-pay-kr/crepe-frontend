@@ -24,7 +24,7 @@ interface Order {
   rejectionReason?: string
 }
 
-export default function OrderStatus() {
+export default function OrderStatusPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const [orders, setOrders] = useState<Order[]>([

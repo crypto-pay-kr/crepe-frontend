@@ -3,6 +3,6 @@
 import ShowTransationId from "@/components/coin/ShowTransationId"
 
 
-export default function Page() {
+export default function CoinHomeTransaction() {
   return <ShowTransationId />
 }
