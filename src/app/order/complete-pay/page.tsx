@@ -7,27 +7,6 @@ import { Home, ShoppingBag, User } from "lucide-react"
 
 export default function PayCompletePage() {
   const navigate = useNavigate()
-  const isSeller = false
-  const navItems = [
-    {
-      icon: <Home className="w-6 h-6" color="white" />,
-      label: "홈",
-      isActive: false,
-      onClick: () => navigate("/home"),
-    },
-    {
-      icon: <ShoppingBag className="w-6 h-6" color="white" />,
-      label: "쇼핑몰",
-      isActive: true,
-      onClick: () => navigate("/shoppingmall"),
-    },
-    {
-      icon: <User className="w-6 h-6" color="white" />,
-      label: "마이페이지",
-      isActive: false,
-      onClick: () => navigate(isSeller ? "/my/store" : "/my"),
-    },
-  ]
   const goBack = () => navigate(-1)
 
   return (
@@ -118,13 +97,13 @@ export default function PayCompletePage() {
         <div className="p-4 mt-auto">
           <button
             className="bg-[#002169] text-white h-12 rounded-md font-medium w-full"
-            onClick={() => navigate("/shoppingmall")}
+            onClick={() => navigate("/mall")}
           >
             확인
           </button>
         </div>
       </motion.div>
-      <BottomNav navItems={navItems} />
+      <BottomNav/>
     </div>
   )
 }

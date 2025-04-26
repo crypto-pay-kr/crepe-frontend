@@ -13,27 +13,6 @@ export default function StoreSettings() {
   const navigate = useNavigate()
   const isSeller = location.pathname.includes('/store');
 
-  const navItems = [
-    {
-      icon: <Home className="w-6 h-6" color="white" />,
-      label: "홈",
-      isActive: false,
-      onClick: () => navigate("/home")
-    },
-    {
-      icon: <ShoppingBag className="w-6 h-6" color="white" />,
-      label: "쇼핑몰",
-      isActive: false,
-      onClick: () => navigate("/shop")
-    },
-    {
-      icon: <User className="w-6 h-6" color="white" />,
-      label: "마이페이지",
-      isActive: true,
-      onClick: () => navigate(isSeller ? "/store/my" : "/home/my")
-    }
-  ];
-
 
   const handleStoreNameUpdate = () => {
     if (!storeName.trim()) {
@@ -135,7 +114,7 @@ export default function StoreSettings() {
 
 
       {/* Bottom Navigation */}
-      <BottomNav navItems={navItems} />
+      <BottomNav />
   </div>
   )
 }

@@ -32,28 +32,6 @@ export default function OrderPage() {
     }
 
 
-    const navItems = [
-        {
-            icon: <Home className="w-6 h-6" color="white" />,
-            label: "홈",
-            isActive: false,
-            onClick: () => navigate("/home"),
-        },
-        {
-            icon: <ShoppingBag className="w-6 h-6" color="white" />,
-            label: "쇼핑몰",
-            isActive: true, // 현재 활성화된 탭
-            onClick: () => navigate("/shoppingmall"),
-        },
-        {
-            icon: <User className="w-6 h-6" color="white" />,
-            label: "마이페이지",
-            isActive: false,
-            onClick: () => navigate(isSeller ? "/my/store" : "/my"),
-        },
-    ];
-
-
     const paymentOptions = [
         { id: "KRW", label: "KRW", amount: "33,000 KRW", insufficientBalance: false },
         { id: "XRP", label: "XRP", amount: "9.9 XRP", insufficientBalance: false },
@@ -118,12 +96,12 @@ export default function OrderPage() {
                 <div className="flex justify-center mt-auto">
                     <Button
                         text="주문하기"
-                        onClick={() => navigate("/shoppingmall/store/order-pending")}
+                        onClick={() => navigate("/mall/store/order-pending")}
                         className="mx-4 rounded-[9px] font-medium bg-[#0C2B5F] text-white py-2 px-4"
                     />
                 </div>
             </div>
-            <BottomNav navItems={navItems} />
+            <BottomNav/>
         </div>
     )
 }

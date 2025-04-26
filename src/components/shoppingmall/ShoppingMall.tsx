@@ -78,7 +78,7 @@ export default function ShoppingMall() {
               <div
                 key={store.id}
                 className="border-b pb-4"
-                onClick={() => navigate(`/shoppingmall/store/${store.id}`)} // Updated path
+                onClick={() => navigate(`/mall/store/${store.id}`)} // Updated path
               >
                 <div className="flex justify-between items-center mb-2">
                   <h3 className="font-bold">{store.name}</h3>
