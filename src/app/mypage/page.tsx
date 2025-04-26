@@ -85,7 +85,7 @@ export default function MyPage(): React.ReactElement {
         />
         <MenuList menuItems={getMenuItems()} />
       </main>
-      <BottomNav navItems={navItems} />
+      <BottomNav  />
     </div>
   );
 }
