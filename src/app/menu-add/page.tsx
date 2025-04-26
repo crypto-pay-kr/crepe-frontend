@@ -192,7 +192,7 @@ export default function MenuEdit(): React.ReactElement {
       </main>
 
       {/* 하단 네비게이션 */}
-      <BottomNav navItems={navItems} />
+      <BottomNav/>
     </div>
   );
 }

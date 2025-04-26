@@ -295,7 +295,7 @@ export default function OrderStatus() {
       </div>
 
       {/* 하단 네비게이션 */}
-      <BottomNav navItems={navItems} />
+      <BottomNav />
 
       {/* 모달 컴포넌트 */}
       <TimeSelectionModal isOpen={timeModalOpen} onClose={() => setTimeModalOpen(false)} onAccept={handleAccept} />
