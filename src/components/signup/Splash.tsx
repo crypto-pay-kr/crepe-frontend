@@ -1,11 +1,13 @@
 export default function Splash() {
   return (
     <div className="h-full flex flex-col">
-      <div className="flex-1 flex flex-col items-center justify-center">
-        <h1 className="text-4xl font-bold text-[#0a5ca8] mb-40">Crepe</h1>
-        <div className="absolute bottom-10 flex items-center">
-          <img src="/crepe-logo.png" alt="우리 로고" className="mr-2 w-4 h-4" />
-          <span>Crepe : 편리한 블록체인 토큰결제</span>
+      <div className="h-full flex flex-col relative bg-white">
+        <div className="flex-1 flex flex-col items-center justify-center space-y-4">
+          <img src="/crepe-newlogo2.png" alt="Crepe 메인 로고" className="w-65 h-60" />
+        </div>
+        <div className="absolute bottom-10 left-0 right-0 flex justify-center text-lg text-slate-700">
+          <span>편리한 블록체인 토큰결제,</span>
+          <span className="text-[#1C355E] font-semibold ml-1">Crepe</span>
         </div>
       </div>
     </div>

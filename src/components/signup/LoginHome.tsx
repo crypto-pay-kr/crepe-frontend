@@ -17,11 +17,12 @@ export default function LoginHome({ onSignup, onLogin, buttonClassName  }: Login
   const isButtonDisabled = !userId || !password
 
   return (
-    <div className="px-5 mt-[129px]"> {/* 좌우 패딩 추가 */}
+    <div className="min-h-screen flex flex-col px-5 pt-24 pb-10">
+      {/* 로고 */}
       <img
-        src="https://cdn.builder.io/api/v1/image/assets/TEMP/7c1a66a08012ee38b1897d831a899618cb0db434?placeholderIfAbsent=true&apiKey=dfb0c1f2d9e8499aa6de387bae897f9a"
+        src="/crepe-newlogo2.png"
         alt="Logo"
-        className="object-contain w-[148px] aspect-[2.51] mx-auto"
+        className="object-contain w-[500px] aspect-[2.51] mx-auto"
       />
 
       {/* Login Form */}
