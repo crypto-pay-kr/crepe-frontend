@@ -5,18 +5,16 @@ import BottomNav from '@/components/common/BottomNavigate'
 import React, { useState } from 'react'
 import { OrderSection } from '@/components/coin/OrderSection'
 import { Coin, Order } from '@/constants/coinData'
-
-
 import { Wallet, ArrowUpRight } from "lucide-react"
 
-export default function CoinHome() {
+export default function StoreCoinPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const isUser = location.state?.isUser ?? false;
+  const isStore = true; 
   const [activeTab, setActiveTab] = useState('assets'); // 'assets' or 'orders'
 
   const handleCoinClick = (symbol: string) => {
-    navigate(`/coin-detail/${symbol}`, { state: { isUser } });
+    navigate(`/coin-detail/${symbol}`, { state: { isStore } });
   };
 
   // 코인 데이터
@@ -81,11 +79,9 @@ export default function CoinHome() {
 
   return (
     <div className="flex h-full flex-col bg-gray-50">
-      {/* Custom Header with notification */}
-      <Header title="자산관리" />
+      <Header title="가맹점 자산관리" />
 
       <main className="flex-1 overflow-auto bg-gray-50">
-        {/* Premium Balance Card */}
         <div className="px-4 py-6">
           <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-400 to-blue-500 p-5 shadow-lg">
             <div className="mb-4 flex items-center">
@@ -94,10 +90,10 @@ export default function CoinHome() {
                 <span className="text-lg font-medium text-blue-100">총 자산</span>
               </div>
             </div>
-            <h2 className="mb-1 text-3xl font-bold text-white">3,000 KRW</h2>
+            <h2 className="mb-1 text-3xl font-bold text-white">5,000 KRW</h2>
             <div className="flex items-center text-green-300">
               <ArrowUpRight className="mr-1 h-4 w-4" />
-              <span className="text-sm">+2.4% 오늘</span>
+              <span className="text-sm">+3.2% 오늘</span>
             </div>
 
           </div>
@@ -115,18 +111,16 @@ export default function CoinHome() {
           >
             보유 자산
           </button>
-          {isUser && (
-            <button 
-              className={`flex-1 py-3 text-center text-sm font-medium ${
-                activeTab === 'orders' 
-                  ? 'border-b-2 border-indigo-600 text-indigo-600' 
-                  : 'text-gray-500'
-              }`}
-              onClick={() => setActiveTab('orders')}
-            >
-              거래 내역
-            </button>
-          )}
+          <button 
+            className={`flex-1 py-3 text-center text-sm font-medium ${
+              activeTab === 'orders' 
+                ? 'border-b-2 border-indigo-600 text-indigo-600' 
+                : 'text-gray-500'
+            }`}
+            onClick={() => setActiveTab('orders')}
+          >
+            거래 내역
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -135,7 +129,12 @@ export default function CoinHome() {
             <div className="rounded-xl bg-white p-4 shadow-sm">
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="text-lg font-bold text-gray-800">보유 코인</h3>
-                <button className="text-sm font-medium text-indigo-600">전체보기</button>
+                <button 
+                  className="text-sm font-medium text-indigo-600"
+                  onClick={() => navigate('/settlement')}
+                >
+                  정산하기
+                </button>
               </div>
               
               <div className="space-y-3">
@@ -163,7 +162,7 @@ export default function CoinHome() {
               </div>
             </div>
           ) : (
-            isUser && <OrderSection orders={SAMPLE_ORDERS} />
+            <OrderSection orders={SAMPLE_ORDERS} />
           )}
         </div>
       </main>

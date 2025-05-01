@@ -1,8 +1,37 @@
 import { useNavigate } from "react-router-dom";
 import Button from "@/components/common/Button";
+import { useState, useEffect } from "react";
+
+const AnimationStyles = () => (
+  <style>
+    {`
+      @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+      }
+    `}
+  </style>
+);
 
 export default function SignupCompletePage() {
   const navigate = useNavigate();
+
+  const [showGreeting, setShowGreeting] = useState(false);
+  const [showLogo, setShowLogo] = useState(false);
+  const [showButton, setShowButton] = useState(false);
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setShowGreeting(true), 200);
+    const t2 = setTimeout(() => setShowLogo(true), 700);
+    const t3 = setTimeout(() => setShowButton(true), 1200);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
+  }, []);
 
   const handleNext = () => {
     navigate("/login");
@@ -10,9 +39,15 @@ export default function SignupCompletePage() {
 
   return (
     <div className="h-full flex flex-col">
+      <AnimationStyles />
+
       {/* 상단 인삿말 */}
       <div className="flex-1 flex flex-col items-center justify-center">
-        <div className="flex flex-col items-center space-y-0.5">
+        <div
+          className={`transition-all duration-700 ${
+            showGreeting ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          } flex flex-col items-center space-y-0.5`}
+        >
           <div className="flex items-center gap-0">
             <img
               src="/crepe-newlogosmall.png"
@@ -29,7 +64,12 @@ export default function SignupCompletePage() {
 
       {/* 중앙 이미지 */}
       <div className="flex-grow flex items-center justify-center">
-        <div className="relative w-50 h-52">
+        <div
+          className={`relative w-50 h-52 transition-all duration-700 ${
+            showLogo ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          }`}
+          style={showLogo ? { animation: "float 3s ease-in-out infinite" } : {}}
+        >
           <img src="/crepe-newlogo.png" alt="Crepe Logo" className="w-full h-full" />
         </div>
       </div>

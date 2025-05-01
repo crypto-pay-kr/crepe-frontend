@@ -18,9 +18,9 @@ export default function MyPage(): React.ReactElement {
   const handleEditInfo = (): void => {
     // 유저 타입에 따라 다른 편집 페이지로 이동
     if (isSeller) {
-      navigate("/store/my/edit-info");
+      navigate("/store/my/edit");
     } else {
-      navigate("/home/my/edit-info");
+      navigate("/home/my/edit");
     }
   };
 
@@ -42,7 +42,7 @@ export default function MyPage(): React.ReactElement {
     if (isSeller) {
       baseMenuItems.push({ 
         label: "결산리포트", 
-        onClick: () => navigate("/store/my/settlement-report"),
+        onClick: () => navigate("/settlement"),
         icon: <BarChart2 size={18} color="#10b981" />
       });
     }

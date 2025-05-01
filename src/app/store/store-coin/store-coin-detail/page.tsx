@@ -3,10 +3,8 @@ import Header from "@/components/common/Header"
 import { useNavigate, useParams, useLocation } from "react-router-dom"
 import React, { useState } from "react"
 import BottomNav from '@/components/common/BottomNavigate'
-import Button from "@/components/common/Button"
 import TransactionItem from "@/components/coin/TransactionItem"
 import CoinAddressModal from "@/components/coin/CoinAddressModal";
-
 
 interface CryptoWalletProps {
   isUser?: boolean;
@@ -47,14 +45,12 @@ export default function CoinDetailPage() {
   const location = useLocation()
   const isUser = location.state?.isUser ?? false
 
-
   const accountStatus = "registered" as "registered" | "not_registered" | "pending";
   const [showModal, setShowModal] = useState(false)
+  const [selectedPeriod, setSelectedPeriod] = useState('day')
 
   const navigate = useNavigate()
   const isSeller = location.pathname.includes('/store');
-
-
 
   const coin = coinMeta[symbol as keyof typeof coinMeta]
 
@@ -62,9 +58,12 @@ export default function CoinDetailPage() {
 
   return (
     <div className="h-full flex flex-col bg-gray-50">
-      <Header title={`${coin.name} 상세`}   onBackClick={() => {
-        navigate(isUser ? "/user-coin" : "/store-coin")
-      }} />
+      <Header 
+        title={`${coin.name} 상세`} 
+        onBackClick={() => {
+          navigate(isUser ? "/user-coin" : "/store-coin")
+        }} 
+      />
 
       <main className="flex-1 overflow-auto p-5">
         {/* 보유 자산 카드 */}
@@ -84,16 +83,16 @@ export default function CoinDetailPage() {
         </div>
 
         {/* 버튼 영역 */}
-        <div className="w-full px-4 mb-8">
-          <Button
+        <div className="w-full mb-6">
+          <button
             className="w-full bg-[#0a2e64] text-white py-4 rounded-xl text-lg font-semibold shadow"
             onClick={() => {
               if (isUser) {
                 navigate(`/home-coin-address/${symbol}`, { state: { isUser,symbol } })
               } else {
                 if (accountStatus==="registered") {
-                  navigate("/adjustmentCoin", { state: { isUser ,symbol } })
-                }else if (accountStatus==="not_registered") {
+                  navigate("/settlement", { state: { isUser ,symbol } })
+                } else if (accountStatus==="not_registered") {
                   navigate("/add-coin-address", { state: { isUser ,symbol } })
                 }
               }
@@ -107,9 +106,9 @@ export default function CoinDetailPage() {
                   ? "계좌 등록중입니다..."
                   : "계좌 등록"
             }
-          </Button>
+          </button>
 
-          {/* 회색 비활성 텍스트 박스 */}
+          {/* 계좌 상태 표시 박스 (스토어일 경우만) */}
           {!isUser && (
             <div
               className="w-full bg-gray-200 text-center py-3 rounded-xl text-base font-medium mt-3"
@@ -122,23 +121,44 @@ export default function CoinDetailPage() {
                 }
               }}
             >
-    <span className={
-      accountStatus === "registered"
-        ? "text-gray-500"
-        : accountStatus === "pending"
-          ? "text-gray-500"
-          : "text-red-500"
-    }>
-      {accountStatus === "registered"
-        ? "계좌가 등록되었습니다"
-        : accountStatus === "pending"
-          ? "계좌가 등록중입니다"
-          : "계좌가 등록되지 않았습니다"}
-    </span>
+              <span className={
+                accountStatus === "registered"
+                  ? "text-gray-500"
+                  : accountStatus === "pending"
+                    ? "text-gray-500"
+                    : "text-red-500"
+              }>
+                {accountStatus === "registered"
+                  ? "계좌가 등록되었습니다"
+                  : accountStatus === "pending"
+                    ? "계좌가 등록중입니다"
+                    : "계좌가 등록되지 않았습니다"}
+              </span>
             </div>
           )}
         </div>
-
+        
+        {/* 기간 선택 탭 - 계좌등록 버튼 아래로 이동 */}
+        <div className="mb-6">
+          <div className="flex bg-white rounded-xl p-1 shadow-sm">
+            {['day', 'week', 'month', 'year'].map((period) => (
+              <button
+                key={period}
+                onClick={() => setSelectedPeriod(period)}
+                className={`flex-1 py-2 text-center text-sm font-medium rounded-lg transition ${
+                  selectedPeriod === period 
+                    ? 'bg-[#0a2e64] text-white' 
+                    : 'text-gray-500 hover:bg-gray-50'
+                }`}
+              >
+                {period === 'day' && '1일'}
+                {period === 'week' && '1주'}
+                {period === 'month' && '1개월'}
+                {period === 'year' && '1년'}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {showModal && (
           <CoinAddressModal
@@ -148,8 +168,19 @@ export default function CoinDetailPage() {
           />
         )}
 
+        {/* 거래 내역 섹션 */}
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-lg font-bold text-gray-800">거래 내역</h3>
+          <button className="text-sm font-medium text-[#0a2e64] flex items-center">
+            전체보기
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className="ml-1">
+              <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </div>
+        
         {/* 거래 내역 */}
-        <div className="space-y-6 px-4 pb-10 text-[20px]">
+        <div className="space-y-6 pb-10 text-[20px]">
           {/* 입금 내역 */}
           <TransactionItem
             date="2024.12.12 16:36"
@@ -168,6 +199,12 @@ export default function CoinDetailPage() {
             krw="1000"
             isDeposit={false}
           />
+          
+          {isUser && (
+            <div className="text-center p-2">
+              <button className="text-sm text-[#0a2e64] font-medium">더보기</button>
+            </div>
+          )}
         </div>
       </main>
 

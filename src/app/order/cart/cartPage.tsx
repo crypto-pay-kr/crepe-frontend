@@ -47,7 +47,7 @@ export default function CartPage() {
                         
                         {/* 더 담으러 가기 버튼 */}
                         <div className="mt-6 pt-4 border-t border-gray-100">
-                            <AddMoreItemsButton onClick={() => navigate("/shopping/store")} />
+                            <AddMoreItemsButton onClick={() => navigate("/mall/store/1")} />
                         </div>
                     </div>
                     

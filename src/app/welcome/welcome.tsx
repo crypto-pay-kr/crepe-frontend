@@ -41,7 +41,7 @@ export default function WelcomePage() {
           {/* 가맹점 회원가입 */}
           <div className="text-center text-sm">
             <span>사장님이신가요? </span>
-            <button className="text-[#0a5ca8] font-medium" onClick={() => navigate("/terms?store=true")}>
+            <button className="text-[#0a5ca8] font-medium" onClick={() => navigate("/store/terms")}>
               가맹점 회원가입하기
             </button>
           </div>
