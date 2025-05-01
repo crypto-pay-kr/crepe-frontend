@@ -3,8 +3,9 @@ import ImageUploader from "@/components/common/ImageUploader";
 import Input from "@/components/common/Input";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Button from "@/components/common/Button";
 
-const BusinessVerification: React.FC = () => {
+const BusinessVerificationPage: React.FC = () => {
   const navigate = useNavigate();
   const [businessNumber, setBusinessNumber] = useState("");
   const [certificate, setCertificate] = useState<File | null>(null);
@@ -59,7 +60,7 @@ const BusinessVerification: React.FC = () => {
         </div>
 
         <div className="mt-auto">
-          <button
+          <Button
             onClick={handleVerify}
             className={`w-full py-4 rounded-lg ${
               businessNumber && certificate ? "bg-[#0a2e65] text-white" : "bg-gray-300 text-gray-700"
@@ -67,11 +68,11 @@ const BusinessVerification: React.FC = () => {
             disabled={!businessNumber || !certificate}
           >
             인증하기
-          </button>
+          </Button>
         </div>
       </main>
     </div>
   );
 };
 
-export default BusinessVerification;
+export default BusinessVerificationPage;

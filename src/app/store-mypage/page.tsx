@@ -1,4 +1,3 @@
-'use client'
 import Header from "@/components/common/Header";
 import Modal from "@/components/common/Modal";
 import BusinessCertificateForm from "@/components/edit-info/BusinessCertificationForm";
@@ -6,7 +5,6 @@ import PasswordChangeForm from "@/components/edit-info/PasswordChangeForm";
 import PhoneChangeForm from "@/components/edit-info/PhoneChangeForm";
 import ProfileImageChangeForm from "@/components/edit-info/ProfileImageChangeFromProps";
 import React, { useState, ChangeEvent } from "react";
-import { useNavigate } from "react-router-dom";
 
 export default function StoreEditInfo(): React.ReactElement {
   const [profileImage, setProfileImage] = useState<File | null>(null);

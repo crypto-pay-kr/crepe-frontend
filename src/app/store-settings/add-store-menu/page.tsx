@@ -1,11 +1,10 @@
-'use client'
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
-import { Home, ShoppingBag, User } from "lucide-react";
 import Header from "@/components/common/Header";
+import Button from "@/components/common/Button";
 import BottomNav from "@/components/common/BottomNavigate";
-import ImageUploader from "@/components/common/ImageUploader"; // Import the ImageUploader component
+import ImageUploader from "@/components/common/ImageUploader";
+import Input from '@/components/common/Input' // Import the ImageUploader component
 
 interface CryptoCurrency {
   code: string;
@@ -20,7 +19,7 @@ interface MenuItemData {
   image?: File | null;
 }
 
-export default function MenuEdit(): React.ReactElement {
+export default function MenuEditPage(): React.ReactElement {
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams<{ id?: string }>(); 
@@ -93,26 +92,6 @@ export default function MenuEdit(): React.ReactElement {
   };
   
   const isSeller = location.pathname.includes('/store');
-  const navItems = [
-      {
-        icon: <Home className="w-6 h-6" color="white" />,
-        label: "홈",
-        isActive: false,
-        onClick: () => navigate("/")
-      },
-      {
-        icon: <ShoppingBag className="w-6 h-6" color="white" />,
-        label: "쇼핑몰",
-        isActive: false,
-        onClick: () => navigate("/shop")
-      },
-      {
-        icon: <User className="w-6 h-6" color="white" />,
-        label: "마이페이지",
-        isActive: true,
-        onClick: () => navigate(isSeller ? "/store/my" : "/home/my")
-      }
-    ];
 
   return (
     <div className="flex flex-col h-screen">
@@ -124,25 +103,22 @@ export default function MenuEdit(): React.ReactElement {
       <main className="flex-1 p-4 bg-white overflow-auto">
         {/* 음식명 */}
         <div className="mb-4 mt-5">
-          <label className="block text-lg font-medium mb-2">음식명</label>
-          <input
-            type="text"
+          <Input
+            label="음식명"
             value={menuItem.name}
-            onChange={handleNameChange}
-            className="w-full border-b border-gray-300 p-2 bg-transparent focus:outline-none"
+            onChange={(value) => setMenuItem({ ...menuItem, name: value })}
             placeholder="음식명을 입력해주세요."
           />
         </div>
 
         {/* 가격 */}
         <div className="mb-4">
-          <label className="block text-lg font-medium mb-2">가격</label>
-          <input
-            type="text"
+          <Input
+            label="가격"
             value={menuItem.price}
-            onChange={handlePriceChange}
-            className="w-full border-b border-gray-300 p-2 bg-transparent focus:outline-none"
+            onChange={(value) => setMenuItem({ ...menuItem, price: value.replace(/[^0-9]/g, "") })}
             placeholder="가격을 입력해주세요."
+            type="text"
           />
         </div>
 
@@ -181,13 +157,10 @@ export default function MenuEdit(): React.ReactElement {
         {/* 버튼 영역 */}
         <div className="space-y-3 mt-6">
           {isEditMode && (
-            <button onClick={handleDelete} className="w-full bg-red-500 text-white py-3 rounded-lg">
-              삭제하기
-            </button>
+            <Button text="삭제하기" onClick={handleDelete} className="w-full bg-red-500 text-white py-3 rounded-lg"></Button>
           )}
-          <button onClick={handleSubmit} className="w-full bg-[#0a2e65] text-white py-3 rounded-lg">
-            {isAddMode ? "추가하기" : "수정하기"}
-          </button>
+          <Button text={isAddMode ? "추가하기" : "수정하기"} onClick={handleSubmit} className="w-full bg-[#0a2e65] text-white py-3 rounded-lg">
+          </Button>
         </div>
       </main>
 
