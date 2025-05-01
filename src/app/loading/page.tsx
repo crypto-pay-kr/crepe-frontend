@@ -2,16 +2,9 @@ import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import Header from "@/components/common/Header"
 import BottomNav from "@/components/common/BottomNavigate"
-import { Home, ShoppingBag, User } from "lucide-react"
 
 export default function LoadingPage() {
     const navigate = useNavigate()
-    const isSeller = false
-
-    const goBack = () => {
-        navigate(-1)
-    }
-
     useEffect(() => {
         const timer = setTimeout(() => {
             navigate("/mall/store/pay-complete")

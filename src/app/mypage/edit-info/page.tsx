@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Header from "@/components/common/Header";
 import PasswordChangeForm from "@/components/edit-info/PasswordChangeForm";
 import NicknameChangeForm from "@/components/edit-info/NicknameChangeForm";
@@ -10,7 +9,6 @@ import Modal from "@/components/common/Modal";
 
 
 export default function EditInfo(): React.ReactElement {
-  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalTitle, setModalTitle] = useState<string>("");
 
@@ -36,18 +34,15 @@ export default function EditInfo(): React.ReactElement {
 
   return (
     <div className="flex flex-col h-screen">
-      {/* 헤더 */}
+  
       <Header title="내 정보 수정"/>
-      
-      {/* 메인 콘텐츠 */}
+  
       <main className="flex-1 p-4 bg-gray-50 overflow-auto">
         <PasswordChangeForm onSuccess={handlePasswordChangeSuccess} />
         <NicknameChangeForm onSuccess={handleNicknameChangeSuccess} />
         <EmailChangeForm onSuccess={handleEmailChangeSuccess} />
         <PhoneChangeForm onSuccess={handlePhoneChangeSuccess} />
       </main>
-
-      {/* 완료 모달 */}
       <Modal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)}

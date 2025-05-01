@@ -4,6 +4,7 @@ import Header from '@/components/common/Header'
 import BottomNav from '@/components/common/BottomNavigate'
 import React from 'react'
 
+
 const coins = [
   {
     symbol: "XRP",
@@ -176,5 +177,5 @@ export default function  CoinWalletPage() {
       <BottomNav />
     </div>
   )
-}
+
 

@@ -17,6 +17,7 @@ import LoginPage from "./app/login/page";
 import AdditionalStoreInfoPage from "./app/sign-up/store-additional-info/page";
 import MyStoreManagePage from "./app/store-settings/page";
 import MenuEdit from "./app/store-settings/add-store-menu/page";
+
 import StoreSettingsPage from "./app/store-settings/edit-store-info/page";
 import CartPage from "./app/order/cart/page";
 import OrderPage from "./app/order/select-payment/page";
@@ -24,16 +25,28 @@ import LoadingPage from "./app/loading/page";
 import PayCompletePage from "./app/order/complete-pay/page";
 import { StoreIcon } from "lucide-react";
 import CoinDetailPage from "./app/store-coin/store-coin-detail/page";
+
+import StoreSettings from "./components/store-settings/settings";
+import CartPage from "./app/order/cart/cartPage";
+import OrderPage from "./app/order/payment/selectPayment";
+import LoadingPage from "./app/loading/page";
+import PayCompletePage from "./app/order/complete-pay/payComplete";
+import CoinDetailPage from "./components/coin/CoinDetail";
+
 import OrderStatusPage from "./app/store-order-manage/page";
-import AddCoinAddress from "./components/coin/AddCoinAddress";
-import CoinHomeTransaction from "./app/coin/show-coin-transaction/page";
-import AdjustmentCoinPage from "./app/coin/settlement-coin/page";
-import CoinHomePage from "./app/coin/page";
-import CoinDepositPage from "./app/coin/show-coin-address/page";
 import MallPage from "./app/shop/page";
 import MallDetailPage from "./app/shop/store/page";
 import StoreCoinPage from "./app/store-coin/page";
+
 import StoreEditInfoPage from '@/app/store-settings/edit-store-info/page'
+
+import AddCoinAddress from "./app/coin/adress/addCoinAddress";
+import SettlementCoin from "./app/coin/settlement/settlementCoin";
+import CoinDeposit from "./app/coin/deposit/depositCoin";
+import CoinTransaction from "./app/coin/transaction/coinTransaction";
+import CoinHome from "./app/coin/home/CoinHome";
+import SelectPaymentPage from "./app/order/payment/selectPayment";
+
 
 
 
@@ -68,7 +81,7 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
 
         {/* 가맹점 및 유저 정보 관리 및 수정 페이지 */}
         <Route path="/home/my" element={<MyPage/>} />
-        <Route path="/home/my/edit-info" element={<EditInfo />} />
+        <Route path="/home/my/edit" element={<EditInfo />} />
 
         <Route path="/store/my" element={<MyPage />} />
         <Route path="/store/my/settlement-report" element={<SettlementReport/>} />
@@ -87,7 +100,7 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/mall" element={<MallPage/>} />
         <Route path="/mall/store/:id" element={<MallDetailPage/>} />
         <Route path="/mall/store/cart" element={<CartPage/>} />
-        <Route path="/mall/store/order" element={<OrderPage/>} />
+        <Route path="/mall/store/order" element={<SelectPaymentPage/>} />
         <Route path="/mall/store/order-pending" element={<LoadingPage/>} />
         <Route path="/mall/store/pay-complete" element={<PayCompletePage/>} />
 
@@ -95,17 +108,17 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         {/*가맹점코인 내역*/}
         <Route path="/store-coin" element={<StoreCoinPage/>} />
         {/*유저 코인 내역*/}
-        <Route path="/user-coin" element={<CoinHomePage/>} />
+        <Route path="/user/coin" element={<CoinHome/>} />
         {/*코인 상세내역 보여주는 페이지*/}
         <Route path="/coin-detail/:symbol" element={<CoinDetailPage/>} />
         {/*입금주소 보여주는 페이지*/}
-        <Route path="/home-coin-address/:symbol" element={<CoinDepositPage/>} />
+        <Route path="/coin/address/:symbol" element={<CoinDeposit/>} />
         {/*거래ID 입력 페이지*/}
-        <Route path="/home-coin-transaction/:symbol" element={<CoinHomeTransaction />} />
+        <Route path="/coin/transaction/:symbol" element={<CoinTransaction />} />
         {/*입금 계좌 등록 페이지*/}
-        <Route path="/add-coin-address" element={<AddCoinAddress/>} />
+        <Route path="/coin/address/add" element={<AddCoinAddress/>} />
         {/*가맹점 코인 정산 페이지*/}
-        <Route path="/adjustmentCoin" element={<AdjustmentCoinPage />} />
+        <Route path="/settlement" element={ <SettlementCoin/>} />
 
       </Routes>
     </BrowserRouter>
