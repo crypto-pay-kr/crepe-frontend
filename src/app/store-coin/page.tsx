@@ -1,6 +1,7 @@
-import CoinWallet from "@/components/coin/CoinWallet"
+
+import CoinHome from "../coin/home/CoinHome"
 
 
 export default function Page() {
-  return <CoinWallet isUser={false} />
+  return <CoinHome />
 }
