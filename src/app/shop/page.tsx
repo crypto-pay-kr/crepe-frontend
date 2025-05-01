@@ -1,5 +1,3 @@
-
-
 import ShoppingMall from "@/components/shoppingmall/ShoppingMall"
 import * as React from "react"
 

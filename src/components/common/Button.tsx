@@ -40,7 +40,7 @@ export default function Button({
       onClick={onClick}
       disabled={disabled}
     >
-      {text}
+      {children ?? text}
     </button>
   );
 }

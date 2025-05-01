@@ -3,7 +3,7 @@ import { useEffect } from "react"
 import SplashPage from "./app/splash/page";
 import MyPage from "./app/mypage/page";
 import EditInfo from "./app/mypage/edit-info/page";
-import BusinessVerification from "./app/sign-up/store-verification/page";
+import BusinessVerificationPage from "./app/sign-up/store-verification/page";
 import SettlementReport from "./app/store-coin/store-coin-report/page";
 import StoreEditInfo from "./app/store-mypage/page";
 import WelcomePage from "./app/welcome/page";
@@ -11,28 +11,42 @@ import TermsAgreementPage from "./app/sign-up/common/terms/page";
 import EmailPasswordPage from "./app/sign-up/common/email-input/page";
 import PhoneNumberPage from "./app/sign-up/common/phone-number-input/page";
 import PhoneVerificationPage from "./app/sign-up/common/phone-verification/page";
-import AdditionalInfoPage from "./app/sign-up/additional-info/page";
+import AdditionalUserInfoPage from "./app/sign-up/additional-info/page";
 import SignupCompletePage from "./app/sign-up/success/page";
 import LoginPage from "./app/login/page";
 import AdditionalStoreInfoPage from "./app/sign-up/store-additional-info/page";
 import MyStoreManagePage from "./app/store-settings/page";
 import MenuEdit from "./app/store-settings/add-store-menu/page";
+
+import StoreSettingsPage from "./app/store-settings/edit-store-info/page";
+import CartPage from "./app/order/cart/page";
+import OrderPage from "./app/order/select-payment/page";
+import LoadingPage from "./app/loading/page";
+import PayCompletePage from "./app/order/complete-pay/page";
+import { StoreIcon } from "lucide-react";
+import CoinDetailPage from "./app/store-coin/store-coin-detail/page";
+
 import StoreSettings from "./components/store-settings/settings";
 import CartPage from "./app/order/cart/cartPage";
 import OrderPage from "./app/order/payment/selectPayment";
 import LoadingPage from "./app/loading/page";
 import PayCompletePage from "./app/order/complete-pay/payComplete";
 import CoinDetailPage from "./components/coin/CoinDetail";
+
 import OrderStatusPage from "./app/store-order-manage/page";
 import MallPage from "./app/shop/page";
 import MallDetailPage from "./app/shop/store/page";
 import StoreCoinPage from "./app/store-coin/page";
+
+import StoreEditInfoPage from '@/app/store-settings/edit-store-info/page'
+
 import AddCoinAddress from "./app/coin/adress/addCoinAddress";
 import SettlementCoin from "./app/coin/settlement/settlementCoin";
 import CoinDeposit from "./app/coin/deposit/depositCoin";
 import CoinTransaction from "./app/coin/transaction/coinTransaction";
 import CoinHome from "./app/coin/home/CoinHome";
 import SelectPaymentPage from "./app/order/payment/selectPayment";
+
 
 
 
@@ -60,8 +74,8 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/phone" element={<PhoneNumberPage/>} />
         <Route path="/phone-number" element={<PhoneNumberPage />} />
         <Route path="/phone-verification" element={<PhoneVerificationPage />} />
-        <Route path="/store/verification" element={<BusinessVerification/>} />
-        <Route path="/additional-info" element={<AdditionalInfoPage />} />
+        <Route path="/store/verification" element={<BusinessVerificationPage/>} />
+        <Route path="/additional-info" element={<AdditionalUserInfoPage />} />
         <Route path="/signup-complete" element={<SignupCompletePage />} />
         <Route path="/login" element={<LoginPage />} />
 
@@ -71,7 +85,7 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
 
         <Route path="/store/my" element={<MyPage />} />
         <Route path="/store/my/settlement-report" element={<SettlementReport/>} />
-        <Route path="/store/my/edit-info" element={<StoreEditInfo />} />
+        <Route path="/store/my/edit-info" element={<StoreEditInfoPage />} />
 
 
         {/* 가맹점 가게 및 주문 관리 페이지 */}
@@ -79,7 +93,7 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/store/manage" element={<MyStoreManagePage/>} />
         <Route path="/store/menu/add" element={<MenuEdit/>} />
         <Route path="/store/menu/edit" element={<MenuEdit/>} />
-        <Route path="/store-settings" element={<StoreSettings />} />
+        <Route path="/store-settings" element={<StoreSettingsPage/>} />
         <Route path="/store" element={<OrderStatusPage />} />
 
         {/* 유저 쇼핑몰 페이지 */}

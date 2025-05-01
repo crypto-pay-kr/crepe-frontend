@@ -23,7 +23,7 @@ export default function PhoneVerification({
       newCode[index] = value
       setVerificationCode(newCode)
 
-      // Auto focus next input
+
       if (value && index < 5) {
         const nextInput = document.getElementById(`code-${index + 1}`)
         if (nextInput) {

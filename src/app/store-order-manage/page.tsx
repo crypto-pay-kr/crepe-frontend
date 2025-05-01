@@ -5,6 +5,7 @@ import Header from "@/components/common/Header"
 import BottomNav from "@/components/common/BottomNavigate"
 import { TimeSelectionModal } from "@/components/order/time-selection-modal"
 import { RejectionReasonModal } from "@/components/order/reject-reason-modal"
+import Button from '@/components/common/Button'
 
 
 
@@ -208,13 +209,13 @@ export default function OrderStatusPage() {
                     </span>
                   </div>
                 </div>
-                <button onClick={() => handleToggleExpand(order.id)} className="p-1 rounded-full bg-gray-100">
+                <Button onClick={() => handleToggleExpand(order.id)} className="p-1 rounded-full bg-gray-100">
                   {order.expanded ? (
                     <ChevronUp className="w-5 h-5 text-gray-500" />
                   ) : (
                     <ChevronDown className="w-5 h-5 text-gray-500" />
                   )}
-                </button>
+                </Button>
               </div>
 
               {order.expanded && (
@@ -289,9 +290,8 @@ export default function OrderStatusPage() {
 
       {/* 가게 설정 버튼 */}
       <div className="p-4 bg-gray-100">
-        <button onClick={handleStoreSettings} className="w-full py-4 bg-[#0a2e65] text-white rounded-md font-medium">
-          가게 설정
-        </button>
+        <Button text="가게 설정" onClick={handleStoreSettings} className="w-full py-4 bg-[#0a2e65] text-white rounded-md font-medium">
+        </Button>
       </div>
 
       {/* 하단 네비게이션 */}

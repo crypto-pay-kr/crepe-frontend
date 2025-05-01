@@ -8,7 +8,7 @@ import { Home, ShoppingBag, User } from "lucide-react";
 import { stores, menuItems } from "@/mocks/stores";
 import Button from "@/components/common/Button";
 
-function MyStoreManagePage() {
+export default function StoreSettingsPage() {
     const navigate = useNavigate();
 
     const isSeller = true;
@@ -46,5 +46,3 @@ function MyStoreManagePage() {
         </>
     );
 }
-
-export default MyStoreManagePage;
