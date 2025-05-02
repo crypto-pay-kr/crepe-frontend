@@ -3,16 +3,20 @@ import Header from "../common/Header"
 import Button from "../common/Button"
 
 interface PhoneNumberProps {
-  onNext: () => void,
-  isStore?: boolean
+  onNext: () => void;
+  isStore: boolean;
+  onPhoneNumberChange: (phone: string) => void; // 전화번호 변경 핸들러
 }
 
-export default function PhoneNumber({ onNext, isStore }: PhoneNumberProps) {
-  const [phoneNumber, setPhoneNumber] = useState("01012345678")
+export default function PhoneNumber({
+  onNext,
+  isStore,
+  onPhoneNumberChange,
+}: PhoneNumberProps) {
+  const [phoneNumber, setPhoneNumber] = useState("")
   const [formattedNumber, setFormattedNumber] = useState("")
   const isButtonDisabled = !phoneNumber || phoneNumber.length < 10
 
-  // 전화번호 포맷팅 함수 (010-1234-5678 형식)
   useEffect(() => {
     if (phoneNumber) {
       let formatted = phoneNumber.replace(/[^0-9]/g, '')
@@ -31,9 +35,10 @@ export default function PhoneNumber({ onNext, isStore }: PhoneNumberProps) {
 
   // 전화번호 입력 처리
   const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/[^0-9-]/g, '')
-    setPhoneNumber(value.replace(/-/g, ''))
-  }
+    const value = e.target.value.replace(/[^0-9-]/g, ""); // 숫자와 '-'만 허용
+    setPhoneNumber(value.replace(/-/g, "")); // '-' 제거 후 상태 업데이트
+    onPhoneNumberChange(value.replace(/-/g, "")); // 부모 컴포넌트로 전달
+  };
 
   return (
     <div className="h-full flex flex-col bg-white">

@@ -1,8 +1,8 @@
-"use client"
-
 import { useState } from "react"
-import LoginForm from "./LoginForm"
+import { useNavigate } from "react-router-dom"
 import Button from "../common/Button"
+import LoginForm from "./LoginForm"
+import API_ENDPOINTS from "@/api/user"
 
 
 interface LoginHomeProps {
@@ -11,10 +11,41 @@ interface LoginHomeProps {
   buttonClassName?: string
 }
 
-export default function LoginHome({ onSignup, onLogin, buttonClassName  }: LoginHomeProps) {
+export default function LoginHome({ onSignup, onLogin, buttonClassName }: LoginHomeProps) {
   const [userId, setUserId] = useState("")
   const [password, setPassword] = useState("")
   const isButtonDisabled = !userId || !password
+
+  // 로그인 요청 처리 함수
+  const handleLogin = async () => {
+    if (isButtonDisabled) {
+      alert("아이디와 비밀번호를 입력해 주세요.")
+      return
+    }
+
+    try {
+      const res = await fetch(API_ENDPOINTS.LOGIN, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: userId, password }),
+      })
+      if (!res.ok) {
+        alert("로그인에 실패했습니다.")
+        return
+      }
+      const { accessToken, refreshToken, role } = await res.json()
+
+      // 토큰을 localStorage 등에 저장
+      localStorage.setItem("accessToken", accessToken)
+      localStorage.setItem("refreshToken", refreshToken)
+
+      // 로그인 후 작업 (페이지 이동 등)
+      onLogin()
+    } catch (err) {
+      console.error("로그인 오류:", err)
+      alert("로그인 중 오류가 발생했습니다.")
+    }
+  }
 
   return (
     <div className="min-h-screen flex flex-col px-5 pt-24 pb-10">
@@ -27,7 +58,7 @@ export default function LoginHome({ onSignup, onLogin, buttonClassName  }: Login
 
       {/* Login Form */}
       <div className="mt-12 w-full">
-        <LoginForm onSubmit={() => { }}>
+        <LoginForm onSubmit={handleLogin}>
           <div className="flex flex-col gap-4">
             <input
               type="text"
@@ -53,7 +84,7 @@ export default function LoginHome({ onSignup, onLogin, buttonClassName  }: Login
           </div>
           <Button
             text="로그인하기"
-            onClick={onLogin}
+            onClick={handleLogin}
             className={`w-full rounded-[9px] font-medium bg-[#0C2B5F] text-white ${buttonClassName}`}
           />
 

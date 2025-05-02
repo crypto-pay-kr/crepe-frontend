@@ -43,6 +43,15 @@ export default defineConfig({
         replacement: path.resolve(__dirname, 'src/utils'),
       },
     ],
-
   },
+  server: {
+    proxy: {
+      "/api": {
+        target: process.env.API_SERVER_URL,
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
+    },
+  },
+  
 })
