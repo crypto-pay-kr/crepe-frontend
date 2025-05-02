@@ -1,7 +1,7 @@
 import PhoneVerification from "@/components/signup/PhoneVerification";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
-import API_ENDPOINTS from "@/api/user"; 
+import { verifySMS } from "@/api/user"; 
 
 export default function PhoneVerificationPage() {
   const navigate = useNavigate();
@@ -26,17 +26,7 @@ export default function PhoneVerificationPage() {
 
       const { phoneNumber } = JSON.parse(storedData);
 
-      const response = await fetch(API_ENDPOINTS.VERIFY_SMS,  {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          code: verificationCode,
-          phone: phoneNumber,
-          smsType: "SIGN_UP",
-        }),
-      });
+      const response = await verifySMS(verificationCode, phoneNumber, "SIGN_UP");
 
       if (response.ok) {
         // 성공 시 전화번호를 세션 스토리지에 저장
