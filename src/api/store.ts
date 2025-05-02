@@ -1,6 +1,10 @@
 const API_BASE_URL = import.meta.env.VITE_API_SERVER_URL || "http://localhost:8080"
 
-// 가맹점 회원가입
+
+const token = localStorage.getItem("accessToken");
+
+
+
 export async function signUpStore(formData: FormData) {
   const response = await fetch(API_BASE_URL + "/store/signup", {
     method: "POST",
@@ -8,6 +12,7 @@ export async function signUpStore(formData: FormData) {
   });
   return response;
 }
+
 
 export async function updateStoreName(token: string, newStoreName: string) {
   const response = await fetch(API_BASE_URL + "/store/change/name", {
@@ -29,6 +34,15 @@ export async function updateStoreAddress(token: string, newAddress: string) {
       "Authorization": `Bearer ${token}`,
     },
     body: JSON.stringify({ newAddress }),
+
+// 가맹점 메뉴 등록
+export async function storeMenuAdd(formData: FormData)  {
+const response = await fetch(`${API_BASE_URL}/store/menu`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
   });
   return response;
 }
