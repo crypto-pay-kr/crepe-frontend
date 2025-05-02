@@ -146,31 +146,31 @@ export default function OrderStatusPage() {
   }
 
   const handleStoreSettings = () => {
-    navigate("/store-settings")
+    navigate("/store/manage")
   }
-  
+
   const isSeller = location.pathname.includes('/store');
   const navItems = [
-      {
-        icon: <Home className="w-6 h-6" color="white" />,
-        label: "홈",
-        isActive: false,
-        onClick: () => navigate("/")
-      },
-      {
-        icon: <ShoppingBag className="w-6 h-6" color="white" />,
-        label: "쇼핑몰",
-        isActive: false,
-        onClick: () => navigate("/shop")
-      },
-      {
-        icon: <User className="w-6 h-6" color="white" />,
-        label: "마이페이지",
-        isActive: true,
-        onClick: () => navigate(isSeller ? "/store/my" : "/home/my")
-      }
-    ];
-    
+    {
+      icon: <Home className="w-6 h-6" color="white" />,
+      label: "홈",
+      isActive: false,
+      onClick: () => navigate("/")
+    },
+    {
+      icon: <ShoppingBag className="w-6 h-6" color="white" />,
+      label: "쇼핑몰",
+      isActive: false,
+      onClick: () => navigate("/shop")
+    },
+    {
+      icon: <User className="w-6 h-6" color="white" />,
+      label: "마이페이지",
+      isActive: true,
+      onClick: () => navigate(isSeller ? "/store/my" : "/home/my")
+    }
+  ];
+
   // 상태에 따른 배경색 클래스 반환
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -226,7 +226,7 @@ export default function OrderStatusPage() {
                       <span>{item.quantity}개</span>
                     </div>
                   ))}
-                  
+
                   {/* 거절된 주문에 대한 거절 사유 표시 */}
                   {order.status === "거절됨" && order.rejectionReason && (
                     <div className="mt-2 p-2 bg-red-50 rounded-md">
@@ -278,7 +278,7 @@ export default function OrderStatusPage() {
                 {order.status === "종료" && (
                   <div className="ml-auto px-4 py-2 bg-gray-100 text-gray-500 rounded-md">완료됨</div>
                 )}
-                
+
                 {order.status === "거절됨" && (
                   <div className="ml-auto px-4 py-2 bg-red-100 text-red-500 rounded-md">거절됨</div>
                 )}
