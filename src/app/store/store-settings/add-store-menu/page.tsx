@@ -4,7 +4,8 @@ import Header from "@/components/common/Header";
 import Button from "@/components/common/Button";
 import BottomNav from "@/components/common/BottomNavigate";
 import ImageUploader from "@/components/common/ImageUploader";
-import Input from '@/components/common/Input' // Import the ImageUploader component
+import Input from "@/components/common/Input";
+import { storeMenuAdd } from "@/api/store";
 
 interface CryptoCurrency {
   code: string;
@@ -19,12 +20,13 @@ interface MenuItemData {
   image?: File | null;
 }
 
+const BASE_URL = import.meta.env.VITE_API_SERVER_URL;
+
 export default function MenuEditPage(): React.ReactElement {
   const navigate = useNavigate();
   const location = useLocation();
-  const { id } = useParams<{ id?: string }>(); 
-  
-  // 현재 경로가 /menu/add인지 /menu/edit인지 확인
+  const { id } = useParams<{ id?: string }>();
+
   const isAddMode = location.pathname === "/store/menu/add";
   const isEditMode = location.pathname === "/store/menu/edit" || location.pathname.startsWith("/store/menu/edit/");
 
@@ -39,10 +41,8 @@ export default function MenuEditPage(): React.ReactElement {
   });
 
   useEffect(() => {
-    // 수정 모드일 경우 기존 데이터 불러오기
     if (isEditMode && id) {
       // 실제 구현에서는 API 호출로 데이터를 가져옵니다
-      // 여기서는 예시 데이터를 사용합니다
       setMenuItem({
         id: id,
         name: "불고기 버거",
@@ -53,76 +53,131 @@ export default function MenuEditPage(): React.ReactElement {
         ],
         image: null,
       });
-      // 실제로는 가격에 따라 자동으로 계산되기 때문에 cryptoPrices 값은 중요하지 않습니다
     }
   }, [isEditMode, id]);
-
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMenuItem({ ...menuItem, name: e.target.value });
   };
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // 숫자만 입력 가능하도록
     const value = e.target.value.replace(/[^0-9]/g, "");
     setMenuItem({ ...menuItem, price: value });
   };
-
 
   const handleImageChange = (file: File) => {
     setMenuItem({ ...menuItem, image: file });
   };
 
-  const handleSubmit = () => {
-    // 실제 구현에서는 API 호출로 데이터를 저장합니다
-    if (isAddMode) {
-      alert("메뉴가 추가되었습니다.");
-    } else {
-      alert("메뉴가 수정되었습니다.");
+  const handleSubmit = async () => {
+    if (!menuItem.name.trim()) {
+      alert("음식명을 입력해주세요.");
+      return;
     }
-    navigate(-1);
+
+    if (!menuItem.price.trim()) {
+      alert("가격을 입력해주세요.");
+      return;
+    }
+
+    if (!menuItem.image) {
+      alert("음식 사진을 업로드해주세요.");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        alert("로그인 정보가 없습니다. 다시 로그인해주세요.");
+        navigate("/login");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append(
+        "menuData",
+        new Blob(
+          [
+            JSON.stringify({
+              name: menuItem.name,
+              price: menuItem.price,
+            }),
+          ],
+          { type: "application/json" }
+        )
+      );
+      formData.append("menuImage", menuItem.image);
+
+      const response = await storeMenuAdd(formData);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "메뉴 등록에 실패했습니다.");
+      }
+
+      alert(isAddMode ? "메뉴가 추가되었습니다." : "메뉴가 수정되었습니다.");
+      navigate(-1);
+    } catch (err) {
+      console.error("메뉴 등록 실패:", err);
+      alert("메뉴 등록 중 오류가 발생했습니다.");
+    }
   };
 
-  const handleDelete = () => {
-    // 실제 구현에서는 API 호출로 데이터를 삭제합니다
+  const handleDelete = async () => {
     if (window.confirm("정말로 이 메뉴를 삭제하시겠습니까?")) {
-      alert("메뉴가 삭제되었습니다.");
-      navigate(-1);
+      try {
+        const token = localStorage.getItem("accessToken");
+        if (!token) {
+          alert("로그인 정보가 없습니다. 다시 로그인해주세요.");
+          navigate("/login");
+          return;
+        }
+
+        const response = await fetch(`${BASE_URL}/store/menu/${id}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(errorText || "메뉴 삭제에 실패했습니다.");
+        }
+
+        alert("메뉴가 삭제되었습니다.");
+        navigate(-1);
+      } catch (err) {
+        console.error("메뉴 삭제 실패:", err);
+        alert("메뉴 삭제 중 오류가 발생했습니다.");
+      }
     }
   };
-  
-  const isSeller = location.pathname.includes('/store');
 
   return (
     <div className="flex flex-col h-screen">
-      {/* 헤더 */}
-      <Header
-        title={isAddMode ? "메뉴 추가" : "메뉴 수정"}/>
+      <Header title={isAddMode ? "메뉴 추가" : "메뉴 수정"} />
 
-      {/* 메인 콘텐츠 */}
       <main className="flex-1 p-4 bg-white overflow-auto">
-        {/* 음식명 */}
         <div className="mb-4 mt-5">
           <Input
             label="음식명"
             value={menuItem.name}
-            onChange={(value) => setMenuItem({ ...menuItem, name: value })}
+            onChange={handleNameChange}
             placeholder="음식명을 입력해주세요."
           />
         </div>
 
-        {/* 가격 */}
         <div className="mb-4">
           <Input
             label="가격"
             value={menuItem.price}
-            onChange={(value) => setMenuItem({ ...menuItem, price: value.replace(/[^0-9]/g, "") })}
+            onChange={handlePriceChange}
             placeholder="가격을 입력해주세요."
             type="text"
           />
         </div>
 
-        {/* 각 코인 금액 - 자동 계산 */}
         <div className="mb-6">
           <label className="block text-lg font-medium mb-2">각 코인 금액</label>
           <div className="space-y-3">
@@ -144,7 +199,6 @@ export default function MenuEditPage(): React.ReactElement {
           </div>
         </div>
 
-        {/* 이미지 업로드 - ImageUploader 컴포넌트 사용 */}
         <div className="mb-6">
           <ImageUploader
             label="음식사진 업로드"
@@ -154,18 +208,19 @@ export default function MenuEditPage(): React.ReactElement {
           />
         </div>
 
-        {/* 버튼 영역 */}
         <div className="space-y-3 mt-6">
           {isEditMode && (
             <Button text="삭제하기" onClick={handleDelete} className="w-full bg-red-500 text-white py-3 rounded-lg"></Button>
           )}
-          <Button text={isAddMode ? "추가하기" : "수정하기"} onClick={handleSubmit} className="w-full bg-[#0a2e65] text-white py-3 rounded-lg">
-          </Button>
+          <Button
+            text={isAddMode ? "추가하기" : "수정하기"}
+            onClick={handleSubmit}
+            className="w-full bg-[#0a2e65] text-white py-3 rounded-lg"
+          />
         </div>
       </main>
 
-      {/* 하단 네비게이션 */}
-      <BottomNav/>
+      <BottomNav />
     </div>
   );
 }
