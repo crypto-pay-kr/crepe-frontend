@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 
+
 interface PasswordChangeFormProps {
+  onSubmit: (data: { oldPassword: string; newPassword: string }) => Promise<void>;
   onSuccess: () => void;
 }
 
-export default function PasswordChangeForm({ onSuccess }: PasswordChangeFormProps): React.ReactElement {
-  const [currentPassword, setCurrentPassword] = useState<string>("");
+
+
+export default function PasswordChangeForm({ onSuccess, onSubmit, }: PasswordChangeFormProps): React.ReactElement {
+  const [oldPassword, setCurrentPassword] = useState<string>("");
   const [newPassword, setNewPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [passwordError, setPasswordError] = useState<string>("");
@@ -13,14 +17,14 @@ export default function PasswordChangeForm({ onSuccess }: PasswordChangeFormProp
 
   const verifyCurrentPassword = (): void => {
     // 실제 구현에서는 API 호출 등을 통해 현재 비밀번호 검증
-    if (currentPassword) {
+    if (oldPassword) {
       setIsCurrentPasswordVerified(true);
     } else {
       setPasswordError("비밀번호를 입력해주세요.");
     }
   };
 
-  const handlePasswordChange = (): void => {
+  const handlePasswordChange = async () => {
     if (!isCurrentPasswordVerified) {
       setPasswordError("현재 비밀번호를 먼저 확인해주세요.");
       return;
@@ -36,9 +40,13 @@ export default function PasswordChangeForm({ onSuccess }: PasswordChangeFormProp
       return;
     }
 
-    // 비밀번호 변경 성공 시 성공 콜백 호출
-    setPasswordError("");
-    onSuccess();
+    try {
+      await onSubmit({ oldPassword, newPassword });
+      onSuccess();
+    } catch (err) {
+      console.error("비밀번호 변경 실패", err);
+      setPasswordError("비밀번호 변경 중 오류가 발생했습니다.");
+    }
   };
 
   return (
@@ -49,17 +57,17 @@ export default function PasswordChangeForm({ onSuccess }: PasswordChangeFormProp
         <div className="flex">
           <input
             type="password"
-            value={currentPassword}
+            value={oldPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
             className="flex-1 border rounded p-2"
             placeholder="비밀번호를 입력해주세요."
             disabled={isCurrentPasswordVerified}
           />
-          <button 
-            onClick={verifyCurrentPassword} 
+          <button
+            onClick={verifyCurrentPassword}
             className={`ml-2 border px-3 py-2 rounded ${
-              isCurrentPasswordVerified 
-                ? "bg-gray-100 text-gray-500 border-gray-300" 
+              isCurrentPasswordVerified
+                ? "bg-gray-100 text-gray-500 border-gray-300"
                 : "bg-white border-[#0a2e65] text-[#0a2e65]"
             }`}
             disabled={isCurrentPasswordVerified}
@@ -99,11 +107,11 @@ export default function PasswordChangeForm({ onSuccess }: PasswordChangeFormProp
         )}
       </div>
 
-      <button 
-        onClick={handlePasswordChange} 
+      <button
+        onClick={handlePasswordChange}
         className={`w-full py-3 rounded ${
-          isCurrentPasswordVerified 
-            ? "bg-[#0a2e65] text-white" 
+          isCurrentPasswordVerified
+            ? "bg-[#0a2e65] text-white"
             : "bg-gray-300 text-gray-500"
         }`}
         disabled={!isCurrentPasswordVerified}

@@ -169,7 +169,7 @@ export default function ShoppingMall() {
       <BottomNav />
 
       {/* 아래에 전역 스타일을 추가하여 페이지 전환 애니메이션을 처리합니다 */}
-      <style jsx global>{`
+      <style>{`
         body {
           margin: 0;
           padding: 0;
