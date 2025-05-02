@@ -6,6 +6,10 @@ import { ChevronRight } from 'lucide-react'
 import BottomNav from '@/components/common/BottomNavigate'
 import Input from "@/components/common/Input";
 const BASE_URL = import.meta.env.VITE_API_SERVER_URL;
+import {
+  updateStoreName,
+  updateStoreAddress,
+} from "@/api/store";
 
 export default function StoreEditInfoPage() {
   const [newStoreName, setStoreName] = useState("")
@@ -22,19 +26,7 @@ export default function StoreEditInfoPage() {
     }
 
     try {
-      const response = await fetch(`${BASE_URL}/store/change/name`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-        body: JSON.stringify({ newStoreName: newStoreName }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || "가게명 변경에 실패했습니다.");
-      }
+      const response = await updateStoreName(token!, newStoreName);
 
       alert(`가게명이 "${newStoreName}"(으)로 변경되었습니다.`);
     } catch (err) {
@@ -51,14 +43,7 @@ export default function StoreEditInfoPage() {
     }
 
     try {
-      const response = await fetch(`${BASE_URL}/store/change/address`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-        body: JSON.stringify({ newAddress :  newAddress }),
-      });
+      const response = await updateStoreAddress(token!, newAddress);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -150,3 +135,8 @@ export default function StoreEditInfoPage() {
     </div>
   )
 }
+
+
+
+
+
