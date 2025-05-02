@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import CryptocurrencyTags from "./CryptocurrencyTags";
 import { stores } from "../../mocks/stores";
 
@@ -7,9 +7,15 @@ interface ShopInfoProps {
 }
 
 function ShopInfo({ storeId }: ShopInfoProps) {
-
     const store = stores.find((store) => store.id === storeId);
-
+    
+    // 찜 상태 관리
+    const [isWishlisted, setIsWishlisted] = useState(false);
+    
+    // 찜 토글 함수
+    const toggleWishlist = () => {
+        setIsWishlisted(!isWishlisted);
+    };
 
     // 가게 정보가 없을 경우 처리
     if (!store) {
@@ -19,7 +25,6 @@ function ShopInfo({ storeId }: ShopInfoProps) {
             </div>
         );
     }
-
 
     return (
         <div className="flex flex-col self-center mt-3 w-full font-bold text-center text-black">
@@ -43,7 +48,8 @@ function ShopInfo({ storeId }: ShopInfoProps) {
             <p className="self-center text-base tracking-tight leading-7">
                 주소: 부천광역시 마장동 본훈구 21동 2층
             </p>
-            <div className="flex self-center space-x-2 mb-2 mt-10">
+            
+            <div className="flex self-center space-x-2 mb-2 mt-3">
                 <CryptocurrencyTags tags={store.tags} />
             </div>
         </div>

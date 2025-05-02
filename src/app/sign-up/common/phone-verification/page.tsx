@@ -4,12 +4,12 @@ import { useNavigate, useLocation } from "react-router-dom"
 export default function PhoneVerificationPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const isStore = location.search.includes("store=true")
+  const isStore = location.pathname.includes("/store/")
   const handleNext = () => {
     if (!isStore) {
-      navigate("/additional-info")
+      navigate("/additional/info")
     } else {
-      navigate("/store-info")
+      navigate("/store/info")
     }
   }
 

@@ -30,7 +30,7 @@ const BottomNav: React.FC = () => {
       icon: <Home className="w-6 h-6" color="white" />,
       label: "홈",
       isActive: location.pathname === "/coin",
-      onClick: () => navigate("/user-coin" ),
+      onClick: () => navigate("/user/coin" ),
     },
     {
       icon: <ShoppingBag className="w-6 h-6" color="white" />,
