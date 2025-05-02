@@ -5,31 +5,72 @@ import Button from '@/components/common/Button'
 import { ChevronRight } from 'lucide-react'
 import BottomNav from '@/components/common/BottomNavigate'
 import Input from "@/components/common/Input";
+const BASE_URL = import.meta.env.VITE_API_SERVER_URL;
 
 export default function StoreEditInfoPage() {
-  const [storeName, setStoreName] = useState("")
-  const [address, setAddress] = useState("")
+  const [newStoreName, setStoreName] = useState("")
+  const [newAddress, setAddress] = useState("")
   const navigate = useNavigate()
   const isSeller = location.pathname.includes('/store');
 
+  const token = localStorage.getItem("accessToken");
 
-  const handleStoreNameUpdate = () => {
-    if (!storeName.trim()) {
-      alert("가게명을 입력해주세요!")
-      return
+  const handleStoreNameUpdate = async () => {
+    if (!newStoreName.trim()) {
+      alert("가게명을 입력해주세요!");
+      return;
     }
-    console.log("입력된 가게명:", storeName)
-    alert(`가게명이 "${storeName}"(으)로 변경됩니다`)
-  }
 
-  const handleAddressUpdate = () => {
-    if (!address.trim()) {
-      alert("주소를 입력해주세요!")
-      return
+    try {
+      const response = await fetch(`${BASE_URL}/store/change/name`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({ newStoreName: newStoreName }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "가게명 변경에 실패했습니다.");
+      }
+
+      alert(`가게명이 "${newStoreName}"(으)로 변경되었습니다.`);
+    } catch (err) {
+      console.error("가게명 변경 실패:", err);
+      alert("가게명 변경 중 오류가 발생했습니다.");
     }
-    console.log("입력된 주소:", address)
-    alert(`주소가 "${address}"(으)로 변경됩니다`)
-  }
+  };
+
+
+  const handleAddressUpdate = async () => {
+    if (!newAddress.trim()) {
+      alert("주소를 입력해주세요!");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${BASE_URL}/store/change/address`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({ newAddress :  newAddress }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "주소 변경에 실패했습니다.");
+      }
+
+      alert(`주소가 "${newAddress}"(으)로 변경되었습니다.`);
+    } catch (err) {
+      console.error("주소 변경 실패:", err);
+      alert("주소 변경 중 오류가 발생했습니다.");
+    }
+  };
 
   const onNext = () => {
     navigate("/store/menu/add", {
@@ -56,8 +97,8 @@ export default function StoreEditInfoPage() {
           <h2 className="font-medium mb-2 font-bold">가게명 변경</h2>
           <Input
             label="가게명"
-            value={storeName}
-            onChange={setStoreName}
+            value={newStoreName}
+            onChange={(e) => setStoreName(e.target.value)}
             placeholder="가게명을 입력해주세요."
           />
           <Button text="변경하기"
@@ -70,8 +111,8 @@ export default function StoreEditInfoPage() {
           <h2 className="font-medium mb-2 font-bold">주소</h2>
           <Input
             label="주소"
-            value={address}
-            onChange={setAddress}
+            value={newAddress}
+            onChange={(e) => setAddress(e.target.value)}
             placeholder="주소를 입력해주세요."
           />
           <Button text="변경하기"

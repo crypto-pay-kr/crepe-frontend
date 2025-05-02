@@ -2,9 +2,12 @@ import React, { useState } from "react";
 
 interface NicknameChangeFormProps {
   onSuccess: () => void;
+  onSubmit: (data: { newNickname: string }) => Promise<void>;
 }
 
-export default function NicknameChangeForm({ onSuccess }: NicknameChangeFormProps): React.ReactElement {
+export default function NicknameChangeForm({ onSuccess,  onSubmit, }: NicknameChangeFormProps): React.ReactElement {
+  const [oldNickname, setOldNickname] = useState<string>("");
+  const [newNickname, setNewNickname] = useState<string>("");
   const [nickname, setNickname] = useState<string>("");
   const [isNicknameVerified, setIsNicknameVerified] = useState<boolean>(false);
   const [nicknameError, setNicknameError] = useState<string>("");
@@ -15,20 +18,25 @@ export default function NicknameChangeForm({ onSuccess }: NicknameChangeFormProp
       setNicknameError("닉네임을 입력해주세요.");
       return;
     }
-    
+
     // 닉네임 중복 검사 성공 시
     setIsNicknameVerified(true);
     setNicknameError("");
   };
 
-  const handleNicknameChange = (): void => {
+  const handleNicknameChange = async (): Promise<void> => {
     if (!isNicknameVerified) {
       setNicknameError("닉네임 중복 확인을 먼저 해주세요.");
       return;
     }
 
-    // 닉네임 변경 성공 시 성공 콜백 호출
-    onSuccess();
+    try {
+      await onSubmit({ newNickname: nickname });
+      onSuccess();
+    } catch (err) {
+      console.error("닉네임 변경 실패", err);
+      setNicknameError("닉네임 변경 중 오류가 발생했습니다.");
+    }
   };
 
   return (
@@ -47,14 +55,14 @@ export default function NicknameChangeForm({ onSuccess }: NicknameChangeFormProp
             className="flex-1 border rounded p-2"
             placeholder="닉네임을 입력해주세요."
           />
-          <button 
-            onClick={checkNicknameDuplicate} 
+          <button
+            onClick={checkNicknameDuplicate}
             className="ml-2 bg-white border border-[#0a2e65] text-[#0a2e65] px-3 py-2 rounded"
           >
             중복확인
           </button>
         </div>
-        
+
         {nicknameError ? (
           <p className="text-xs text-red-500 mt-1">{nicknameError}</p>
         ) : isNicknameVerified ? (
@@ -62,11 +70,11 @@ export default function NicknameChangeForm({ onSuccess }: NicknameChangeFormProp
         ) : null}
       </div>
 
-      <button 
-        onClick={handleNicknameChange} 
+      <button
+        onClick={handleNicknameChange}
         className={`w-full py-3 rounded ${
-          isNicknameVerified 
-            ? "bg-[#0a2e65] text-white" 
+          isNicknameVerified
+            ? "bg-[#0a2e65] text-white"
             : "bg-gray-300 text-gray-500"
         }`}
         disabled={!isNicknameVerified}
