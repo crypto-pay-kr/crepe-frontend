@@ -4,13 +4,16 @@ import BusinessCertificateForm from "@/components/edit-info/BusinessCertificatio
 import PasswordChangeForm from "@/components/edit-info/PasswordChangeForm";
 import PhoneChangeForm from "@/components/edit-info/PhoneChangeForm";
 import ProfileImageChangeForm from "@/components/edit-info/ProfileImageChangeFromProps";
-import React, { useState, ChangeEvent } from "react";
+import React, { useState, ChangeEvent, useEffect } from 'react'
+import { changeNickname, changePassword, changePhone } from '@/api/user'
 
 export default function StoreEditInfo(): React.ReactElement {
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [businessCertificate, setBusinessCertificate] = useState<File | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalTitle, setModalTitle] = useState<string>("");
+
+  const token = localStorage.getItem("accessToken");
 
   const handlePhoneChangeSuccess = (): void => {
     setModalTitle("휴대폰 변경 완료");
@@ -36,21 +39,44 @@ export default function StoreEditInfo(): React.ReactElement {
     }
   };
 
+  const handlePasswordChange = async (data: { oldPassword: string; newPassword: string }) => {
+    if (!token) throw new Error("로그인이 필요합니다.");
+    await changePassword(token, data);
+  };
+
+  const handleNicknameChange = async (data: { newNickname: string }) => {
+    if (!token) throw new Error("로그인이 필요합니다.");
+    await changeNickname(token, data);
+  };
+
+  const handlePhoneChange = async (data: { phoneNumber: string }) => {
+    if (!token) throw new Error("로그인이 필요합니다.");
+    await changePhone(token, data);
+  };
+
+
+
   return (
     <div className="flex flex-col h-screen">
-        <Header title="내 정보 수정" />
-        <main className="flex-1 p-4 bg-gray-50 overflow-auto min-h-screen">
-          <PasswordChangeForm onSuccess={handlePasswordChangeSuccess} />
-          <PhoneChangeForm onSuccess={handlePhoneChangeSuccess} />
-          <ProfileImageChangeForm onSuccess={handleProfileImageChange} />
-          <BusinessCertificateForm onSuccess={handleBusinessCertificateChange} />
-          <Modal 
-              isOpen={isModalOpen} 
-              onClose={() => setIsModalOpen(false)}
-              title={modalTitle}
-              />
-    </main>
+      <Header title="내 정보 수정" />
+      <main className="flex-1 p-4 bg-gray-50 overflow-auto min-h-screen">
+        <PasswordChangeForm
+          onSuccess={handlePasswordChangeSuccess}
+          onSubmit={handlePasswordChange}
+        />
+        <PhoneChangeForm
+          onSuccess={handlePhoneChangeSuccess}
+          onSubmit={handlePhoneChange}
+        />
+        <ProfileImageChangeForm onSuccess={handleProfileImageChange} />
+        <BusinessCertificateForm onSuccess={handleBusinessCertificateChange} />
+        <Modal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          title={modalTitle}
+        />
+      </main>
     </div>
-      
+
   );
 }

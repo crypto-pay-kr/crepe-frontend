@@ -1,51 +1,53 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import Button from "../common/Button"
-import LoginForm from "./LoginForm"
-import API_ENDPOINTS from "@/api/user"
-
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Button from "../common/Button";
+import LoginForm from "./LoginForm";
+import { loginUser } from "@/api/user";
 
 interface LoginHomeProps {
-  onLogin: () => void
-  onSignup: () => void
-  buttonClassName?: string
+  onSignup: () => void;
+  buttonClassName?: string;
 }
 
-export default function LoginHome({ onSignup, onLogin, buttonClassName }: LoginHomeProps) {
-  const [userId, setUserId] = useState("")
-  const [password, setPassword] = useState("")
-  const isButtonDisabled = !userId || !password
+export default function LoginHome({ onSignup, buttonClassName }: LoginHomeProps) {
+  const [userId, setUserId] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+  const isButtonDisabled = !userId || !password;
 
   // 로그인 요청 처리 함수
   const handleLogin = async () => {
     if (isButtonDisabled) {
-      alert("아이디와 비밀번호를 입력해 주세요.")
-      return
+      alert("아이디와 비밀번호를 입력해 주세요.");
+      return;
     }
 
     try {
-      const res = await fetch(API_ENDPOINTS.LOGIN, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: userId, password }),
-      })
+      const res = await loginUser(userId, password);
       if (!res.ok) {
-        alert("로그인에 실패했습니다.")
-        return
+        alert("로그인에 실패했습니다.");
+        return;
       }
-      const { accessToken, refreshToken, role } = await res.json()
+
+      const { accessToken, refreshToken, role } = await res.json();
 
       // 토큰을 localStorage 등에 저장
-      localStorage.setItem("accessToken", accessToken)
-      localStorage.setItem("refreshToken", refreshToken)
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
 
-      // 로그인 후 작업 (페이지 이동 등)
-      onLogin()
+      // role에 따라 페이지 이동
+      if (role === "USER") {
+        navigate("/user/coin");
+      } else if (role === "SELLER") {
+        navigate("/store/coin");
+      } else {
+        alert("알 수 없는 사용자 유형입니다.");
+      }
     } catch (err) {
-      console.error("로그인 오류:", err)
-      alert("로그인 중 오류가 발생했습니다.")
+      console.error("로그인 오류:", err);
+      alert("로그인 중 오류가 발생했습니다.");
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex flex-col px-5 pt-24 pb-10">
@@ -75,7 +77,7 @@ export default function LoginHome({ onSignup, onLogin, buttonClassName }: LoginH
               className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          <div className="flex justify-center gap-4  mt-4 mb-4 text-sm text-gray-500">
+          <div className="flex justify-center gap-4 mt-4 mb-4 text-sm text-gray-500">
             <button onClick={onSignup} className="hover:underline">
               회원가입
             </button>
@@ -87,9 +89,8 @@ export default function LoginHome({ onSignup, onLogin, buttonClassName }: LoginH
             onClick={handleLogin}
             className={`w-full rounded-[9px] font-medium bg-[#0C2B5F] text-white ${buttonClassName}`}
           />
-
         </LoginForm>
       </div>
     </div>
-  )
+  );
 }

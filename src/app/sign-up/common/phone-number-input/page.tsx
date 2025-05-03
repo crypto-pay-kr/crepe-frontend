@@ -1,7 +1,7 @@
 import PhoneNumber from "@/components/signup/PhoneNumber";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import API_ENDPOINTS from "@/api/user"; 
+import { sendSMS } from "@/api/user"; 
 
 
 export default function PhoneNumberPage() {
@@ -19,16 +19,7 @@ export default function PhoneNumberPage() {
     const eliminateDashPhoneNumber = phoneNumber.replace(/-/g, "");
 
     try {
-      const response = await fetch(API_ENDPOINTS.SEND_SMS, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          phone: eliminateDashPhoneNumber,
-          smsType: "SIGN_UP",
-        }),
-      });
+      const response = await sendSMS(eliminateDashPhoneNumber, "SIGN_UP");
 
       if (response.ok) {
 
