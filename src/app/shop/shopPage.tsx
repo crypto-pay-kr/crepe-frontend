@@ -1,46 +1,97 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { stores } from "../../mocks/stores";
 import Header from "@/components/common/Header";
 import CryptocurrencyTags from "@/components/shoppingmall/CryptocurrencyTags";
 import BottomNav from "@/components/common/BottomNavigate";
+import { getStoreList } from "@/api/shop";
+import { Store } from "@/types/store";
 
-export default function ShoppingMall() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("전체");
+const ShoppingMall: React.FC = () => {
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<string>("전체");
   const navigate = useNavigate();
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState<boolean>(false);
+  const [storeData, setStoreData] = useState<Store[]>([]); 
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // 컴포넌트 마운트 시 스크롤 위치 조정 및 로딩 상태 처리
   useEffect(() => {
-    // 스크롤을 맨 위로 이동
     window.scrollTo(0, 0);
-    // 페이지 로딩 상태 설정
     setIsLoaded(true);
-    
-    // 스크롤 방지
     document.body.style.overflow = 'hidden';
+    document.body.classList.remove('page-transition');
+    
+    // API에서 가게 목록 데이터 가져오기
+    const fetchStores = async (): Promise<void> => {
+      try {
+        setLoading(true);
+        const data = await getStoreList();
+        setStoreData(data);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching stores:", err);
+        setError("가게 목록을 불러오는데 실패했습니다. 다시 시도해주세요.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStores();
     
     return () => {
-      // 컴포넌트 언마운트 시 원래 상태로 복원
       document.body.style.overflow = '';
     };
   }, []);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = (e: React.FormEvent): void => {
     e.preventDefault();
     // 검색 기능 구현
   };
+
+  // 탭 필터링 로직
+  const filteredStores = storeData.filter((store) => {
+    // 검색어로 필터링
+    const matchesSearch = searchTerm === "" || 
+      store.storeName.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // 카테고리로 필터링
+    const matchesCategory = activeTab === "전체" || store.storeType === activeTab;
+    
+    return matchesSearch && matchesCategory;
+  });
+
+  // 실제 표시할 가게 목록 (에러 상태일 경우 빈 배열)
+  const displayStores = error ? [] : filteredStores;
+
+  // 전역 스타일 정의
+  const globalStyles = `
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+    }
+
+    #root {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .page-transition {
+      opacity: 0.8;
+      transition: opacity 0.2s ease-in-out;
+    }
+  `;
 
   return (
     <div className="flex h-full flex-col bg-gray-50">
       <Header title="쇼핑몰" isStore={false} />
 
       <main className="flex-1 overflow-auto">
-        {/* 상단 고정 영역 */}
         <div className="bg-white shadow-sm">
           <div className="px-5 pt-5 pb-3">
-            {/* 검색 폼 */}
             <form onSubmit={handleSearch} className="relative mb-5">
               <input
                 type="text"
@@ -71,9 +122,9 @@ export default function ShoppingMall() {
 
             {/* 탭 영역 */}
             <div className="flex border-b border-gray-200">
-              {["전체", "음식", "카페", "옷"].map((tab) => (
+              {["전체", "크레페", "카페"].map((tab) => (
                 <button
-                  key={tab}
+                  key={`tab-${tab}`}
                   className={`px-5 py-3 text-sm font-medium relative transition-all ${
                     activeTab === tab
                       ? "text-[#002169] font-semibold"
@@ -110,85 +161,97 @@ export default function ShoppingMall() {
           </div>
         </div>
    
-        {/* 스크롤 가능한 리스트 */}
-        <div className="bg-gray-50 py-3">
-          <div className="px-5 space-y-4">
-            {stores.map((store) => (
-              <div
-                key={store.id}
-                className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 transition-all hover:shadow-md"
-                onClick={() => {
-                  // 페이지 전환 시 부드러운 처리를 위한 클래스 추가
-                  document.body.classList.add('page-transition');
-                  navigate(`/mall/store/${store.id}`);
-                }}
-              >
-                <div className="flex justify-between items-center mb-3">
-                  <h3 className="font-bold text-gray-900">{store.name}</h3>
-                  <div className="flex items-center">
-                    <img
-                      src={store.image}
-                      alt={store.name}
-                      width={80}
-                      height={60}
-                      className="rounded-lg object-cover"
-                    />
-                  </div>
-                </div>
-
-                <CryptocurrencyTags tags={store.tags} />
-               
-                <div className="flex justify-between items-center mt-2">
-                  <div></div>
-                  <div className="flex items-center text-gray-500 bg-gray-50 px-2 py-1 rounded-full">
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="mr-1"
-                    >
-                      <path
-                        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    <span className="text-sm font-medium">{store.likes}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
+        {/* 로딩 상태 표시 */}
+        {loading ? (
+          <div className="flex justify-center items-center p-10">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#002169]"></div>
           </div>
-        </div>
+        ) : error ? (
+          // 에러 메시지 표시
+          <div className="px-5 py-10 text-center text-gray-600">
+            <p>{error}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="mt-4 px-4 py-2 bg-[#002169] text-white rounded-lg hover:bg-opacity-90"
+            >
+              새로고침
+            </button>
+          </div>
+        ) : (
+          // 스크롤 가능한 리스트
+          <div className="bg-gray-50 py-3">
+            <div className="px-5 space-y-4">
+              {displayStores.length > 0 ? (
+                displayStores.map((store) => (
+                  <div
+                    key={`store-${store.storeId}`}
+                    className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 transition-all hover:shadow-md"
+                    onClick={() => {
+                      // 페이지 전환 시 부드러운 처리를 위한 클래스 추가
+                      document.body.classList.add('page-transition');
+                      navigate(`/mall/store/${store.storeId}`);
+                    }}
+                  >
+                    <div className="flex justify-between items-center mb-3">
+                      <h3 className="font-bold text-gray-900">{store.storeName}</h3>
+                      <div className="flex items-center">
+                        <img
+                          src={store.storeImage}
+                          alt={store.storeName}
+                          width={80}
+                          height={60}
+                          className="rounded-lg object-cover"
+                        />
+                      </div>
+                    </div>
+
+                    <CryptocurrencyTags coins={store.coinStatus || []} />
+                    <div className="flex justify-between items-center mt-2">
+                      <div className="text-sm text-gray-500">
+                        {store.storeType && (
+                          <span className="bg-gray-100 px-2 py-1 rounded-full">
+                            {store.storeType}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center text-gray-500 bg-gray-50 px-2 py-1 rounded-full">
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="mr-1"
+                        >
+                          <path
+                            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                        <span className="text-sm font-medium">{store.likeCount || 0}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="py-10 text-center text-gray-600">
+                  <p>표시할 가게가 없습니다.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </main>
 
       <BottomNav />
 
-      {/* 아래에 전역 스타일을 추가하여 페이지 전환 애니메이션을 처리합니다 */}
-      <style jsx global>{`
-        body {
-          margin: 0;
-          padding: 0;
-          height: 100vh;
-          width: 100vw;
-          overflow: hidden;
-        }
-
-        #root {
-          height: 100%;
-          width: 100%;
-          overflow: hidden;
-        }
-
-        .page-transition {
-          opacity: 0.8;
-          transition: opacity 0.2s ease-in-out;
-        }
-      `}</style>
+      {/* 스타일 적용 */}
+      <style dangerouslySetInnerHTML={{ __html: globalStyles }} />
     </div>
   );
-}
+};
+
+export default ShoppingMall;
