@@ -41,7 +41,6 @@ export default function SignupCompletePage() {
     <div className="h-full flex flex-col">
       <AnimationStyles />
 
-      {/* 상단 인삿말 */}
       <div className="flex-1 flex flex-col items-center justify-center">
         <div
           className={`transition-all duration-700 ${
