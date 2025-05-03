@@ -103,3 +103,21 @@ export async function changeNickname(
     throw new Error(errorText || "닉네임 변경에 실패했습니다.");
   }
 }
+
+// 사용자 정보 조회
+export async function fetchMyUserInfo(token: string) {
+  const response = await fetch(API_BASE_URL +"/api/auth/myInfo", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("사용자 정보를 불러오지 못했습니다.");
+  }
+
+  return await response.json();
+}
+
+
