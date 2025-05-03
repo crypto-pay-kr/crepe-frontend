@@ -1,8 +1,9 @@
 const API_BASE_URL = import.meta.env.VITE_API_SERVER_URL || "http://localhost:8080"
 
+
 const token = localStorage.getItem("accessToken");
 
-// 가맹점 호원가입
+
 export async function signUpStore(formData: FormData) {
   const response = await fetch(API_BASE_URL + "/store/signup", {
     method: "POST",
@@ -11,20 +12,18 @@ export async function signUpStore(formData: FormData) {
   return response;
 }
 
+
 // 가맹점 메뉴 등록
 export async function storeMenuAdd(formData: FormData) {
   const response = await fetch(`${API_BASE_URL}/store/menu`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${token}`,
+      "Authorization": `Bearer ${token}`,
     },
     body: formData,
   });
   return response;
 }
-
-
-
 
 
 
@@ -67,6 +66,21 @@ export async function acceptOrder(orderId: string, preparationTime: string) {
   return response;
 }
 
+    
+export async function updateStoreName(token: string, newStoreName: string) {
+  const response = await fetch(API_BASE_URL + "/store/change/name", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify({ newStoreName }),
+  });
+  return response;
+}
+
+
+
 // 주문 거절
 export async function rejectOrder(orderId: string, refusalReason: string) {
   const response = await fetch(`${API_BASE_URL}/store/orders/${orderId}/action`, {
@@ -83,6 +97,20 @@ export async function rejectOrder(orderId: string, refusalReason: string) {
   return response;
 }
 
+
+export async function updateStoreAddress(token: string, newAddress: string) {
+  const response = await fetch(API_BASE_URL + "/store/change/address", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify({ newAddress }),
+  });
+  return response;
+}
+
+
 // 준비 완료
 export async function completeOrder(orderId: string) {
   const response = await fetch(`${API_BASE_URL}/store/orders/${orderId}/action`, {
@@ -97,3 +125,19 @@ export async function completeOrder(orderId: string) {
   });
   return response;
 }
+
+
+export async function fetchMyStoreAllDetails(token: string) {
+  const response = await fetch(API_BASE_URL + "/store/my", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("내 가게 정보를 불러올 수 없습니다.");
+  }
+
+  return await response.json();
+}
+

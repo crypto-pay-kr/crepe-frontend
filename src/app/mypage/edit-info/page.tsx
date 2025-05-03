@@ -4,6 +4,7 @@ import PasswordChangeForm from "@/components/edit-info/PasswordChangeForm";
 import NicknameChangeForm from "@/components/edit-info/NicknameChangeForm";
 import PhoneChangeForm from "@/components/edit-info/PhoneChangeForm";
 import Modal from "@/components/common/Modal";
+import { changeNickname, changePassword, changePhone } from '@/api/user'
 const BASE_URL = import.meta.env.VITE_API_SERVER_URL;
 
 
@@ -13,7 +14,6 @@ export default function EditInfo(): React.ReactElement {
   const [modalTitle, setModalTitle] = useState<string>("");
 
   const token = localStorage.getItem("accessToken");
-
 
 
   const handlePasswordChangeSuccess = (): void => {
@@ -32,75 +32,26 @@ export default function EditInfo(): React.ReactElement {
     setIsModalOpen(true);
   };
 
-  // Password change API integration
-  const handlePasswordChange = async (data: { oldPassword: string; newPassword: string }): Promise<void> => {
-    const response = await fetch(`${BASE_URL}/api/auth/change/password`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        oldPassword: data.oldPassword,
-        newPassword: data.newPassword
-      })
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || "비밀번호 변경에 실패했습니다.");
-    }
+  const handlePasswordChange = async (data: { oldPassword: string; newPassword: string }) => {
+    if (!token) throw new Error("로그인이 필요합니다.");
+    await changePassword(token, data);
   };
 
-
-  const handlePhoneChange = async (data: { phoneNumber: string }): Promise<void> => {
-    const response = await fetch(`${BASE_URL}/api/auth/change/phone`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        phoneNumber: data.phoneNumber,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || "전화번호 변경에 실패했습니다.");
-    }
-
+  const handleNicknameChange = async (data: { newNickname: string }) => {
+    if (!token) throw new Error("로그인이 필요합니다.");
+    await changeNickname(token, data);
   };
 
-  const handleNicknameChange = async (data: { newNickname: string }): Promise<void> => {
-    const response = await fetch(`${BASE_URL}/api/auth/change/nickname`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-
-        newNickname: data.newNickname
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || "닉네임 변경에 실패했습니다.");
-    }
-
-
-
+  const handlePhoneChange = async (data: { phoneNumber: string }) => {
+    if (!token) throw new Error("로그인이 필요합니다.");
+    await changePhone(token, data);
   };
-
-
 
 
   return (
     <div className="flex flex-col h-screen">
 
-      <Header title="내 정보 수정"/>
+      <Header title="내 정보 수정" />
 
       <main className="flex-1 p-4 bg-gray-50 overflow-auto">
         <PasswordChangeForm

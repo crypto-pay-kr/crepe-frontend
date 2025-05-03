@@ -150,8 +150,9 @@ export default function OrderStatusPage() {
   }
 
   const handleStoreSettings = () => {
-    navigate("/store-settings")
+    navigate("/store/manage")
   }
+
 
   const isSeller = location.pathname.includes('/store')
 
@@ -210,6 +211,7 @@ export default function OrderStatusPage() {
                       <span>{item.quantity}개</span>
                     </div>
                   ))}
+
 
                   {order.status === "거절됨" && order.rejectionReason && (
                     <div className="mt-2 p-2 bg-red-50 rounded-md">

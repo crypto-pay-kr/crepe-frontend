@@ -10,7 +10,7 @@ export async function sendSMS(phone: string, smsType: string) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ phone, smsType }),
   });
-  return response; 
+  return response;
 }
 
 // 인증 코드 검증
@@ -42,4 +42,64 @@ export async function loginUser(email: string, password: string) {
     body: JSON.stringify({ email, password }),
   });
   return response;
+}
+
+// 비밀번호 변경
+export async function changePassword(
+  token: string,
+  data: { oldPassword: string; newPassword: string }
+): Promise<void> {
+  const response = await fetch(API_BASE_URL + "/api/auth/change/password", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "비밀번호 변경에 실패했습니다.");
+  }
+}
+
+// 전화번호 변경
+export async function changePhone(
+  token: string,
+  data: { phoneNumber: string }
+): Promise<void> {
+  const response = await fetch(API_BASE_URL +"/api/auth/change/phone", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "전화번호 변경에 실패했습니다.");
+  }
+}
+
+// 닉네임 변경
+export async function changeNickname(
+  token: string,
+  data: { newNickname: string }
+): Promise<void> {
+  const response = await fetch(API_BASE_URL +"/api/auth/change/nickname", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "닉네임 변경에 실패했습니다.");
+  }
 }

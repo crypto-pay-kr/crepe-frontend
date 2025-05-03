@@ -5,12 +5,25 @@ import Button from '@/components/common/Button'
 import { ChevronRight } from 'lucide-react'
 import BottomNav from '@/components/common/BottomNavigate'
 import Input from "@/components/common/Input";
-const BASE_URL = import.meta.env.VITE_API_SERVER_URL;
+import { useEffect } from 'react';
+import {
+  updateStoreName,
+  updateStoreAddress,
+  fetchMyStoreAllDetails
+} from "@/api/store";
+
+interface MenuItem {
+  menuId: number;
+  menuName: string;
+  menuPrice: number;
+  menuImage: string;
+}
 
 export default function StoreEditInfoPage() {
   const [newStoreName, setStoreName] = useState("")
   const [newAddress, setAddress] = useState("")
   const navigate = useNavigate()
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const isSeller = location.pathname.includes('/store');
 
   const token = localStorage.getItem("accessToken");
@@ -22,19 +35,7 @@ export default function StoreEditInfoPage() {
     }
 
     try {
-      const response = await fetch(`${BASE_URL}/store/change/name`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-        body: JSON.stringify({ newStoreName: newStoreName }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || "가게명 변경에 실패했습니다.");
-      }
+      const response = await updateStoreName(token!, newStoreName);
 
       alert(`가게명이 "${newStoreName}"(으)로 변경되었습니다.`);
     } catch (err) {
@@ -51,14 +52,7 @@ export default function StoreEditInfoPage() {
     }
 
     try {
-      const response = await fetch(`${BASE_URL}/store/change/address`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-        body: JSON.stringify({ newAddress :  newAddress }),
-      });
+      const response = await updateStoreAddress(token!, newAddress);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -81,10 +75,21 @@ export default function StoreEditInfoPage() {
 
   const isButtonDisabled = false
 
-  const menuItems = [
-    { id: 1, name: "얼큰칼국수", price: 9000, image: "/menu.png" },
-    { id: 2, name: "얼큰칼국수", price: 9000, image: "/menu.png" },
-  ]
+  useEffect(() => {
+    const loadMenus = async () => {
+      try {
+        const token = localStorage.getItem("accessToken")!;
+        const data = await fetchMyStoreAllDetails(token);
+        console.log("API 응답:", data);
+        setMenuItems(data.menuList ?? []);
+      } catch (err) {
+        console.error("메뉴 불러오기 실패:", err);
+        alert("메뉴 정보를 불러오는 데 실패했습니다.");
+      }
+    };
+
+    loadMenus();
+  }, []);
 
   return (
     <div className="flex flex-col h-screen bg-white">
@@ -93,7 +98,7 @@ export default function StoreEditInfoPage() {
       {/* Main Content */}
       <div className="flex-1 px-4 py-4 overflow-auto">
         {/* 가게명 변경 */}
-        <div className="bg-white p-4 mb-2">
+        <div className="bg-white p-5 mb-2">
           <h2 className="font-medium mb-2 font-bold">가게명 변경</h2>
           <Input
             label="가게명"
@@ -107,7 +112,7 @@ export default function StoreEditInfoPage() {
         </div>
 
         {/* 주소 변경 */}
-        <div className="bg-white p-4 mb-2">
+        <div className="bg-white p-5 mb-2">
           <h2 className="font-medium mb-2 font-bold">주소</h2>
           <Input
             label="주소"
@@ -128,22 +133,25 @@ export default function StoreEditInfoPage() {
           </div>
 
           {menuItems.map((item) => (
-            <div key={item.id} className="flex justify-between items-center py-2 border-t border-gray-200">
+            <div key={item.menuId} className="flex justify-between items-center py-2 border-t border-gray-200">
               <div>
-                <h3 className="font-medium">{item.name}</h3>
-                <p className="text-sm text-gray-600">{item.price.toLocaleString()} KRW</p>
+                <h3 className="font-medium">{item.menuName}</h3>
+                <p className="text-sm text-gray-600">{item.menuPrice.toLocaleString()} KRW</p>
               </div>
-              <img src={item.image || "/placeholder.svg"} alt={item.name} className="w-20 h-20 object-cover rounded" />
+              <img
+                src={item.menuImage || "/placeholder.svg"}
+                alt={item.menuName}
+                className="w-20 h-20 object-cover rounded"
+              />
             </div>
           ))}
-        </div>
 
-        {/* 메뉴 추가 버튼 */}
-        <div className="p-5">
-          <Button text="메뉴 추가하기" onClick={onNext} color={isButtonDisabled ? "gray" : "blue"} />
+          {/* 메뉴 추가 버튼 */}
+          <div className="p-3">
+            <Button text="메뉴 추가하기" onClick={onNext} color={isButtonDisabled ? "gray" : "blue"} className="mt-3 w-full bg-[#0a2158] text-white py-3 rounded-lg font-medium" />
+          </div>
         </div>
       </div>
-
 
       {/* Bottom Navigation */}
       <BottomNav />
