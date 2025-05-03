@@ -44,14 +44,5 @@ export default defineConfig({
       },
     ],
   },
-  server: {
-    proxy: {
-      "/api": {
-        target: process.env.API_SERVER_URL,
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""),
-      },
-    },
-  },
   
 })

@@ -1,8 +1,8 @@
 import React from 'react';
 
 export interface Coin {
-  symbol: string;
-  name: string;
+  currency: string;
+  coinName: string;
   icon: React.ReactNode;
   bg: string;
   balance: string;

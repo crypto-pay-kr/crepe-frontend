@@ -1,15 +1,26 @@
 import { X } from 'lucide-react'
 import Header from "@/components/common/Header"
 import { useNavigate, useParams, useLocation } from "react-router-dom"
-import React, { useState } from "react"
+import React, { useEffect, useState } from 'react'
 import BottomNav from '@/components/common/BottomNavigate'
 import TransactionItem from "@/components/coin/TransactionItem"
 import CoinAddressModal from "@/components/coin/CoinAddressModal";
+import {
+  checkStoreAddress,
+  getStoreBalanceByCurrency,
+  getStoreSettlementHistory,
+  getUserBalanceByCurrency,
+  getUserDepositHistory,
+} from '@/api/coin'
 
 interface CryptoWalletProps {
   isUser?: boolean;
 }
-
+export interface PaymentHistory {
+  status: 'COMPLETED' | 'PENDING' | 'FAILED'; // PaymentStatus enum
+  amount: number;
+  transferredAt: string; // ISO string
+}
 const coinMeta = {
   XRP: {
     name: "리플",
@@ -45,109 +56,185 @@ export default function CoinDetailPage() {
   const location = useLocation()
   const isUser = location.state?.isUser ?? false
 
-  const accountStatus = "registered" as "registered" | "not_registered" | "pending";
+  const [addressStatus, setAddressStatus] = useState<'ACTIVE' | 'REGISTERING' | 'NOT_REGISTERED' | null>(null);
   const [showModal, setShowModal] = useState(false)
   const [selectedPeriod, setSelectedPeriod] = useState('day')
+  const [addressInfo, setAddressInfo] = useState<{
+    address: string;
+    tag?: string;
+  } | null>(null);
 
   const navigate = useNavigate()
   const isSeller = location.pathname.includes('/store');
-
+  const [settlements, setSettlements] = useState<PaymentHistory[]>([]);
   const coin = coinMeta[symbol as keyof typeof coinMeta]
-
+  const [balance, setBalance] = useState<number>(0);
   if (!coin) return <div className="p-4">잘못된 경로입니다.</div>
 
+  useEffect(() => {
+    if (!isUser && symbol) {
+      checkStoreAddress(symbol)
+        .then((res) => {
+          setAddressStatus(res.addressRegistryStatus);
+          if (res.addressRegistryStatus === 'ACTIVE' || res.addressRegistryStatus === 'REGISTERING') {
+            setAddressInfo({ address: res.address, tag: res.tag });
+          }
+        })
+        .catch((err) => {
+          console.error("등록된 주소없음", err);
+          setAddressStatus('NOT_REGISTERED');
+          setAddressInfo(null);
+        });
+    }
+  }, [isUser, symbol]);
+
+
+
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (!symbol) return;
+
+      try {
+        if (isUser) {
+          const data = await getUserBalanceByCurrency(symbol);
+          setBalance(data.balance ?? 0);
+        } else {
+          const data = await getStoreBalanceByCurrency(symbol);
+          setBalance(data.balance ?? 0);
+        }
+      } catch (e) {
+        console.warn("잔액 조회 실패:", e);
+      }
+    };
+
+    fetchBalance();
+  }, [isUser, symbol]);
+
+
+
+  useEffect(() => {
+    if (isUser || !symbol) return;
+    getStoreSettlementHistory(symbol)
+      .then(setSettlements)
+      .catch(err => console.error("정산 내역 실패:", err));
+  }, [isUser, symbol]);
+
+
+  const [transactions, setTransactions] = useState<PaymentHistory[]>([]);
+
+  useEffect(() => {
+    if (!isUser || !symbol) return;
+    getUserDepositHistory(symbol)
+      .then(setTransactions)
+      .catch(err => console.error("입금 내역 실패:", err));
+  }, [isUser, symbol]);
+
+
   return (
-    <div className="h-full flex flex-col bg-gray-50">
-      <Header 
-        title={`${coin.name} 상세`} 
+    <div className="flex h-full flex-col bg-gray-50">
+      <Header
+        title={`${coin.name} 상세`}
         onBackClick={() => {
-          navigate(isUser ? "/user-coin" : "/store-coin")
-        }} 
+          navigate(isUser ? '/user/coin' : '/store/coin')
+        }}
       />
 
       <main className="flex-1 overflow-auto p-5">
         {/* 보유 자산 카드 */}
-        <div className="rounded-2xl border-2 border-gray-200 bg-white p-12 shadow-[0_4px_20px_rgba(0,0,0,0.06)] mb-6">
+        <div className="mb-6 rounded-2xl border-2 border-gray-200 bg-white p-12 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className={`w-10 h-10 ${coin.bg} rounded-full flex items-center justify-center mr-4`}>
+              <div
+                className={`h-10 w-10 ${coin.bg} mr-4 flex items-center justify-center rounded-full`}
+              >
                 {coin.icon}
               </div>
               <p className="text-2xl font-semibold">총 보유</p>
             </div>
             <div className="text-right">
-              <p className="text-2xl font-bold">{coin.balance}</p>
-              <p className="text-base text-gray-500">= {coin.krw}</p>
+              <p className="text-2xl font-bold">
+                {balance} {symbol}
+              </p>
+              <p className="text-base text-gray-500">
+                = {(balance * 1000).toLocaleString()} KRW
+              </p>
             </div>
           </div>
         </div>
 
         {/* 버튼 영역 */}
-        <div className="w-full mb-6">
+        <div className="mb-6 w-full">
           <button
-            className="w-full bg-[#0a2e64] text-white py-4 rounded-xl text-lg font-semibold shadow"
+            className="w-full rounded-xl bg-[#0a2e64] py-4 text-lg font-semibold text-white shadow"
             onClick={() => {
               if (isUser) {
-                navigate(`/home-coin-address/${symbol}`, { state: { isUser,symbol } })
+                navigate(`/coin/address/${symbol}`, {
+                  state: { isUser, symbol },
+                })
               } else {
-                if (accountStatus==="registered") {
-                  navigate("/settlement", { state: { isUser ,symbol } })
-                } else if (accountStatus==="not_registered") {
-                  navigate("/add-coin-address", { state: { isUser ,symbol } })
+                if (addressStatus === 'ACTIVE') {
+                  navigate('/settlement', { state: { isUser, symbol } })
+                } else if (addressStatus === 'NOT_REGISTERED') {
+                  navigate('/coin/address/add', { state: { isUser, symbol } })
                 }
               }
             }}
           >
             {isUser
-              ? "코인 충전"
-              : accountStatus === "registered"
-                ? "정산 요청"
-                : accountStatus === "pending"
-                  ? "계좌 등록중입니다..."
-                  : "계좌 등록"
-            }
+              ? '코인 충전'
+              : addressStatus === 'ACTIVE'
+                ? '정산 요청'
+                : addressStatus === 'REGISTERING'
+                  ? '계좌 등록중입니다...'
+                  : '계좌 등록'}
           </button>
 
           {/* 계좌 상태 표시 박스 (스토어일 경우만) */}
           {!isUser && (
             <div
-              className="w-full bg-gray-200 text-center py-3 rounded-xl text-base font-medium mt-3"
+              className="mt-3 w-full rounded-xl bg-gray-200 py-3 text-center text-base font-medium"
               style={{ boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.1)' }}
               onClick={() => {
-                if (accountStatus === "registered" || accountStatus === "pending") {
+                if (
+                  addressStatus === 'ACTIVE' ||
+                  addressStatus === 'REGISTERING'
+                ) {
                   setShowModal(true)
                 } else {
                   setShowModal(false)
                 }
               }}
             >
-              <span className={
-                accountStatus === "registered"
-                  ? "text-gray-500"
-                  : accountStatus === "pending"
-                    ? "text-gray-500"
-                    : "text-red-500"
-              }>
-                {accountStatus === "registered"
-                  ? "계좌가 등록되었습니다"
-                  : accountStatus === "pending"
-                    ? "계좌가 등록중입니다"
-                    : "계좌가 등록되지 않았습니다"}
+              <span
+                className={
+                  addressStatus === 'ACTIVE'
+                    ? 'text-gray-500'
+                    : addressStatus === 'REGISTERING'
+                      ? 'text-gray-500'
+                      : 'text-red-500'
+                }
+              >
+                {addressStatus === 'ACTIVE'
+                  ? '계좌가 등록되었습니다'
+                  : addressStatus === 'REGISTERING'
+                    ? '계좌가 등록중입니다'
+                    : '계좌가 등록되지 않았습니다'}
               </span>
             </div>
           )}
         </div>
-        
+
         {/* 기간 선택 탭 - 계좌등록 버튼 아래로 이동 */}
         <div className="mb-6">
-          <div className="flex bg-white rounded-xl p-1 shadow-sm">
-            {['day', 'week', 'month', 'year'].map((period) => (
+          <div className="flex rounded-xl bg-white p-1 shadow-sm">
+            {['day', 'week', 'month', 'year'].map(period => (
               <button
                 key={period}
                 onClick={() => setSelectedPeriod(period)}
-                className={`flex-1 py-2 text-center text-sm font-medium rounded-lg transition ${
-                  selectedPeriod === period 
-                    ? 'bg-[#0a2e64] text-white' 
+                className={`flex-1 rounded-lg py-2 text-center text-sm font-medium transition ${
+                  selectedPeriod === period
+                    ? 'bg-[#0a2e64] text-white'
                     : 'text-gray-500 hover:bg-gray-50'
                 }`}
               >
@@ -160,10 +247,12 @@ export default function CoinDetailPage() {
           </div>
         </div>
 
-        {showModal && (
+        {showModal && addressInfo && (
           <CoinAddressModal
             symbol={symbol!}
             coinName={coin.name}
+            address={addressInfo.address}
+            tag={addressInfo.tag}
             onClose={() => setShowModal(false)}
           />
         )}
@@ -171,39 +260,48 @@ export default function CoinDetailPage() {
         {/* 거래 내역 섹션 */}
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-bold text-gray-800">거래 내역</h3>
-          <button className="text-sm font-medium text-[#0a2e64] flex items-center">
+          <button className="flex items-center text-sm font-medium text-[#0a2e64]">
             전체보기
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className="ml-1">
-              <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="ml-1"
+            >
+              <path
+                d="M6 12L10 8L6 4"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </button>
         </div>
-        
+
         {/* 거래 내역 */}
         <div className="space-y-6 pb-10 text-[20px]">
-          {/* 입금 내역 */}
-          <TransactionItem
-            date="2024.12.12 16:36"
-            type="입금 완료"
-            balance="0.31232123 XRP"
-            amount="+0.31232123 XRP"
-            krw="1000"
-            isDeposit
-          />
-
-          <TransactionItem
-            date="2024.12.11 16:36"
-            type="결제 완료"
-            balance="0.31232123 XRP"
-            amount="-0.31232123 XRP"
-            krw="1000"
-            isDeposit={false}
-          />
-          
-          {isUser && (
-            <div className="text-center p-2">
-              <button className="text-sm text-[#0a2e64] font-medium">더보기</button>
-            </div>
+          {(isUser ? transactions : settlements).map((item, idx) => (
+            <TransactionItem
+              key={idx}
+              date={new Date(item.transferredAt).toLocaleString()}
+              type={
+                item.status === 'COMPLETED'
+                  ? isUser
+                    ? '입금 완료'
+                    : '정산 완료'
+                  : '대기중'
+              }
+              balance={`${item.amount} ${symbol}`}
+              amount={item.amount + ' ' + symbol}
+              krw={Math.floor(item.amount * 1000).toLocaleString()}
+              isDeposit={isUser}
+            />
+          ))}
+          {isUser && transactions.length === 0 && (
+            <p className="text-sm text-gray-500">거래 내역이 없습니다.</p>
           )}
         </div>
       </main>

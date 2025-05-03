@@ -20,7 +20,7 @@ export default function CoinDeposit() {
   }
 
   const onNext = () => {
-    navigate(`/home-coin-transaction/${symbol}`, {
+    navigate(`/coin/transaction/${symbol}`, {
       state: { isUser: true }
     });
   }
