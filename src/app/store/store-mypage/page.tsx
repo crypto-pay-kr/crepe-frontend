@@ -4,8 +4,8 @@ import BusinessCertificateForm from "@/components/edit-info/BusinessCertificatio
 import PasswordChangeForm from "@/components/edit-info/PasswordChangeForm";
 import PhoneChangeForm from "@/components/edit-info/PhoneChangeForm";
 import ProfileImageChangeForm from "@/components/edit-info/ProfileImageChangeFromProps";
-import React, { useState, ChangeEvent } from "react";
-const BASE_URL = import.meta.env.VITE_API_SERVER_URL;
+import React, { useState, ChangeEvent, useEffect } from 'react'
+import { changeNickname, changePassword, changePhone } from '@/api/user'
 
 export default function StoreEditInfo(): React.ReactElement {
   const [profileImage, setProfileImage] = useState<File | null>(null);
@@ -39,67 +39,44 @@ export default function StoreEditInfo(): React.ReactElement {
     }
   };
 
-  // Password change API integration
-  const handlePasswordChange = async (data: { oldPassword: string; newPassword: string }): Promise<void> => {
-    const response = await fetch(`${BASE_URL}/api/auth/change/password`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        oldPassword: data.oldPassword,
-        newPassword: data.newPassword
-      })
-    });
+  const handlePasswordChange = async (data: { oldPassword: string; newPassword: string }) => {
+    if (!token) throw new Error("로그인이 필요합니다.");
+    await changePassword(token, data);
+  };
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || "비밀번호 변경에 실패했습니다.");
-    }
+  const handleNicknameChange = async (data: { newNickname: string }) => {
+    if (!token) throw new Error("로그인이 필요합니다.");
+    await changeNickname(token, data);
+  };
+
+  const handlePhoneChange = async (data: { phoneNumber: string }) => {
+    if (!token) throw new Error("로그인이 필요합니다.");
+    await changePhone(token, data);
   };
 
 
-  const handlePhoneChange = async (data: { phoneNumber: string }): Promise<void> => {
-    const response = await fetch(`${BASE_URL}/api/auth/change/phone`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        phoneNumber: data.phoneNumber,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || "전화번호 변경에 실패했습니다.");
-    }
-
-  };
 
   return (
     <div className="flex flex-col h-screen">
-        <Header title="내 정보 수정" />
-        <main className="flex-1 p-4 bg-gray-50 overflow-auto min-h-screen">
-          <PasswordChangeForm
-            onSuccess={handlePasswordChangeSuccess}
-            onSubmit={handlePasswordChange}
-            />
-          <PhoneChangeForm
-            onSuccess={handlePhoneChangeSuccess}
-            onSubmit={handlePhoneChange}
-          />
-          <ProfileImageChangeForm onSuccess={handleProfileImageChange} />
-          <BusinessCertificateForm onSuccess={handleBusinessCertificateChange} />
-          <Modal 
-              isOpen={isModalOpen} 
-              onClose={() => setIsModalOpen(false)}
-              title={modalTitle}
-              />
-    </main>
+      <Header title="내 정보 수정" />
+      <main className="flex-1 p-4 bg-gray-50 overflow-auto min-h-screen">
+        <PasswordChangeForm
+          onSuccess={handlePasswordChangeSuccess}
+          onSubmit={handlePasswordChange}
+        />
+        <PhoneChangeForm
+          onSuccess={handlePhoneChangeSuccess}
+          onSubmit={handlePhoneChange}
+        />
+        <ProfileImageChangeForm onSuccess={handleProfileImageChange} />
+        <BusinessCertificateForm onSuccess={handleBusinessCertificateChange} />
+        <Modal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          title={modalTitle}
+        />
+      </main>
     </div>
-      
+
   );
 }
