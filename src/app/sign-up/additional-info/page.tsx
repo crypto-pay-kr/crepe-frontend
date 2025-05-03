@@ -3,14 +3,12 @@ import { useNavigate } from "react-router-dom";
 import Header from "@/components/common/Header";
 import Button from "@/components/common/Button";
 import Input from "@/components/common/Input";
-import API_ENDPOINTS from "@/api/user"; 
-
+import { signUpUser } from "@/api/user";
 
 export default function AdditionalUserInfoPage() {
   const navigate = useNavigate();
   const [name, setName] = useState(""); // 사용자 입력 이름
   const [nickname, setNickname] = useState(""); // 사용자 입력 닉네임
-  const [buttonColor, setButtonColor] = useState<"blue" | "gray">("blue");
 
   // 유효성 검사
   const isFormValid = name.trim() && nickname.trim();
@@ -39,16 +37,15 @@ export default function AdditionalUserInfoPage() {
       };
 
       // POST 요청 보내기
-      const response = await fetch(API_ENDPOINTS.SIGNUP, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      });
+      const response = await signUpUser(requestBody);
 
       if (response.ok) {
-        // 회원가입 성공 시 완료 페이지로 이동
+        // 회원가입 성공 시 localStorage와 sessionStorage 데이터 삭제
+        sessionStorage.removeItem("signUpData");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+
+        // 완료 페이지로 이동
         navigate("/signup-complete");
       } else {
         const errorData = await response.json();
@@ -76,15 +73,14 @@ export default function AdditionalUserInfoPage() {
             onChange={(e) => setName(e.target.value)}
             placeholder="이름을 입력해주세요"
           />
-          
           <Input
             label="닉네임"
             value={nickname}
-            onChange={(e) => setNickname(e.target.value)} 
+            onChange={(e) => setNickname(e.target.value)}
             placeholder="닉네임을 입력해주세요"
           />
         </div>
-        
+
         <div className="flex flex-col items-center justify-center mt-auto mb-8">
           <div className="bg-gray-50 p-3 rounded-full shadow-sm mb-4">
             <img src="/lock.png" alt="Lock Icon" className="w-6 h-6 text-gray-400" />

@@ -1,13 +1,11 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
-import { ChevronDown, ChevronUp, Home, ShoppingBag, User } from "lucide-react"
 import Header from "@/components/common/Header"
 import BottomNav from "@/components/common/BottomNavigate"
 import { TimeSelectionModal } from "@/components/order/time-selection-modal"
 import { RejectionReasonModal } from "@/components/order/reject-reason-modal"
 import Button from '@/components/common/Button'
-
-
+import { fetchOrders, acceptOrder, rejectOrder, completeOrder } from "@/api/store";
 
 interface OrderItem {
   name: string
@@ -28,150 +26,136 @@ interface Order {
 export default function OrderStatusPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const [orders, setOrders] = useState<Order[]>([
-    {
-      id: "1",
-      number: "90897",
-      type: "매장 식사",
-      status: "주문 접수",
-      items: [
-        { name: "일반 감자수", quantity: 5 },
-        { name: "양념 감자수", quantity: 2 },
-        { name: "새우튀김", quantity: 1 },
-        { name: "보링핫식", quantity: 2 },
-        { name: "보링핫식", quantity: 2 },
-        { name: "보링핫식", quantity: 2 },
-      ],
-      expanded: true,
-    },
-    {
-      id: "2",
-      number: "90897",
-      type: "포장 주문",
-      status: "수락 완료",
-      timeRemaining: 15,
-      items: [
-        { name: "일반 감자수", quantity: 5 },
-        { name: "양념 감자수", quantity: 2 },
-        { name: "새우튀김", quantity: 1 },
-        { name: "보링핫식", quantity: 2 },
-        { name: "보링핫식", quantity: 2 },
-        { name: "보링핫식", quantity: 2 },
-      ],
-      expanded: true,
-    },
-    {
-      id: "3",
-      number: "90897",
-      type: "포장 주문",
-      status: "준비 완료",
-      items: [
-        { name: "일반 감자수", quantity: 5 },
-        { name: "양념 감자수", quantity: 2 },
-        { name: "새우튀김", quantity: 1 },
-        { name: "보링핫식", quantity: 2 },
-        { name: "보링핫식", quantity: 2 },
-        { name: "보링핫식", quantity: 2 },
-      ],
-      expanded: true,
-    },
-    {
-      id: "4",
-      number: "90897",
-      type: "포장 주문",
-      status: "종료",
-      items: [
-        { name: "일반 감자수", quantity: 5 },
-        { name: "양념 감자수", quantity: 2 },
-        { name: "새우튀김", quantity: 1 },
-        { name: "보링핫식", quantity: 2 },
-        { name: "보링핫식", quantity: 2 },
-        { name: "보링핫식", quantity: 2 },
-      ],
-      expanded: true,
-    },
-  ])
-
-  // 모달 상태 관리
+  const [orders, setOrders] = useState<Order[]>([])
   const [timeModalOpen, setTimeModalOpen] = useState(false)
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false)
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
+
+  useEffect(() => {
+    const loadOrders = async () => {
+      try {
+        const data = await fetchOrders(); 
+        // 응답 데이터에서 주문 정보 매핑
+        const mappedOrders: Order[] = data.map((order: any) => ({
+          id: order.orderId,
+          number: order.orderId,
+          type: order.orderType,
+          status: order.status === "WAITING" ? "주문 접수" : order.status,
+          items: order.orderDetails.map((detail: any) => ({
+            name: detail.menuName,
+            quantity: detail.menuCount,
+          })),
+          expanded: false,
+        }));
+        setOrders(mappedOrders);
+      } catch (error) {
+        console.error("Failed to fetch orders:", error);
+      }
+    };
+
+    loadOrders();
+  }, []);
 
   const handleToggleExpand = (id: string) => {
     setOrders(orders.map((order) => (order.id === id ? { ...order, expanded: !order.expanded } : order)))
   }
 
+  // ------------------------------------
+  //    OPEN MODALS
+  // ------------------------------------
   const handleOpenAcceptModal = (id: string) => {
-    setSelectedOrderId(id)
-    setTimeModalOpen(true)
-  }
+    setSelectedOrderId(id);
+    setTimeModalOpen(true);
+  };
 
   const handleOpenRejectModal = (id: string) => {
-    setSelectedOrderId(id)
-    setRejectionModalOpen(true)
-  }
+    setSelectedOrderId(id);
+    setRejectionModalOpen(true);
+  };
 
-  const handleAccept = (time: number) => {
-    if (selectedOrderId) {
-      setOrders(
-        orders.map((order) =>
-          order.id === selectedOrderId ? { ...order, status: "수락 완료", timeRemaining: time } : order,
+  // ------------------------------------
+  //    API CALLS
+  // ------------------------------------
+  // 주문 수락
+  const handleAccept = async (time: string) => {
+    if (!selectedOrderId) return;
+    try {
+
+      const response = await acceptOrder(selectedOrderId, time);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // 주문 상태 업데이트
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === selectedOrderId ? { ...order, status: "수락 완료", timeRemaining: parseInt(time) } : order,
         ),
-      )
-      setTimeModalOpen(false) // 모달 닫기
+      );
+    } catch (error) {
+      console.error("Failed to accept order:", error);
+    } finally {
+      setTimeModalOpen(false);
     }
-  }
+  };
 
-  const handleReject = (reason: string) => {
-    if (selectedOrderId) {
-      console.log(`주문 ${selectedOrderId} 거절 사유: ${reason}`)
-      // 상태를 '거절됨'으로 변경하고 거절 사유 저장
-      setOrders(
-        orders.map((order) =>
+  // 주문 거절
+  const handleReject = async (reason: string) => {
+    if (!selectedOrderId) return;
+    try {
+
+      const response = await rejectOrder(selectedOrderId, reason);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      //  상태 업데이트
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
           order.id === selectedOrderId ? { ...order, status: "거절됨", rejectionReason: reason } : order,
         ),
-      )
-      setRejectionModalOpen(false) // 모달 닫기
+      );
+    } catch (error) {
+      console.error("Failed to refuse order:", error);
+    } finally {
+      setRejectionModalOpen(false);
     }
-  }
+  };
 
-  const handlePrepareComplete = (id: string) => {
-    setOrders(
-      orders.map((order) => (order.id === id ? { ...order, status: "준비 완료", timeRemaining: undefined } : order)),
-    )
-  }
+  // 주문 거절
+  const handlePrepareComplete = async (id: string) => {
+    try {
+
+      const response = await completeOrder(id);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Update local state
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === id ? { ...order, status: "준비 완료", timeRemaining: undefined } : order,
+        ),
+      );
+    } catch (error) {
+      console.error("Failed to complete order:", error);
+    }
+  };
 
   const handleCancelPrepareComplete = (id: string) => {
     setOrders(orders.map((order) => (order.id === id ? { ...order, status: "수락 완료", timeRemaining: 15 } : order)))
   }
 
   const handleStoreSettings = () => {
-    navigate("/store-settings")
+    navigate("/store/manage")
   }
-  
-  const isSeller = location.pathname.includes('/store');
-  const navItems = [
-      {
-        icon: <Home className="w-6 h-6" color="white" />,
-        label: "홈",
-        isActive: false,
-        onClick: () => navigate("/")
-      },
-      {
-        icon: <ShoppingBag className="w-6 h-6" color="white" />,
-        label: "쇼핑몰",
-        isActive: false,
-        onClick: () => navigate("/shop")
-      },
-      {
-        icon: <User className="w-6 h-6" color="white" />,
-        label: "마이페이지",
-        isActive: true,
-        onClick: () => navigate(isSeller ? "/store/my" : "/home/my")
-      }
-    ];
-    
-  // 상태에 따른 배경색 클래스 반환
+
+
+  const isSeller = location.pathname.includes('/store')
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "주문 접수":
@@ -191,31 +175,32 @@ export default function OrderStatusPage() {
 
   return (
     <div className="flex flex-col h-screen">
-      {/* 헤더 */}
-      <Header title="주문 현황"  />
+      <Header title="주문 현황" />
 
-      {/* 메인 콘텐츠 */}
       <main className="flex-1 bg-gray-100 overflow-auto">
         {orders.map((order) => (
-          <div key={order.id} className="bg-white mb-2 border-b border-gray-200">
+          <div key={order.id} className="bg-white mb-2 border-b border-gray-200 mt-2">
             <div className="p-4">
               <div className="flex justify-between items-start mb-2">
                 <div>
-                  <h2 className="font-bold">Order #{order.number} - N분 전</h2>
+                  <h2 className="font-bold">Order #{order.number}</h2>
                   <div className="flex items-center">
-                    <p className="text-gray-600 text-sm mr-2">{order.type}</p>
-                    <span className={`px-2 py-0.5 rounded-full text-xs ${getStatusColor(order.status)}`}>
+                    <p className="text-gray-600 text-base mr-2">{order.type}</p>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-sm`}
+                      style={{ color: "#0C2B5F" }}
+                    >
                       {order.status}
                     </span>
                   </div>
                 </div>
-                <Button onClick={() => handleToggleExpand(order.id)} className="p-1 rounded-full bg-gray-100">
-                  {order.expanded ? (
-                    <ChevronUp className="w-5 h-5 text-gray-500" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5 text-gray-500" />
-                  )}
-                </Button>
+                <button onClick={() => handleToggleExpand(order.id)} className="p-1 rounded-full">
+                  <img
+                    src={order.expanded ? "/foldingbutton.png" : "/expandbutton.png"}
+                    alt={order.expanded ? "Collapse" : "Expand"}
+                    className="w-7 h-7"
+                  />
+                </button>
               </div>
 
               {order.expanded && (
@@ -226,8 +211,8 @@ export default function OrderStatusPage() {
                       <span>{item.quantity}개</span>
                     </div>
                   ))}
-                  
-                  {/* 거절된 주문에 대한 거절 사유 표시 */}
+
+
                   {order.status === "거절됨" && order.rejectionReason && (
                     <div className="mt-2 p-2 bg-red-50 rounded-md">
                       <p className="text-red-600 text-sm font-medium">거절 사유: {order.rejectionReason}</p>
@@ -278,7 +263,7 @@ export default function OrderStatusPage() {
                 {order.status === "종료" && (
                   <div className="ml-auto px-4 py-2 bg-gray-100 text-gray-500 rounded-md">완료됨</div>
                 )}
-                
+
                 {order.status === "거절됨" && (
                   <div className="ml-auto px-4 py-2 bg-red-100 text-red-500 rounded-md">거절됨</div>
                 )}
@@ -288,16 +273,13 @@ export default function OrderStatusPage() {
         ))}
       </main>
 
-      {/* 가게 설정 버튼 */}
       <div className="p-4 bg-gray-100">
         <Button text="가게 설정" onClick={handleStoreSettings} className="w-full py-4 bg-[#0a2e65] text-white rounded-md font-medium">
         </Button>
       </div>
 
-      {/* 하단 네비게이션 */}
       <BottomNav />
 
-      {/* 모달 컴포넌트 */}
       <TimeSelectionModal isOpen={timeModalOpen} onClose={() => setTimeModalOpen(false)} onAccept={handleAccept} />
       <RejectionReasonModal
         isOpen={rejectionModalOpen}

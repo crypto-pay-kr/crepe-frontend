@@ -248,7 +248,6 @@ const ShoppingMall: React.FC = () => {
 
       <BottomNav />
 
-      {/* 스타일 적용 */}
       <style dangerouslySetInnerHTML={{ __html: globalStyles }} />
     </div>
   );

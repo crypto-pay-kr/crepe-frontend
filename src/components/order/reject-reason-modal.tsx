@@ -8,13 +8,20 @@ interface RejectionReasonModalProps {
   onReject: (reason: string) => void
 }
 
+const reasonMap: Record<string, string> = {
+  "매장에 자리가 없어요": "자리없음",
+  "매장 주문이 너무 많아요": "주문많음",
+  "매장에 재고가 없어요": "재고없음",
+}
+
 export function RejectionReasonModal({ isOpen, onClose, onReject }: RejectionReasonModalProps) {
   const [selectedReason, setSelectedReason] = useState<string | null>(null)
   const reasonOptions = ["매장에 자리가 없어요", "매장 주문이 너무 많아요", "매장에 재고가 없어요"]
 
   const handleReject = () => {
     if (selectedReason !== null) {
-      onReject(selectedReason)
+      const backendReason = reasonMap[selectedReason]
+      onReject(backendReason)
       onClose()
     }
   }

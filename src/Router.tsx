@@ -16,7 +16,6 @@ import LoginPage from "./app/login/page";
 import AdditionalStoreInfoPage from "./app/sign-up/store-additional-info/page";
 import MyStoreManagePage from "./app/store/store-settings/page";
 import MenuEdit from "./app/store/store-settings/add-store-menu/page";
-import StoreSettingsPage from "./app/store/store-settings/edit-store-info/page";
 import LoadingPage from "./app/loading/page";
 import CoinDetailPage from "./app/store/store-coin/store-coin-detail/page";
 import OrderStatusPage from "./app/store/store-order-manage/page";
@@ -83,7 +82,6 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/store/manage" element={<MyStoreManagePage/>} />
         <Route path="/store/menu/add" element={<MenuEdit/>} />
         <Route path="/store/menu/edit" element={<MenuEdit/>} />
-        <Route path="/store-settings" element={<StoreSettingsPage/>} />
         <Route path="/store" element={<OrderStatusPage />} />
 
         {/* 유저 쇼핑몰 페이지 */}
