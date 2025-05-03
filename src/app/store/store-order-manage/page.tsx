@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
-import { ChevronDown, ChevronUp, Home, ShoppingBag, User } from "lucide-react"
 import Header from "@/components/common/Header"
 import BottomNav from "@/components/common/BottomNavigate"
 import { TimeSelectionModal } from "@/components/order/time-selection-modal"
 import { RejectionReasonModal } from "@/components/order/reject-reason-modal"
 import Button from '@/components/common/Button'
+import { fetchOrders, acceptOrder, rejectOrder, completeOrder } from "@/api/store";
 
 interface OrderItem {
   name: string
@@ -31,87 +31,119 @@ export default function OrderStatusPage() {
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false)
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
 
-  // Fetch orders from API
   useEffect(() => {
-    const fetchOrders = async () => {
+    const loadOrders = async () => {
       try {
-        const token = localStorage.getItem("accessToken"); // Retrieve token from localStorage
-        const response = await fetch('http://localhost:8080/store/orders', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json()
-
-        // Map API response to match the Order interface
+        const data = await fetchOrders(); 
+        // 응답 데이터에서 주문 정보 매핑
         const mappedOrders: Order[] = data.map((order: any) => ({
           id: order.orderId,
           number: order.orderId,
           type: order.orderType,
-          status: order.status === "WAITING" ? "주문 접수" : order.status, // Map status
+          status: order.status === "WAITING" ? "주문 접수" : order.status,
           items: order.orderDetails.map((detail: any) => ({
             name: detail.menuName,
             quantity: detail.menuCount,
           })),
-          expanded: false, // Default to collapsed
-        }))
-
-        setOrders(mappedOrders)
+          expanded: false,
+        }));
+        setOrders(mappedOrders);
       } catch (error) {
-        console.error("Failed to fetch orders:", error)
+        console.error("Failed to fetch orders:", error);
       }
-    }
+    };
 
-    fetchOrders()
-  }, [])
+    loadOrders();
+  }, []);
 
   const handleToggleExpand = (id: string) => {
     setOrders(orders.map((order) => (order.id === id ? { ...order, expanded: !order.expanded } : order)))
   }
 
+  // ------------------------------------
+  //    OPEN MODALS
+  // ------------------------------------
   const handleOpenAcceptModal = (id: string) => {
-    setSelectedOrderId(id)
-    setTimeModalOpen(true)
-  }
+    setSelectedOrderId(id);
+    setTimeModalOpen(true);
+  };
 
   const handleOpenRejectModal = (id: string) => {
-    setSelectedOrderId(id)
-    setRejectionModalOpen(true)
-  }
+    setSelectedOrderId(id);
+    setRejectionModalOpen(true);
+  };
 
-  const handleAccept = (time: number) => {
-    if (selectedOrderId) {
-      setOrders(
-        orders.map((order) =>
-          order.id === selectedOrderId ? { ...order, status: "수락 완료", timeRemaining: time } : order,
+  // ------------------------------------
+  //    API CALLS
+  // ------------------------------------
+  // 주문 수락
+  const handleAccept = async (time: string) => {
+    if (!selectedOrderId) return;
+    try {
+
+      const response = await acceptOrder(selectedOrderId, time);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // 주문 상태 업데이트
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === selectedOrderId ? { ...order, status: "수락 완료", timeRemaining: parseInt(time) } : order,
         ),
-      )
-      setTimeModalOpen(false)
+      );
+    } catch (error) {
+      console.error("Failed to accept order:", error);
+    } finally {
+      setTimeModalOpen(false);
     }
-  }
+  };
 
-  const handleReject = (reason: string) => {
-    if (selectedOrderId) {
-      console.log(`주문 ${selectedOrderId} 거절 사유: ${reason}`)
-      setOrders(
-        orders.map((order) =>
+  // 주문 거절
+  const handleReject = async (reason: string) => {
+    if (!selectedOrderId) return;
+    try {
+
+      const response = await rejectOrder(selectedOrderId, reason);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      //  상태 업데이트
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
           order.id === selectedOrderId ? { ...order, status: "거절됨", rejectionReason: reason } : order,
         ),
-      )
-      setRejectionModalOpen(false)
+      );
+    } catch (error) {
+      console.error("Failed to refuse order:", error);
+    } finally {
+      setRejectionModalOpen(false);
     }
-  }
+  };
 
-  const handlePrepareComplete = (id: string) => {
-    setOrders(
-      orders.map((order) => (order.id === id ? { ...order, status: "준비 완료", timeRemaining: undefined } : order)),
-    )
-  }
+  // 주문 거절
+  const handlePrepareComplete = async (id: string) => {
+    try {
+
+      const response = await completeOrder(id);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Update local state
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === id ? { ...order, status: "준비 완료", timeRemaining: undefined } : order,
+        ),
+      );
+    } catch (error) {
+      console.error("Failed to complete order:", error);
+    }
+  };
 
   const handleCancelPrepareComplete = (id: string) => {
     setOrders(orders.map((order) => (order.id === id ? { ...order, status: "수락 완료", timeRemaining: 15 } : order)))
@@ -152,9 +184,9 @@ export default function OrderStatusPage() {
                 <div>
                   <h2 className="font-bold">Order #{order.number}</h2>
                   <div className="flex items-center">
-                    <p className="text-gray-600 text-base mr-2">{order.type}</p> 
+                    <p className="text-gray-600 text-base mr-2">{order.type}</p>
                     <span
-                      className={`px-2 py-0.5 rounded-full text-sm`} 
+                      className={`px-2 py-0.5 rounded-full text-sm`}
                       style={{ color: "#0C2B5F" }}
                     >
                       {order.status}
