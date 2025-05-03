@@ -1,205 +1,198 @@
 import BottomNav from "@/components/common/BottomNavigate";
 import Header from "@/components/common/Header";
-import MenuList, { MenuItemData } from "@/components/shoppingmall/MenuList";
 import ShopInfo from "@/components/shoppingmall/ShoppingmallInfo";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { stores, menuItems } from "@/mocks/stores";
 import Button from "@/components/common/Button";
 import { ShoppingCart, ChevronUp } from "lucide-react";
+import { fetchStoreDetail } from "@/api/shop";
+
 
 function MallDetailPage() {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
+
+    // store: API에서 내려오는 값을 그대로 저장 (storeName, storeAddress, storeImageUrl, menuList 등)
+    const [store, setStore] = useState<{
+        storeName: string;
+        storeAddress: string;
+        storeImageUrl: string;
+        likeCount: number;
+        coinStatus: any[];
+        menuList: {
+            menuId: number;
+            menuName: string;
+            menuPrice: number;
+            menuImage: string;
+        }[];
+    } | null>(null);
+
+    // 장바구니 (로컬 스토리지와 동기화)
     const [cartItems, setCartItems] = useState<{ id: number; name: string; price: number; quantity: number }[]>([]);
     const [showCartPreview, setShowCartPreview] = useState(false);
-    const [activeCategory, setActiveCategory] = useState("추천메뉴");
     const [cartExpanded, setCartExpanded] = useState(false);
 
-    // Scroll to top when component mounts
+    // 페이지 마운트 시 화면 상단으로 스크롤
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
 
-    const addToCart = (item: { id: number; name: string; price: number }) => {
-        const existingItem = cartItems.find((cartItem) => cartItem.id === item.id);
-        
-        // Show cart preview when items are added
-        setShowCartPreview(true);
+    // 컴포넌트 마운트 시 이전 장바구니 로드
+    useEffect(() => {
+        const savedCart = localStorage.getItem("cartItems");
+        if (savedCart) {
+            setCartItems(JSON.parse(savedCart));
+        }
+    }, []);
+
+    // cartItems가 변경될 때 마다 로컬 스토리지에 저장
+    useEffect(() => {
+        localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    }, [cartItems]);
+
+    // 가게 상세 정보 가져오기
+    useEffect(() => {
+        const loadStoreDetail = async () => {
+            try {
+                if (!id) return;
+                const data = await fetchStoreDetail(Number(id));
+                setStore({
+                    storeName: data.storeName,
+                    storeAddress: data.storeAddress,
+                    storeImageUrl: data.storeImageUrl,
+                    likeCount: data.likeCount,
+                    coinStatus: data.coinStatus || [],
+                    menuList: data.menuList || [],
+                });
+            } catch (error) {
+                console.error("Failed to fetch store details:", error);
+            }
+        };
+
+        loadStoreDetail();
+    }, [id]);
+
+    // 장바구니에 메뉴 추가
+    const addToCart = (item: { menuId: number; menuName: string; menuPrice: number; menuImage: string }) => {
+        const existingItem = cartItems.find((cartItem) => cartItem.id === item.menuId);
+        setShowCartPreview(true); // 장바구니 미리보기 표시
 
         if (existingItem) {
-            setCartItems(
-                cartItems.map((cartItem) =>
-                    cartItem.id === item.id ? { ...cartItem, quantity: cartItem.quantity + 1 } : cartItem
+            setCartItems((prev) =>
+                prev.map((cartItem) =>
+                    cartItem.id === item.menuId
+                        ? { ...cartItem, quantity: cartItem.quantity + 1 }
+                        : cartItem
                 )
             );
         } else {
-            setCartItems([...cartItems, { ...item, quantity: 1 }]);
+            setCartItems((prev) => [
+                ...prev,
+                {
+                    id: item.menuId,
+                    name: item.menuName,
+                    price: item.menuPrice,
+                    image: item.menuImage, // menuImage 추가
+                    quantity: 1,
+                },
+            ]);
         }
     };
 
+
+    // 장바구니 수량 변경
     const updateItemQuantity = (itemId: number, change: number) => {
-        setCartItems(prevItems => 
-            prevItems.map(item => {
-                if (item.id === itemId) {
-                    const newQuantity = Math.max(0, item.quantity + change);
-                    return { ...item, quantity: newQuantity };
-                }
-                return item;
-            }).filter(item => item.quantity > 0)
+        setCartItems((prev) =>
+            prev
+                .map((item) => {
+                    if (item.id === itemId) {
+                        const newQuantity = Math.max(0, item.quantity + change);
+                        return { ...item, quantity: newQuantity };
+                    }
+                    return item;
+                })
+                .filter((item) => item.quantity > 0)
         );
 
+        // 장바구니가 비면 프리뷰, 펼침 옵션 해제
         if (cartItems.length === 0) {
             setShowCartPreview(false);
             setCartExpanded(false);
         }
     };
 
-    // id에 해당하는 가게 데이터 찾기
-    const store = stores.find((store) => store.id === Number(id));
-
+    // store가 없으면 로딩/에러 처리
     if (!store) {
         return (
             <div className="flex items-center justify-center h-screen">
-                <p className="text-lg font-bold text-gray-500">가게를 찾을 수 없습니다.</p>
+                <p className="text-lg font-bold text-gray-500">
+                    가게를 찾을 수 없습니다.
+                </p>
             </div>
         );
     }
 
-    // Calculate total items and price
-    const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
-    const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
-
-    // Menu categories - 전체와 추천메뉴만 유지
-    const categories = ["추천메뉴"];
-
-    // 메뉴 아이템에 기본 이미지 및 설명 추가
-    const menuImages = [
-        "/store-image.png", // 칼국수 이미지
-        "/store-image.png", // 모든 메뉴에 동일 이미지 사용
-        "/store-image.png",
-        "/store-image.png",
-        "/store-image.png"
-    ];
-    
-    const menuDescriptions = [
-        "쫄깃한 면발과 진한 육수의 정통 칼국수",
-        "신선한 재료로 만든 특별한 메뉴입니다",
-        "건강한 식재료를 사용한 인기메뉴",
-        "시원한 국물이 일품인 별미",
-        "특제 소스를 사용한 맛있는 요리"
-    ];
-
-    // Mock menu items with categories
-    const enhancedMenuItems = menuItems.map((item, index) => {
-        return {
-            ...item,
-            category: "추천메뉴", // 모든 메뉴를 추천메뉴로 설정
-            image: menuImages[index % menuImages.length],
-            description: menuDescriptions[index % menuDescriptions.length]
-        };
-    });
-
-    // Filter menu items by active category
-    const filteredMenuItems = activeCategory === "전체" 
-        ? enhancedMenuItems 
-        : enhancedMenuItems.filter(item => item.category === activeCategory);
+    // 총 아이템 개수, 총 가격
+    const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+    const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     return (
         <div className="flex flex-col h-full bg-gray-50 relative">
-            <Header title={store.name} isStore={true} />
-            
+            <Header title={store.storeName} isStore />
+
             <main className="flex-1 overflow-auto pb-16">
-                {/* Store Details Section */}
+                {/* 가게 정보 섹션 */}
                 <div className="bg-white shadow-sm mb-2">
                     <div className="relative">
                         <img
-                            src={store.image || "/store-image.png"}
-                            alt={`${store.name} 가게사진`}
+                            src={store.storeImageUrl || "/store-image.png"}
+                            alt={store.storeName}
                             className="w-full h-56 object-cover"
                         />
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                            <h2 className="text-white text-xl font-bold">{store.name}</h2>
+                            <h2 className="text-white text-xl font-bold">{store.storeName}</h2>
+                            <p className="text-white text-sm">{store.storeAddress}</p>
                         </div>
                     </div>
-                    
                     <div className="p-4">
-                        <ShopInfo storeId={Number(id)} />
+                        <p className="text-gray-500">좋아요: {store.likeCount}</p>
                     </div>
                 </div>
-                
-                {/* Menu Categories - 전체와 추천메뉴만 표시 */}
-                <div className="bg-white sticky top-0 z-10 shadow-sm">
-                    <div className="overflow-x-auto">
-                        <div className="flex border-b border-gray-200">
-                            <button 
-                                className={`px-5 py-3 text-sm font-medium relative transition-all ${
-                                    activeCategory === "전체" 
-                                        ? "text-[#002169] font-semibold" 
-                                        : "text-gray-500"
-                                }`}
-                                onClick={() => setActiveCategory("전체")}
-                            >
-                                전체
-                                {activeCategory === "전체" && (
-                                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#002169] rounded-t-full"></span>
-                                )}
-                            </button>
-                            
-                            <button
-                                className={`px-5 py-3 text-sm font-medium relative transition-all ${
-                                    activeCategory === "추천메뉴"
-                                        ? "text-[#002169] font-semibold"
-                                        : "text-gray-500"
-                                }`}
-                                onClick={() => setActiveCategory("추천메뉴")}
-                            >
-                                추천메뉴
-                                {activeCategory === "추천메뉴" && (
-                                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#002169] rounded-t-full"></span>
-                                )}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                {/* Menu Items */}
+
+                {/* 메뉴 리스트 렌더링 */}
                 <div className="bg-white pb-4">
                     <div className="divide-y divide-gray-100 px-5">
-                        {filteredMenuItems.map((item) => (
-                            <div key={item.id} className="py-4">
+                        {store.menuList.map((item) => (
+                            <div key={item.menuId} className="py-4">
                                 <div className="flex justify-between">
                                     <div className="flex-1 pr-4">
-                                        <h3 className="font-bold text-gray-900">{item.name}</h3>
-                                        <p className="text-sm text-gray-500 mt-1">
-                                            {item.description}
-                                        </p>
-                                        <div className="mt-2 font-bold text-gray-900">
-                                            {item.price.toLocaleString()} KRW
-                                        </div>
+                                        <h3 className="font-bold text-gray-900">{item.menuName}</h3>
+                                        <div className="mt-2 font-bold text-gray-900">{item.menuPrice.toLocaleString()} KRW</div>
                                     </div>
-                                    
                                     <div className="relative">
                                         <div className="h-24 w-24 rounded-lg overflow-hidden bg-gray-100">
-                                            <img 
-                                                src={item.image} 
-                                                alt={item.name} 
-                                                className="h-full w-full object-cover"
-                                            />
+                                            <img src={item.menuImage} alt={item.menuName} className="h-full w-full object-cover" />
                                         </div>
-                                        <button 
-                                            onClick={() => addToCart(item)}
+                                        <button
+                                            onClick={() =>
+                                                addToCart({
+                                                    menuId: item.menuId,
+                                                    menuName: item.menuName,
+                                                    menuPrice: item.menuPrice,
+                                                    menuImage: item.menuImage, // menuImage 전달
+                                                })
+                                            }
                                             className="absolute -bottom-2 -right-2 bg-[#002169] rounded-full p-2 shadow-md hover:bg-[#001d5a]"
                                         >
-                                            {/* 플러스 아이콘 흰색으로 명시적 지정 */}
-                                            <svg 
-                                                width="16" 
-                                                height="16" 
-                                                viewBox="0 0 24 24" 
-                                                fill="none" 
-                                                stroke="white" 
-                                                strokeWidth="2" 
-                                                strokeLinecap="round" 
+                                            <svg
+                                                width="16"
+                                                height="16"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="white"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
                                                 strokeLinejoin="round"
                                             >
                                                 <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -213,16 +206,14 @@ function MallDetailPage() {
                     </div>
                 </div>
             </main>
-            
-            {/* 하단 영역 - 바텀 네비게이션 */}
+
             <BottomNav />
-            
             {/* 장바구니 미리보기 - 메인 콘텐츠보다 좁게 설정 */}
             {cartItems.length > 0 && (
                 <div className="fixed bottom-16 left-0 right-0 z-20 flex justify-center">
                     <div className="bg-white border-t border-gray-200 shadow-lg rounded-t-lg max-w-[28%] w-[28%] mx-auto">
                         {/* Cart Header - 항상 보이는 영역 */}
-                        <div 
+                        <div
                             className="py-3 px-5 flex items-center justify-between cursor-pointer"
                             onClick={() => setCartExpanded(!cartExpanded)}
                         >
@@ -244,7 +235,7 @@ function MallDetailPage() {
                                 <ChevronUp className={`h-5 w-5 text-gray-500 transition-transform ${cartExpanded ? 'rotate-180' : ''}`} />
                             </div>
                         </div>
-                        
+
                         {/* 확장 가능한 장바구니 상세 정보 */}
                         <div className={`transition-all duration-300 ${cartExpanded ? 'max-h-48 overflow-y-auto' : 'max-h-0 overflow-hidden'}`}>
                             <div className="px-5 pb-2">
@@ -256,7 +247,7 @@ function MallDetailPage() {
                                                 <p className="text-sm text-gray-500">{item.price.toLocaleString()} KRW</p>
                                             </div>
                                             <div className="flex items-center">
-                                                <button 
+                                                <button
                                                     onClick={(e) => {
                                                         e.stopPropagation(); // 이벤트 버블링 방지
                                                         updateItemQuantity(item.id, -1);
@@ -268,7 +259,7 @@ function MallDetailPage() {
                                                 <span className="w-8 text-center font-medium">
                                                     {item.quantity}
                                                 </span>
-                                                <button 
+                                                <button
                                                     onClick={(e) => {
                                                         e.stopPropagation(); // 이벤트 버블링 방지
                                                         updateItemQuantity(item.id, 1);
@@ -283,7 +274,7 @@ function MallDetailPage() {
                                 </div>
                             </div>
                         </div>
-                        
+
                         {/* 장바구니 액션 버튼 */}
                         <div className="px-5 py-3 border-t border-gray-100">
                             <div className="flex justify-center gap-3">
@@ -298,7 +289,10 @@ function MallDetailPage() {
                                 />
                                 <Button
                                     text="주문하기"
-                                    onClick={() => navigate("/mall/store/cart")}
+                                    onClick={() => {
+                                        localStorage.setItem("cartItems", JSON.stringify(cartItems));
+                                        navigate("/mall/store/cart");
+                                    }}
                                     className="w-1/2 py-3 rounded-lg font-medium bg-[#002169] text-white shadow-sm"
                                 />
                             </div>
