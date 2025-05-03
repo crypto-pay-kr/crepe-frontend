@@ -5,6 +5,7 @@ import BottomNav from '@/components/common/BottomNavigate'
 import { useState } from 'react'
 import TransactionIdInput from '@/components/coin/TransactionIdInput'
 import InstructionGuide from '@/components/coin/InstructionGuide'
+import { requestUserDeposit } from '@/api/coin'
 
 type RouteParams = {
   symbol: string;
@@ -24,7 +25,7 @@ export default function CoinTransaction() {
 
   const isButtonDisabled = !transactionId
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!symbol) {
       alert("코인 심볼이 없습니다.");
       return;
@@ -34,18 +35,20 @@ export default function CoinTransaction() {
       alert("거래 ID를 입력해주세요.");
       return;
     }
-
-    console.log("입력된 거래 ID:", transactionId) 
-    const navigationState: NavigationState = { 
-      isUser: true, 
-      symbol, 
-      transactionId 
-    };
-    
-    navigate(`/coin-detail/${symbol}`, {
-      state: navigationState,
-    });
-  }
+console.log(symbol,transactionId);
+    try {
+      await requestUserDeposit(symbol, transactionId);
+      navigate(`/coin-detail/${symbol}`, {
+        state: {
+          isUser: true,
+          symbol,
+          transactionId,
+        }
+      });
+    } catch (error) {
+      alert("입금 요청 실패: " + (error as Error).message);
+    }
+  };
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">

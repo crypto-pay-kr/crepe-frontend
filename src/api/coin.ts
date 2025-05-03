@@ -1,0 +1,207 @@
+
+const BASE_URL = import.meta.env.VITE_API_SERVER_URL;
+const token = localStorage.getItem("accessToken");
+
+
+
+
+//-----유저 코인 API--------
+
+// 유저 전체 코인 조회
+export const getUserBalance = async () => {
+  const response = await fetch(`${BASE_URL}/api/user/balance`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error('잔액 조회 실패: ' + response.status);
+  }
+  return await response.json();
+};
+
+//유저 코인 입금
+export const requestUserDeposit = async (currency: string, txid: string) => {
+
+  const response = await fetch(`${BASE_URL}/api/deposit`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({ txid, currency }),
+  });
+
+  if (!response.ok) {
+    throw new Error("입금 요청 실패: " + response.status);
+  }
+
+  return response.text(); // 응답 메시지
+};
+
+//유저 코인 내역 조회
+export const getUserDepositHistory = async (currency: string) => {
+
+
+  const res = await fetch(`${BASE_URL}/api/deposit?currency=${currency}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+
+  if (!res.ok) {
+    throw new Error('입금 내역 조회 실패');
+  }
+
+  const json = await res.json();
+  return json.content;
+};
+
+// 유저  특정 코인 잔액 조회
+export const getUserBalanceByCurrency = async (currency: string) => {
+  const response = await fetch(`${BASE_URL}/api/user/balance/${currency}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error('특정 코인 잔액 조회 실패: ' + response.status);
+  }
+
+  return await response.json();
+};
+
+
+//-----가맹점 코인  API----------
+
+//가맹점 코인 내역 조회
+export const getStoreSettlementHistory = async (currency: string) => {
+  const res = await fetch(`${BASE_URL}/store/settlement/history?currency=${currency}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error('정산 내역 조회 실패');
+  }
+
+  return await res.json(); // 또는 그냥 return res.json();
+};
+
+// 가맹점 전체 코인 조회
+export const getStoreBalance = async () => {
+  const res = await fetch(`${BASE_URL}/store/balance`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+
+  if (!res.ok) {
+    throw new Error('잔액 조회 실패: ' + res.status);
+  }
+
+  return await res.json();
+};
+
+// 가맹점 특정 코인 잔액 조회
+export const getStoreBalanceByCurrency = async (currency: string) => {
+  const res = await fetch(`${BASE_URL}/store/balance/${currency}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error('스토어 코인 잔액 조회 실패');
+  }
+
+  const json = await res.json(); // 서버는 배열로 반환
+  return json;
+};
+
+// 가맹점 정산요청
+export const requestSettlement = async (currency: string, amount: string) => {
+  const res = await fetch(`${BASE_URL}/store/settlement`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ currency, amount }),
+  });
+
+  if (!res.ok) {
+    throw new Error('정산 요청 실패');
+  }
+
+  return await res.text();
+};
+
+// 가맹점 계좌등록 확인
+export const checkStoreAddress = async (currency: string) => {
+  const res = await fetch(`${BASE_URL}/store/address?currency=${currency}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error('코인 주소 확인 실패');
+  }
+
+  return res.json();
+};
+
+// 가맹점 계좌 등록 요청
+export const submitStoreAddress = async ({ currency, address, tag, }: {
+  currency: string;
+  address: string;
+  tag?: string;
+}) => {
+  const res = await fetch(`${BASE_URL}/store/save/address`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ currency, address, tag }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`계좌 등록 실패: ${res.status} - ${text}`);
+  }
+};
+
+//가맹점 계좌 재등록 요청
+export const reRegisterStoreAddress = async (payload: {
+  currency: string;
+  address: string;
+  tag?: string;
+}) => {
+  return await fetch(`${BASE_URL}/store/resave/address`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+};

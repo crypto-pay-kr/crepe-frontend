@@ -1,12 +1,16 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 interface CoinAddressModalProps {
   symbol: string;
   coinName: string;
   onClose: () => void;
+  address: string;
+  tag?: string; // XRP 같은 경우에만 필요
 }
 
-export default function CoinAddressModal({ symbol, coinName, onClose }: CoinAddressModalProps) {
+export default function CoinAddressModal({ symbol, coinName, onClose,address, tag }: CoinAddressModalProps) {
+  const navigate = useNavigate();
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
       <div className="bg-white rounded-2xl px-6 py-8 text-center w-[320px] shadow-lg">
@@ -14,16 +18,18 @@ export default function CoinAddressModal({ symbol, coinName, onClose }: CoinAddr
 
         <div className="mb-6">
           <p className="text-sm font-medium mb-1 text-gray-600">내 주소</p>
-          <div className="w-full border border-gray-200 rounded-xl py-3 px-4 text-blue-900 font-semibold text-sm bg-gray-50">
-            TNgzweoDR23DDKFodjkfn20d
+          <div
+            className="w-full border border-gray-200 rounded-xl py-3 px-4 text-blue-900 font-semibold text-sm bg-gray-50">
+            {address}
           </div>
         </div>
 
         {symbol === "XRP" && (
           <div className="mb-6">
             <p className="text-sm font-medium mb-1 text-gray-600">태그 주소</p>
-            <div className="w-full border border-gray-200 rounded-xl py-3 px-4 text-blue-900 font-semibold text-sm bg-gray-50">
-              1312412432
+            <div
+              className="w-full border border-gray-200 rounded-xl py-3 px-4 text-blue-900 font-semibold text-sm bg-gray-50">
+              {tag}
             </div>
           </div>
         )}
@@ -32,10 +38,18 @@ export default function CoinAddressModal({ symbol, coinName, onClose }: CoinAddr
           계좌를 잘못 입력했다면?{" "}
           <span
             className="underline cursor-pointer"
-            onClick={onClose} // 또는 navigate 직접
+            onClick={() =>
+              navigate("/coin/address/add", {
+                state: {
+                  symbol, isUser: false,
+                  useExistingAddress: true,
+              address,
+              tag, }
+              })
+            }
           >
-            재등록하기
-          </span>
+    재등록하기
+  </span>
         </p>
 
         <button

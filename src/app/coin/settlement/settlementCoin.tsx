@@ -6,6 +6,7 @@ import AmountInput from '@/components/coin/AmountInput'
 import PercentageSelector from '@/components/coin/PercentageSelector'
 import AvailableAmount from '@/components/coin/AvailableAmount'
 import Button from '@/components/common/Button'
+import { requestSettlement } from '@/api/coin'
 
 
 export default function SettlementCoin() {
@@ -29,10 +30,18 @@ export default function SettlementCoin() {
     setAmount(newAmount)
   }
 
-  const handleSubmit = () => {
-    navigate(`/coin-detail/${symbol}`, {
-      state: { symbol: symbol }
-    })
+
+  const handleSubmit = async () => {
+    try {
+      await requestSettlement(symbol, amount); // 실제 API 호출
+      alert("정산 요청이 완료되었습니다.");
+      navigate(`/coin-detail/${symbol}`, {
+        state: { symbol }
+      });
+    } catch (e) {
+      alert("정산 요청 실패: " + e.message);
+      console.error(e);
+    }
   }
 
   return (

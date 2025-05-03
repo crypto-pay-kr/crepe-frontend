@@ -1,49 +1,71 @@
-import React, { useState } from "react"
-import Button from '@/components/common/Button'
-import { useLocation, useNavigate } from 'react-router-dom'
-import Header from '@/components/common/Header'
-import BottomNav from '@/components/common/BottomNavigate'
-import AddressInput from "@/components/coin/AddressInput"
-import AddressInstructions from "@/components/coin/AddressInstructions"
+import React, { useState } from "react";
+import Button from '@/components/common/Button';
+import { useLocation, useNavigate } from 'react-router-dom';
+import Header from '@/components/common/Header';
+import BottomNav from '@/components/common/BottomNavigate';
+import AddressInput from "@/components/coin/AddressInput";
+import AddressInstructions from "@/components/coin/AddressInstructions";
+import { submitStoreAddress, reRegisterStoreAddress } from '@/api/coin';
 
 interface LocationState {
   symbol?: string;
   isUser?: boolean;
+  useExistingAddress?: boolean;
+  address?: string;
+  tag?: string;
 }
 
 export default function AddCoinAddress() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { symbol } = location.state as LocationState || {};
-  const isSeller = location.pathname.includes("/store");
+  const {
+    symbol,
+    isUser = false,
+    useExistingAddress = false,
+    address: prefillAddress = "",
+    tag: prefillTag = "",
+  } = location.state as LocationState || {};
 
-  const [useExistingAddress, setUseExistingAddress] = useState<boolean>(false);
-  const [address, setAddress] = useState<string>("");
-  const [tagAddress, setTagAddress] = useState<string>("");
+  const [address, setAddress] = useState<string>(prefillAddress);
+  const [tagAddress, setTagAddress] = useState<string>(prefillTag);
 
-  // 주소 입력 핸들러
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAddress(e.target.value);
   };
 
-  // XRP 태그 주소 입력 핸들러
   const handleTagAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTagAddress(e.target.value);
   };
 
-  // 다음 단계로 이동하는 함수
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!symbol) {
       alert("코인 심볼이 없습니다.");
       return;
     }
 
-    navigate(`/coin-detail/${symbol}`, {
-      state: { isUser: false }
-    });
+    try {
+      const payload = {
+        currency: symbol,
+        address,
+        tag: symbol === "XRP" ? tagAddress : undefined,
+      };
+
+      if (useExistingAddress) {
+        await reRegisterStoreAddress(payload);
+        alert("계좌가 재등록되었습니다.");
+      } else {
+        await submitStoreAddress(payload);
+        alert("계좌 등록이 완료되었습니다.");
+      }
+
+      navigate(`/coin-detail/${symbol}`, { state: { isUser: false } });
+    } catch (e: any) {
+      alert(e.message || "계좌 등록 중 오류 발생");
+      console.error(e);
+    }
   };
 
-  const isButtonDisabled = !address && !useExistingAddress;
+  const isButtonDisabled = !address;
 
   return (
     <div className="flex flex-col h-screen bg-white">
@@ -58,18 +80,18 @@ export default function AddCoinAddress() {
                 </svg>
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">네트워크: 솔라나</h2>
-                <p className="text-sm text-gray-600">SOL 토큰을 지원하는 블록체인 네트워크</p>
+                <h2 className="text-lg font-semibold text-gray-900">네트워크: {symbol}</h2>
+                <p className="text-sm text-gray-600">{symbol} 토큰을 지원하는 블록체인 네트워크</p>
               </div>
             </div>
           </div>
 
           <div className="bg-white rounded-lg p-4 mb-8 border border-gray-100 shadow-sm">
             <AddressInput
-              label="고객님의 SOL 주소"
+              label={`고객님의 ${symbol} 주소`}
               value={address}
               onChange={handleAddressChange}
-              placeholder="고객님의 SOL 주소를 입력해주세요."
+              placeholder={`고객님의 ${symbol} 주소를 입력해주세요.`}
             />
 
             {symbol === "XRP" && (
@@ -77,7 +99,7 @@ export default function AddCoinAddress() {
                 label="고객님의 XRP Tag 주소"
                 value={tagAddress}
                 onChange={handleTagAddressChange}
-                placeholder="고객님의 XRP 주소를 입력해주세요."
+                placeholder="고객님의 XRP 태그를 입력해주세요."
                 className="mt-6"
               />
             )}
@@ -97,7 +119,7 @@ export default function AddCoinAddress() {
 
       <div className="p-5 bg-white">
         <Button
-          text="계좌 등록 요청"
+          text={useExistingAddress ? "계좌 재등록 요청" : "계좌 등록 요청"}
           onClick={handleNext}
           disabled={isButtonDisabled}
           color={isButtonDisabled ? "gray" : "blue"}
