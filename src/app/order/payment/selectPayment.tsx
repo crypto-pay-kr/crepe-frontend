@@ -1,63 +1,151 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/common/BottomNavigate";
 import Header from "@/components/common/Header";
 import Button from "@/components/common/Button";
 import PaymentOptionsList from "@/components/order/PaymentOptionList";
-import { PaymentOption } from "@/constants/paymentOption";
+import { getUserBalance, fetchCoinPrices } from "@/api/coin";
 
 
 export default function SelectPaymentPage() {
     const navigate = useNavigate();
     const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
+    const [prices, setPrices] = useState<{ [key: string]: number }>({
+        "KRW-SOL": 0,
+        "KRW-XRP": 0,
+        "KRW-USDT": 0,
+    });
+    const [balances, setBalances] = useState<{ [key: string]: number }>({});
+    const [totalPrice, setTotalPrice] = useState<number>(0);
 
-    const paymentOptions: PaymentOption[] = [
-        { id: "KRW", label: "KRW", amount: "33,000 KRW", insufficientBalance: false },
-        { id: "XRP", label: "XRP", amount: "9.9 XRP", insufficientBalance: false },
-        { id: "SOL", label: "SOL", amount: "0.4 SOL", insufficientBalance: true },
+    // 1. 로컬 스토리지에서 총 금액 가져오기
+    useEffect(() => {
+        const storedTotalPrice = localStorage.getItem("totalPrice");
+        if (storedTotalPrice) {
+            setTotalPrice(Number(storedTotalPrice));
+        }
+    }, []);
+
+    // 2. 코인 시세 가져오기
+    useEffect(() => {
+        const fetchPrices = async () => {
+            try {
+                const updatedPrices = await fetchCoinPrices();
+                setPrices(updatedPrices);
+            } catch (err) {
+                console.error("Error fetching prices:", err);
+            }
+        };
+
+        fetchPrices();
+        const interval = setInterval(fetchPrices, 3000);
+        return () => clearInterval(interval);
+    }, []);
+
+    // 3. 사용자 잔액 가져오기
+    useEffect(() => {
+        const fetchBalances = async () => {
+          try {
+            const data = await getUserBalance();
+            const balanceMap = data.reduce((acc: any, item: any) => {
+              acc[item.currency] = item.balance;
+              return acc;
+            }, {});
+            setBalances(balanceMap);
+          } catch (err) {
+            console.error("Error fetching balances:", err);
+          }
+        };
+    
+        fetchBalances();
+      }, []);
+
+    // 4. 결제 옵션 생성
+    const paymentOptions = [
+        {
+            id: "XRP",
+            label: "XRP",
+            amount: prices["KRW-XRP"]
+                ? `${(totalPrice / prices["KRW-XRP"]).toFixed(2)} XRP`
+                : "Loading...",
+            insufficientBalance:
+                !prices["KRW-XRP"] ||
+                (balances["XRP"] === undefined ||
+                    balances["XRP"] < totalPrice / prices["KRW-XRP"]),
+        },
+        {
+            id: "SOL",
+            label: "SOL",
+            amount: prices["KRW-SOL"]
+                ? `${(totalPrice / prices["KRW-SOL"]).toFixed(2)} SOL`
+                : "Loading...",
+            insufficientBalance:
+                !prices["KRW-SOL"] ||
+                (balances["SOL"] === undefined ||
+                    balances["SOL"] < totalPrice / prices["KRW-SOL"]),
+        },
+        {
+            id: "USDT",
+            label: "USDT",
+            amount: prices["KRW-USDT"]
+                ? `${(totalPrice / prices["KRW-USDT"]).toFixed(2)} USDT`
+                : "Loading...",
+            insufficientBalance:
+                !prices["KRW-USDT"] ||
+                (balances["USDT"] === undefined ||
+                    balances["USDT"] < totalPrice / prices["KRW-USDT"]),
+        }
     ];
 
+    // 5. 결제 수단 선택 핸들러
     const handlePaymentSelect = (method: string) => {
         setSelectedPayment(method);
     };
 
+    // 6. 결제 요청 핸들러
     const handlePayment = () => {
         if (!selectedPayment) return;
-        
-        const selectedOption = paymentOptions.find(option => option.id === selectedPayment);
-        
+
+        const selectedOption = paymentOptions.find(
+            (option) => option.id === selectedPayment
+        );
+
         if (selectedOption?.insufficientBalance) {
-        navigate("/mall/store/order");
+            alert("잔액이 부족합니다.");
         } else {
-        navigate("/mall/store/order-pending");
+            navigate("/mall/store/order-pending");
         }
     };
 
     return (
         <div className="flex flex-col min-h-screen">
-        <Header title="결제수단 선택" isStore={false} />
-        
-        <div className="flex-grow page-container bg-white pb-0 pt-5">
-            <div className="p-4 min-h-[70vh]">
-            <PaymentOptionsList 
-                options={paymentOptions} 
-                selectedPaymentId={selectedPayment} 
-                onSelectPayment={handlePaymentSelect} 
-            />
+            <Header title="결제수단 선택" isStore={false} />
+
+            <div className="flex-grow page-container bg-white pb-0 pt-5">
+                <div className="p-4 min-h-[70vh]">
+                    <PaymentOptionsList
+                        options={paymentOptions}
+                        selectedPaymentId={selectedPayment}
+                        onSelectPayment={handlePaymentSelect}
+                    />
+                </div>
+
+                <div className="flex justify-center mt-auto px-4 pb-4">
+                    <Button
+                        text="주문하기"
+                        onClick={handlePayment}
+                        color="primary"
+                        disabled={
+                            !selectedPayment ||
+                            paymentOptions.find((opt) => opt.id === selectedPayment)
+                                ?.insufficientBalance
+                        }
+                        fullWidth={true}
+                    />
+                </div>
             </div>
-            
-            <div className="flex justify-center mt-auto px-4 pb-4">
-            <Button
-                text="주문하기"
-                onClick={handlePayment}
-                color="primary"
-                disabled={!selectedPayment}
-                fullWidth={true}
-            />
-            </div>
-        </div>
-        
-        <BottomNav />
+
+            <BottomNav />
         </div>
     );
 }

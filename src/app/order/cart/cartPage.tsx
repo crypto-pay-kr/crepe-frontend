@@ -8,7 +8,7 @@ import CartSummary from "@/components/order/CartSummary";
 import AddMoreItemsButton from "@/components/order/AddMoreItemButton";
 import { CartItem } from "@/types/cart";
 import { getStoreDetail } from "@/api/shop";
-import { StoreDetail  } from "@/types/store";
+import { StoreDetail } from "@/types/store";
 
 
 export default function CartPage() {
@@ -24,7 +24,7 @@ export default function CartPage() {
         storeName: string;
         storeAddress: string;
         coinStatus: any[];
-      } | null>(null);
+    } | null>(null);
 
 
     // 3) 컴포넌트 마운트 시 로컬 스토리지에서 cartItems 불러오기
@@ -45,7 +45,7 @@ export default function CartPage() {
                 try {
                     const id = items[0].storeId; // items에서 storeId 추출
                     console.log("Fetching store data for id:", id);
-    
+
                     const data = await getStoreDetail(id);
                     setStoreData({
                         likeCount: data.likeCount,
@@ -58,8 +58,14 @@ export default function CartPage() {
                 }
             };
             loadStoreData();
-        } 
+        }
     }, [items]);
+
+        // 총 금액 계산 및 로컬 스토리지에 저장
+        const totalPrice = items.reduce((acc, cur) => acc + cur.price * cur.quantity, 0);
+        useEffect(() => {
+            localStorage.setItem("totalPrice", totalPrice.toString());
+        }, [totalPrice]);
 
     return (
         <div className="flex flex-col h-screen bg-gray-50">
@@ -123,7 +129,7 @@ export default function CartPage() {
                     {/* 결제 정보 카드 */}
                     <div className="bg-white rounded-xl shadow-sm p-5 mb-12">
                         <CartSummary
-                            totalPrice={items.reduce((acc, cur) => acc + cur.price * cur.quantity, 0)}
+                            totalPrice={totalPrice}
                             onCheckoutClick={() => navigate("/mall/store/order")}
                         />
                     </div>
