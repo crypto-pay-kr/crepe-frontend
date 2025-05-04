@@ -6,6 +6,7 @@ import BottomNav from "@/components/common/BottomNavigate";
 import Button from "@/components/common/Button";
 import OrderProgressBar from "@/components/order/OrderProcessBar";
 import OrderSummaryCard from "@/components/order/OrderSummaryCard";
+import OrderStatusMessage from "@/components/order/OrderStatusMessage";
 import { getOrderDetails } from "@/api/order";
 
 export default function PayCompletePage() {
@@ -13,9 +14,23 @@ export default function PayCompletePage() {
   const { orderId } = useParams<{ orderId: string }>();
   const [orderDetails, setOrderDetails] = useState<any>(null);
 
+  const getCurrentStep = (status: string): number => {
+    switch (status) {
+      case "WAITING":
+        return 1;
+      case "PAID":
+        return 2;
+      case "COMPLETED":
+        return 3;
+      default:
+        return 1;
+    }
+  };
+
+
   useEffect(() => {
     if (!orderId) return;
-    const fetchOrderDetails = async () => {
+    const fetchAndUpdate = async () => {
       try {
         const data = await getOrderDetails(orderId);
         setOrderDetails(data);
@@ -23,7 +38,12 @@ export default function PayCompletePage() {
         console.error("Failed to fetch order details:", error);
       }
     };
-    fetchOrderDetails();
+
+    // 최초 한 번 호출
+    fetchAndUpdate();
+
+    const interval = setInterval(fetchAndUpdate, 10000);
+    return () => clearInterval(interval);
   }, [orderId]);
 
   const containerVariants = {
@@ -56,22 +76,13 @@ export default function PayCompletePage() {
         variants={containerVariants}
       >
         <div className="p-6">
-          <motion.div className="text-center mb-8" variants={itemVariants}>
-            <div className="inline-block rounded-full bg-green-100 p-4 mb-4 shadow-md">
-              <svg className="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-            </div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">
-              주문이 접수되었습니다
-            </h1>
-            <p className="text-gray-600">
-              곧 매장에서 주문을 확인할 예정입니다.
-            </p>
+          <motion.div variants={itemVariants}>
+            <OrderStatusMessage orderStatus={orderDetails ? orderDetails.orderStatus : "WAITING"} />
           </motion.div>
 
+          {/* 주문 상태에 따라 currentStep 업데이트 */}
           <motion.div variants={itemVariants}>
-            <OrderProgressBar currentStep={1} />
+            <OrderProgressBar currentStep={orderDetails ? getCurrentStep(orderDetails.orderStatus) : 1} />
           </motion.div>
 
           <motion.div variants={itemVariants} className="my-8 transition-all duration-300 hover:shadow-lg rounded-xl">

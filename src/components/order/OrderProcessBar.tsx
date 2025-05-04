@@ -23,7 +23,7 @@ const OrderProgressBar: React.FC<OrderProgressBarProps> = ({ currentStep }) => {
                   : "bg-gray-300 text-gray-500"
               } flex items-center justify-center mb-2`}
             >
-              {step.number === 1 && currentStep >= 1 ? (
+              {currentStep >= step.number ? (
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M20 6L9 17L4 12"
