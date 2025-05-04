@@ -22,12 +22,13 @@ export interface Store {
 }
 
 // 가게 상세 조회 응답 타입
-export interface StoreDetail extends Store {
-  businessHours?: string;
-  address?: string;
-  description?: string;
-  isOpen?: boolean;
-  products?: Product[];
+export interface StoreDetail {
+  likeCount: number;
+  storeName: string;
+  storeAddress: string;      // 추가
+  storeImageUrl: string;     // 추가
+  coinStatus: CoinStatus[];
+  menuList: GetMenuDetailResponse[]; // 추가
 }
 
 // 상품 타입
@@ -46,7 +47,7 @@ interface GetMenuDetailResponse {
   menuImage: string;
 }
 
-interface GetOneStoreDetailResponse {
+export interface GetOneStoreDetailResponse {
   likeCount: number;
   storeName: string;
   storeAddress: string;
