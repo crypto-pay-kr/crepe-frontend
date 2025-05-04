@@ -20,3 +20,19 @@ export async function createOrder(orderRequest: {
   }
   return response.text();
 }
+
+
+export async function getOrderDetails(orderId: string): Promise<any> {
+    const token = localStorage.getItem("accessToken");
+    const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  
+    if (!response.ok) {
+      throw new Error(`Failed to fetch order details with status ${response.status}`);
+    }
+    return response.json();
+  }

@@ -124,7 +124,6 @@ export default function SelectPaymentPage() {
         }
 
         const cartItems = JSON.parse(cartItemsStr);
-        console.log("cartItems:", cartItems);
 
         if (!cartItems.length) {
             alert("장바구니가 비어있습니다.");
@@ -132,7 +131,6 @@ export default function SelectPaymentPage() {
         }
 
         const storeId = cartItems[0]?.storeId;
-        console.log("storeId:", storeId);
         if (storeId == null) {
             alert("유효한 가게 정보가 없습니다. (storeId is null)");
             return;
@@ -150,12 +148,10 @@ export default function SelectPaymentPage() {
             currency: selectedPayment,
         };
 
-        console.log("orderRequest:", JSON.stringify(orderRequest));
-
         try {
-            await createOrder(orderRequest);
+            const orderId = await createOrder(orderRequest);
             // 주문 생성 후 로딩 페이지로 이동
-            navigate("/mall/store/order-pending");
+            navigate("/mall/store/order-pending", { state: { orderId } });
         } catch (error: any) {
             console.error("Order creation failed:", error);
             alert("주문 생성에 실패했습니다.");
