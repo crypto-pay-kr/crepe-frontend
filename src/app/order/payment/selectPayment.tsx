@@ -5,6 +5,7 @@ import Header from "@/components/common/Header";
 import Button from "@/components/common/Button";
 import PaymentOptionsList from "@/components/order/PaymentOptionList";
 import { getUserBalance, fetchCoinPrices } from "@/api/coin";
+import { createOrder } from "@/api/order";
 
 
 export default function SelectPaymentPage() {
@@ -45,20 +46,20 @@ export default function SelectPaymentPage() {
     // 3. 사용자 잔액 가져오기
     useEffect(() => {
         const fetchBalances = async () => {
-          try {
-            const data = await getUserBalance();
-            const balanceMap = data.reduce((acc: any, item: any) => {
-              acc[item.currency] = item.balance;
-              return acc;
-            }, {});
-            setBalances(balanceMap);
-          } catch (err) {
-            console.error("Error fetching balances:", err);
-          }
+            try {
+                const data = await getUserBalance();
+                const balanceMap = data.reduce((acc: any, item: any) => {
+                    acc[item.currency] = item.balance;
+                    return acc;
+                }, {});
+                setBalances(balanceMap);
+            } catch (err) {
+                console.error("Error fetching balances:", err);
+            }
         };
-    
+
         fetchBalances();
-      }, []);
+    }, []);
 
     // 4. 결제 옵션 생성
     const paymentOptions = [
@@ -102,8 +103,8 @@ export default function SelectPaymentPage() {
         setSelectedPayment(method);
     };
 
-    // 6. 결제 요청 핸들러
-    const handlePayment = () => {
+    // 6. 주문 생성을 위한 orderRequest 생성 및 결제 요청 핸들러
+    const handlePayment = async () => {
         if (!selectedPayment) return;
 
         const selectedOption = paymentOptions.find(
@@ -112,10 +113,55 @@ export default function SelectPaymentPage() {
 
         if (selectedOption?.insufficientBalance) {
             alert("잔액이 부족합니다.");
-        } else {
+            return;
+        }
+
+        // 로컬스토리지에서 cartItems 가져오기 (JSON 문자열 -> 배열)
+        const cartItemsStr = localStorage.getItem("cartItems");
+        if (!cartItemsStr) {
+            alert("장바구니에 담긴 상품이 없습니다.");
+            return;
+        }
+
+        const cartItems = JSON.parse(cartItemsStr);
+        console.log("cartItems:", cartItems);
+
+        if (!cartItems.length) {
+            alert("장바구니가 비어있습니다.");
+            return;
+        }
+
+        const storeId = cartItems[0]?.storeId;
+        console.log("storeId:", storeId);
+        if (storeId == null) {
+            alert("유효한 가게 정보가 없습니다. (storeId is null)");
+            return;
+        }
+
+        const orderDetails = cartItems.map((item: any) => ({
+            menuId: item.id,
+            menuCount: item.quantity,
+        }));
+
+        // orderRequest 객체 생성
+        const orderRequest = {
+            storeId,
+            orderDetails,
+            currency: selectedPayment,
+        };
+
+        console.log("orderRequest:", JSON.stringify(orderRequest));
+
+        try {
+            await createOrder(orderRequest);
+            // 주문 생성 후 로딩 페이지로 이동
             navigate("/mall/store/order-pending");
+        } catch (error: any) {
+            console.error("Order creation failed:", error);
+            alert("주문 생성에 실패했습니다.");
         }
     };
+
 
     return (
         <div className="flex flex-col min-h-screen">

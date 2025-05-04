@@ -38,7 +38,7 @@ export default function LoadingPage() {
       <BottomNav />
       
       {/* 일관된 방향으로 진행되는 프로그레스바 애니메이션 */}
-      <style jsx>{`
+      <style>{`
         @keyframes progressForward {
           0% { transform: translateX(-100%); }
           100% { transform: translateX(0%); }
