@@ -1,21 +1,26 @@
 import React from "react"
 
+
+interface OrderDetail {
+  menuName: string;
+  menuCount: number;
+  menuPrice: number;
+}
+
 interface OrderSummaryCardProps {
-  orderNumber: string
-  storeName: string
-  items: string
-  orderDate: string
-  orderCode: string
-  storeLocation: string
+  orderId: string;
+  totalPrice: number;
+  orderStatus: string;
+  orderType: string;
+  orderDetails: OrderDetail[];
 }
 
 const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({
-  orderNumber,
-  storeName,
-  items,
-  orderDate,
-  orderCode,
-  storeLocation
+  orderId,
+  totalPrice,
+  orderStatus,
+  orderType,
+  orderDetails,
 }) => {
   return (
     <div className="border rounded-lg p-4 mb-4">
@@ -24,17 +29,22 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({
           <ShoppingCartIcon />
         </div>
         <div>
-          <div className="font-bold">Order #{orderNumber}</div>
+          <div className="font-bold">Order #{orderId}</div>
           <div className="text-xs text-green-500">주문 완료</div>
         </div>
       </div>
 
-      <div className="text-sm text-gray-700 mb-1">{storeName}</div>
-      <div className="text-xs text-gray-500">
-        <div>{items}</div>
-        <div>주문일시: {orderDate}</div>
-        <div>주문번호: {orderCode}</div>
-        <div>주문매장: {storeLocation}</div>
+      <div className="text-sm text-gray-700 mb-2">
+        <p>주문 유형: {orderType}</p>
+        <p>총 금액: {totalPrice.toLocaleString()} 원</p>
+      </div>
+      <div className="mt-4">
+        {orderDetails.map((item, index) => (
+          <div key={index} className="flex justify-between text-sm py-1 border-b last:border-0">
+            <span>{item.menuName} x {item.menuCount}</span>
+            <span>{(item.menuPrice * item.menuCount).toLocaleString()} 원</span>
+          </div>
+        ))}
       </div>
     </div>
   )

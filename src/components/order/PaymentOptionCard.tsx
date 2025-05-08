@@ -4,7 +4,6 @@ import RadioButton from "./radioButton";
 import { PaymentOption } from "@/constants/paymentOption";
 import PaymentInfo from "./PaymentInfo";
 
-
 interface PaymentOptionCardProps {
   option: PaymentOption;
   isSelected: boolean;
@@ -12,23 +11,27 @@ interface PaymentOptionCardProps {
   animationDelay: number;
 }
 
-export default function PaymentOptionCard({ 
-  option, 
-  isSelected, 
-  onSelect, 
-  animationDelay 
+export default function PaymentOptionCard({
+  option,
+  isSelected,
+  onSelect,
+  animationDelay,
 }: PaymentOptionCardProps) {
   return (
     <motion.div
       className={`p-4 rounded-lg border ${
         isSelected ? "border-[#002169]" : "border-gray-200"
-      }`}
-      onClick={() => onSelect(option.id)}
+      } ${option.insufficientBalance ? "opacity-50 cursor-not-allowed" : ""}`}
+      onClick={() => {
+        if (!option.insufficientBalance) {
+          onSelect(option.id);
+        }
+      }}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: animationDelay }}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={!option.insufficientBalance ? { scale: 1.02 } : {}}
+      whileTap={!option.insufficientBalance ? { scale: 0.98 } : {}}
     >
       <div className="flex justify-between items-center">
         <PaymentInfo option={option} />

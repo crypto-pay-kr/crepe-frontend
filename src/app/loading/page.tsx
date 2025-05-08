@@ -1,17 +1,24 @@
 import { useEffect } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom";
 import Header from "@/components/common/Header"
 import BottomNav from "@/components/common/BottomNavigate"
 
 export default function LoadingPage() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const location = useLocation();
+  // 전달받은 orderId (state로 넣은 값)
+  const orderId = location.state?.orderId;
   
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigate("/mall/store/pay-complete")
-    }, 2000)
-    return () => clearTimeout(timer)
-  }, [navigate])
+      if (orderId) {
+        navigate(`/mall/store/pay-complete/${orderId}`);
+      } else {
+        alert("주문 ID가 존재하지 않습니다.");
+      }
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [navigate, orderId]);
   
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -38,7 +45,7 @@ export default function LoadingPage() {
       <BottomNav />
       
       {/* 일관된 방향으로 진행되는 프로그레스바 애니메이션 */}
-      <style jsx>{`
+      <style>{`
         @keyframes progressForward {
           0% { transform: translateX(-100%); }
           100% { transform: translateX(0%); }

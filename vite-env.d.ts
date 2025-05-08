@@ -3,6 +3,7 @@ interface ImportMetaEnv {
     readonly VITE_SKIP_PHONE_VERIFICATION?: string;
     readonly VITE_ACCESS_TOKEN: string;
     readonly VITE_STORE_TOKEN: string;
+    readonly VITE_COIN_PRICE_URL: string;
   }
   
   interface ImportMeta {

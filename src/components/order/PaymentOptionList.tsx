@@ -1,8 +1,6 @@
 import React from "react";
-import { motion } from "framer-motion";
-import PaymentOptionCard from "./PaymentOptionCard";
 import { PaymentOption } from "@/constants/paymentOption";
-
+import PaymentOptionCard from "./PaymentOptionCard";
 
 interface PaymentOptionsListProps {
   options: PaymentOption[];
@@ -10,22 +8,24 @@ interface PaymentOptionsListProps {
   onSelectPayment: (id: string) => void;
 }
 
-export default function PaymentOptionsList({ 
-  options, 
-  selectedPaymentId, 
-  onSelectPayment 
-}: PaymentOptionsListProps) {
+const PaymentOptionsList: React.FC<PaymentOptionsListProps> = ({
+  options,
+  selectedPaymentId,
+  onSelectPayment,
+}) => {
   return (
-    <div className="space-y-4 h-96">
+    <div className="space-y-4">
       {options.map((option, index) => (
-        <PaymentOptionCard 
+        <PaymentOptionCard
           key={option.id}
           option={option}
           isSelected={selectedPaymentId === option.id}
           onSelect={onSelectPayment}
-          animationDelay={0.2 + index * 0.1}
+          animationDelay={index * 0.1} // 애니메이션 딜레이 추가
         />
       ))}
     </div>
   );
-}
+};
+
+export default PaymentOptionsList;

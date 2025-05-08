@@ -90,7 +90,7 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/mall/store/cart" element={<CartPage/>} />
         <Route path="/mall/store/order" element={<SelectPaymentPage/>} />
         <Route path="/mall/store/order-pending" element={<LoadingPage/>} />
-        <Route path="/mall/store/pay-complete" element={<PayCompletePage/>} />
+        <Route path="/mall/store/pay-complete/:orderId" element={<PayCompletePage/>} />
 
 
         {/*가맹점코인 내역*/}
