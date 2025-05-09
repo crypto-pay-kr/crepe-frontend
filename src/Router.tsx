@@ -31,6 +31,10 @@ import CartPage from "./app/order/cart/cartPage";
 import PayCompletePage from "./app/order/complete-pay/payComplete";
 import StoreCoinHome from "./app/store/store-coin/page";
 import ShoppingMall from "./app/shop/shopPage";
+import KTokenProductDetail from "./app/k-token/products/detail/page";
+import KTokenProductSignup from "./app/k-token/products/signup/page";
+import KTokenProductSignupComplete from "./app/k-token/products/signup-complete/page";
+import KTokenHomePage from "./app/k-token/products/page";
 
 
 
@@ -108,9 +112,18 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         {/*가맹점 코인 정산 페이지*/}
         <Route path="/settlement" element={<SettlementCoin/>} />
 
+
+
+
+        {/* K-Token 관련 페이지 */}
+        <Route path="/k-token/products/detail" element={<KTokenProductDetail/>} />
+        <Route path="/k-token/products/signup" element={<KTokenProductSignup/>} />
+        <Route path="/k-token/products/signup-complete" element={<KTokenProductSignupComplete/>} />
+        <Route path="/k-token/products" element={<KTokenHomePage/>} />
+
       </Routes>
     </BrowserRouter>
   )
-}
+} 
 
 export default Router
