@@ -36,7 +36,7 @@ export async function signUpUser(requestBody: any) {
 
 // 로그인(가맹점 및 일반회원 공통)
 export async function loginUser(email: string, password: string) {
-  const response = await fetch(API_BASE_URL + "/api/auth/login", {
+  const response = await fetch(API_BASE_URL + "/api/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),

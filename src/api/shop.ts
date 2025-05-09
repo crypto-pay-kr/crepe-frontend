@@ -4,7 +4,7 @@ const API_BASE_URL = import.meta.env.VITE_API_SERVER_URL || "http://localhost:80
 
 // 열려있는 가게 목록 조회
 export async function getStoreList(): Promise<Store[]> {
-  const response = await fetch(`${API_BASE_URL}/store`, {
+  const response = await fetch(`${API_BASE_URL}/api/store`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -20,7 +20,7 @@ export async function getStoreList(): Promise<Store[]> {
 
 // 특정 가게(id) 정보조회
 export async function getStoreDetail(storeId: number | string): Promise<StoreDetail> {
-  const response = await fetch(`${API_BASE_URL}/store/${storeId}`, {
+  const response = await fetch(`${API_BASE_URL}/api/store/${storeId}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
