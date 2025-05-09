@@ -5,7 +5,7 @@ import Header from '@/components/common/Header';
 import BottomNav from '@/components/common/BottomNavigate';
 import AddressInput from "@/components/coin/AddressInput";
 import AddressInstructions from "@/components/coin/AddressInstructions";
-import { submitStoreAddress, reRegisterStoreAddress } from '@/api/coin';
+import { registerAccountAddress, reRegisterAccountAddress } from '@/api/coin';
 
 interface LocationState {
   symbol?: string;
@@ -51,10 +51,10 @@ export default function AddCoinAddress() {
       };
 
       if (useExistingAddress) {
-        await reRegisterStoreAddress(payload);
+        await reRegisterAccountAddress(payload);
         alert("계좌가 재등록되었습니다.");
       } else {
-        await submitStoreAddress(payload);
+        await registerAccountAddress(payload);
         alert("계좌 등록이 완료되었습니다.");
       }
 
