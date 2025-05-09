@@ -1,0 +1,52 @@
+import Button from "@/components/common/Button";
+import Header from "@/components/common/Header"
+import { BankLogo } from "@/components/common/BankLogo";
+import { ProductTag } from "@/components/k-token/product/ProductTag";
+import { useNavigate } from "react-router-dom"
+import { productInfoData, additionalInfoData, bankProductData,productTags } from "@/mocks/token";
+import ProductAdditionalInfo from "@/components/k-token/product/ProductAdditionalInfo";
+import BankProductInfo from "@/components/k-token/product/BankProductInfo";
+import ProductDetailInfo from "@/components/k-token/product/ProductDetailInfo";
+
+
+export default function KTokenProductDetail() {
+  const navigate = useNavigate();
+
+  const handleSignupClick = () => {
+    navigate("/k-token/products/signup", { state: { product: "woori" } })
+  }
+
+  const tagColorMapping: { [key: string]: string } = {
+    "29세이하": "gray",
+    "월 최대 50만 토큰": "purple",
+    "세제혜택": "green",
+  };
+
+  return (
+    <div className="flex flex-col h-full">
+      <Header title="자산관리" />
+
+      <div className="flex-1 overflow-auto">
+        <div className="p-4">
+          <BankLogo bank="woori" />
+          <BankProductInfo {...bankProductData} />
+          <div className="flex gap-2 mt-2 mb-4">
+            {productTags.map((tag, index) => (
+              <ProductTag key={index} text={tag} color={(tagColorMapping[tag] || "gray") as "gray" | "purple" | "green"} />
+            ))}
+          </div>
+        </div>
+
+        <ProductDetailInfo {...productInfoData} />
+
+        <ProductAdditionalInfo {...additionalInfoData} />
+      </div>
+
+      <div className="p-4">
+        <Button text="토큰 상품 가입" onClick={handleSignupClick} fullWidth />
+      </div>
+    </div>
+
+
+  )
+}
