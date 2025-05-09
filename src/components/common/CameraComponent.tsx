@@ -1,18 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Camera, Video, X, Check, AlertCircle } from 'lucide-react';
+import Button from '@/components/common/Button';
 
 export interface CameraComponentProps {
-  /** 프레임 안에 피사체가 감지되면 호출됩니다 */
-  onDetected?: () => void;
+  /** 촬영 버튼 클릭 시, 캡처한 이미지 dataURL을 부모로 전달합니다. */
+  onCapture?: (imageData: string) => void;
 }
 
-
-export default function CameraComponent({ onDetected }: CameraComponentProps) {
+export default function CameraComponent({ onCapture }: CameraComponentProps) {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
   const [error, setError] = useState<string | null>(null);
-  const [isSubjectDetected, setIsSubjectDetected] = useState<boolean>(false);
-  const [detectionSensitivity, setDetectionSensitivity] = useState<number>(30);
+  const [detectionSensitivity] = useState<number>(30);
+  // subject 감지 여부 (실제 detection 로직에 맞게 교체하세요)
+  const [isSubjectDetected, setIsSubjectDetected] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -23,13 +24,13 @@ export default function CameraComponent({ onDetected }: CameraComponentProps) {
     try {
       if (stream) stream.getTracks().forEach(t => t.stop());
       const media = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode, width:{ ideal:1280 }, height:{ ideal:720 } },
+        video: { facingMode, width: { ideal: 1280 }, height: { ideal: 720 } },
         audio: false
       });
       setStream(media);
       setError(null);
       if (videoRef.current) videoRef.current.srcObject = media;
-      startDetection();
+      // 실제 subject 감지 알고리즘에 따라 setIsSubjectDetected를 업데이트하세요.
     } catch {
       setError('카메라 접근에 실패했습니다. 권한을 확인해주세요.');
     }
@@ -39,25 +40,33 @@ export default function CameraComponent({ onDetected }: CameraComponentProps) {
     if (stream) {
       stream.getTracks().forEach(t => t.stop());
       setStream(null);
-      setIsSubjectDetected(false);
     }
   };
 
-  const startDetection = () => {
-    if (detectionIntervalRef.current) clearInterval(detectionIntervalRef.current);
-    detectionIntervalRef.current = window.setInterval(() => {
-      const v = videoRef.current, c = canvasRef.current, f = frameRef.current;
-      if (!v||!c||!f||v.readyState!==4) return;
-      const ctx = c.getContext('2d', { willReadFrequently: true }); if(!ctx) return;
-      c.width=v.videoWidth; c.height=v.videoHeight;
-      ctx.drawImage(v,0,0,c.width,c.height);
-      const fw=c.width*0.6, fh=c.height*0.6, x=(c.width-fw)/2, y=(c.height-fh)/2;
-      const data=ctx.getImageData(x,y,fw,fh).data;
-      let pc=0, cc=0;
-      for(let i=0;i<data.length;i+=16){const b=(data[i]+data[i+1]+data[i+2])/3; pc++; if(b>40&&b<215) cc++;}
-      setIsSubjectDetected((cc/pc)*100>detectionSensitivity);
-    }, 200) as unknown as number;
+  // manual capture 기능
+  const handleCapture = () => {
+    if (!videoRef.current || !canvasRef.current) return;
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = canvas.toDataURL('image/png');
+      if (onCapture) {
+        onCapture(imageData);
+      }
+    }
   };
+
+  // 예시: 2초마다 감지 상태를 토글 (실제 detection 로직으로 대체하세요)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsSubjectDetected(prev => !prev);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     startCamera();
@@ -67,13 +76,6 @@ export default function CameraComponent({ onDetected }: CameraComponentProps) {
     };
   }, [facingMode]);
 
-    // 감지 상태가 true로 바뀌면 onDetected 호출
-    useEffect(() => {
-        if (isSubjectDetected && onDetected) {
-          onDetected();
-        }
-      }, [isSubjectDetected, onDetected]);
-
   return (
     <div className="relative w-full aspect-video bg-black overflow-hidden rounded-lg">
       {error && (
@@ -81,22 +83,28 @@ export default function CameraComponent({ onDetected }: CameraComponentProps) {
           {error}
         </div>
       )}
-      <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
+        className="w-full h-full object-contain"
+      />
       <canvas ref={canvasRef} className="hidden" />
-      <div 
+      <div
         ref={frameRef}
-        className={`absolute inset-0 m-auto w-3/5 h-3/5 border-4 rounded-lg pointer-events-none
-          ${isSubjectDetected 
-            ? 'border-green-500 bg-green-100 bg-opacity-10' 
-            : 'border-white bg-red-100 bg-opacity-10'}`}
-      >
-        <div className="absolute top-2 left-2 flex items-center bg-black bg-opacity-50 px-2 py-1 rounded text-white text-sm">
-          {isSubjectDetected 
-            ? <><Check className="text-green-500 mr-1" size={16}/>피사체 감지됨</> 
-            : <><AlertCircle className="text-yellow-500 mr-1" size={16}/>프레임 안에 피사체를 위치시키세요</>}
-        </div>
+        className={`absolute inset-0 m-auto w-3/5 h-3/5 border-4 rounded-lg pointer-events-none ${
+          isSubjectDetected
+            ? 'border-green-500 bg-green-100 bg-opacity-10'
+            : 'border-white bg-red-100 bg-opacity-10'
+        }`}
+      />
+      {/* 촬영 버튼은 그대로 유지 */}
+      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2">
+        <button onClick={handleCapture} className="focus:outline-none">
+          <img src="/camera.png" alt="촬영 버튼" className="w-8 h-8" />
+        </button>
       </div>
-      {/* 카메라 전환 버튼 등 필요시 추가 */}
     </div>
   );
 }
