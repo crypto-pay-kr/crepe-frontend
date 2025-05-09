@@ -35,6 +35,9 @@ import KTokenProductDetail from "./app/k-token/products/detail/page";
 import KTokenProductSignup from "./app/k-token/products/signup/page";
 import KTokenProductSignupComplete from "./app/k-token/products/signup-complete/page";
 import KTokenHomePage from "./app/k-token/products/page";
+import IDVerificationStep1 from "./app/sign-up/common/idcard-verification/step01/page";
+import IDVerificationStep2 from "./app/sign-up/common/idcard-verification/step02/page";
+import IDVerificationStep3 from "./app/sign-up/common/idcard-verification/step03/page";
 
 
 
@@ -64,7 +67,10 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/additional/info" element={<AdditionalUserInfoPage />} />
         <Route path="/signup-complete" element={<SignupCompletePage />} />
         <Route path="/login" element={<LoginPage />} />
-        
+        <Route path="/id/verification" element={<IDVerificationStep1 />} />
+        <Route path="/id/verification/step2" element={<IDVerificationStep2/>} />
+        <Route path="/id/verification/step3" element={<IDVerificationStep3/>} />
+
         {/* 가맹점 회원가입 경로 */}
         <Route path="/store/terms" element={<TermsAgreementPage />} />
         <Route path="/store/email" element={<EmailPasswordPage />} />
