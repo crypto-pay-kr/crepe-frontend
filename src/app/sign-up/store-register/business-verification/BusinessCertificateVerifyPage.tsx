@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/common/Header";
 import { uploadBusinessLicense } from "@/api/store"; // 실제 OCR API 호출 함수 예시
+import { AlertCircle } from "lucide-react";
 
 export default function BusinessCertificateVerifyPage() {
   const navigate = useNavigate();
@@ -79,7 +80,7 @@ export default function BusinessCertificateVerifyPage() {
   return (
     <div className="flex flex-col h-full">
       <Header title="사업자 정보확인" />
-      <div className="bg-white pb-24 flex-1 flex flex-col">
+      <div className="bg-white pb-24 flex-1 flex flex-col mt-5">
         <div className="p-4 flex items-center">
           <h2 className="text-xl font-bold">사업자등록증 업로드</h2>
         </div>
@@ -94,9 +95,24 @@ export default function BusinessCertificateVerifyPage() {
             accept="image/*"
             className="hidden"
           />
+          <div className="mb-4 bg-blue-50 border border-blue-100 rounded-lg p-3">
+            <div className="flex items-start">
+              <div className="mr-2 mt-0.5 text-blue-500">
+                <AlertCircle size={16} />
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-blue-800">업로드 가이드</h3>
+                <ul className="mt-1 text-xs text-blue-700 list-disc pl-5 space-y-1">
+                  <li>사업자등록증 전체가 명확하게 보이도록 업로드해주세요</li>
+                  <li>JPEG, PNG, PDF 파일 형식을 지원합니다</li>
+                  <li>최대 10MB 크기까지 업로드 가능합니다</li>
+                </ul>
+              </div>
+            </div>
+          </div>
           {!image ? (
             <div
-              className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500"
+              className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 min-h-[300px] flex flex-col justify-center"
               onClick={handleUploadClick}
             >
               <p className="text-sm font-medium text-gray-700 mb-2">
