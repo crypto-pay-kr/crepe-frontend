@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/common/Header";
-import CryptocurrencyTags from "@/components/shoppingmall/CryptocurrencyTags";
+import CryptocurrencyTags from "@/components/common/CryptocurrencyTags";
 import BottomNav from "@/components/common/BottomNavigate";
 import { getStoreList } from "@/api/shop";
 import { Store } from "@/types/store";

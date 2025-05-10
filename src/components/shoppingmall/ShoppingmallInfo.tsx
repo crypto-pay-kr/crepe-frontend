@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import CryptocurrencyTags from "./CryptocurrencyTags";
+import CryptocurrencyTags from "../common/CryptocurrencyTags";
+import { CoinStatus } from '@/types/store';
 import { changeStoreStatus, fetchMyStoreAllDetails, likeStore, unlikeStore } from '@/api/store'
 import { Check, Heart } from 'lucide-react'
 

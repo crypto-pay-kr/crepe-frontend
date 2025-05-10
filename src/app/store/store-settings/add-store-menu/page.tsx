@@ -22,7 +22,7 @@ interface MenuItemData {
 
 const BASE_URL = import.meta.env.VITE_API_SERVER_URL;
 
-export default function MenuEditPage(): React.ReactElement {
+export default function MenuAddPage(): React.ReactElement {
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams<{ id?: string }>();

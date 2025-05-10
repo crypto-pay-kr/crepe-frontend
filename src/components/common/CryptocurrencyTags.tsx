@@ -31,12 +31,10 @@ const CryptocurrencyTags: React.FC<CryptocurrencyTagsProps> = ({ coins }) => {
     return <div className="text-xs text-gray-400">지원하는 암호화폐가 없습니다</div>;
   }
 
-
   // CoinStatus 객체에서 코인 코드 추출
   const getCoinCode = (coin: CoinLike): string => {
     console.log('코인 데이터:', coin);
-
-
+    
     // CoinStatus가 단순히 문자열이라면
     if (typeof coin === 'string') {
       return coin;
@@ -69,7 +67,6 @@ const CryptocurrencyTags: React.FC<CryptocurrencyTagsProps> = ({ coins }) => {
     if (coinString === 'XRP' || coinString === 'USDT' || coinString === 'SOL') {
       return coinString;
     }
-
     
     // 기본값으로 객체를 문자열화
     return 'default';
@@ -88,6 +85,7 @@ const CryptocurrencyTags: React.FC<CryptocurrencyTagsProps> = ({ coins }) => {
             className={`flex items-center justify-center text-xs px-1.5 h-6 rounded-full ${cryptoColors[coinCode] || cryptoColors.default}`}
           >
             <span className="font-semibold mr-1">{cryptoIcons[coinCode] || ''}</span>
+            {coinCode}
           </div>
         );
       })}

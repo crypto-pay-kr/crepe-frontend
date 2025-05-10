@@ -1,14 +1,14 @@
 import { CircleDollarSign, DollarSign, X } from 'lucide-react'
 import Header from "@/components/common/Header"
 import { useNavigate, useParams, useLocation } from "react-router-dom"
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import BottomNav from '@/components/common/BottomNavigate'
 import TransactionItem from "@/components/coin/TransactionItem"
 import CoinAddressModal from "@/components/coin/CoinAddressModal";
 import {
   isAccountAddressRegistered,
   getCoinBalanceByCurrency,
-  getCoinHistory,
+  getCoinHistory, fetchCoinPrices,
 } from '@/api/coin'
 
 export interface PaymentHistory {
@@ -20,7 +20,7 @@ export interface PaymentHistory {
 const coinMeta = {
   XRP: {
     name: "리플",
-    icon: <X className="w-6 h-6" />,
+    icon: <X className="w-5 h-5 md:w-6 md:h-6" />,
     bg: "bg-gray-200",
     balance: "0.3 XRP",
     krw: "1000 KRW",
@@ -28,7 +28,7 @@ const coinMeta = {
   SOL: {
     name: "솔라나",
     icon: (
-      <div className="w-5 h-5 flex flex-col justify-between">
+      <div className="w-4 h-4 md:w-5 md:h-5 flex flex-col justify-between">
         <div className="h-[2px] bg-white" />
         <div className="h-[2px] bg-white" />
         <div className="h-[2px] bg-white" />
@@ -40,7 +40,7 @@ const coinMeta = {
   },
   USDT: {
     name: "테더",
-    icon: <div className="text-white text-sm font-bold">T</div>,
+    icon: <div className="text-white text-xs md:text-sm font-bold">T</div>,
     bg: "bg-[#26A17B]",
     balance: "0.3 USDT",
     krw: "1000 KRW",
@@ -48,6 +48,30 @@ const coinMeta = {
 }
 
 export default function CoinDetailPage() {
+  // Add CSS keyframes for animations
+  const styleSheet = document.createElement("style");
+  styleSheet.type = "text/css";
+  styleSheet.innerText = `
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideIn {
+      from { transform: translateY(10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  `;
+  document.head.appendChild(styleSheet);
   const { symbol } = useParams()
   const location = useLocation()
   const isUser = location.state?.isUser ?? false
@@ -59,17 +83,32 @@ export default function CoinDetailPage() {
     address: string;
     tag?: string;
   } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [pageVisible, setPageVisible] = useState(false);
 
   const navigate = useNavigate()
   const isSeller = location.pathname.includes('/store');
   const [history, setHistory] = useState<PaymentHistory[]>([]);
   const coin = coinMeta[symbol as keyof typeof coinMeta]
   const [balance, setBalance] = useState<number>(0);
+
+  // Handle page transitions
+  useEffect(() => {
+    // Start with loading state
+    setIsLoading(true);
+
+    // After a short delay, show the page with a fade-in effect
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+      setPageVisible(true);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [symbol]);
+
   if (!coin) return <div className="p-4">잘못된 경로입니다.</div>
 
-
-
-  //입금 주소가 유효한지 확인
+  // 입금 주소가 유효한지 확인
   useEffect(() => {
     if (symbol) {
       isAccountAddressRegistered(symbol)
@@ -88,7 +127,27 @@ export default function CoinDetailPage() {
   }, [symbol]);
 
 
-//코인 잔액 조회
+  const [prices, setPrices] = useState<{ [key: string]: number }>({
+    "KRW-XRP": 0,
+    "KRW-USDT": 0,
+    "KRW-SOL": 0,
+  });
+
+  useEffect(() => {
+    const loadPrices = async () => {
+      try {
+        const updatedPrices = await fetchCoinPrices();
+        setPrices(updatedPrices);
+      } catch (err) {
+        console.error("시세 조회 실패", err);
+      }
+    };
+
+    loadPrices();
+  }, []);
+
+
+  // 코인 잔액 조회
   useEffect(() => {
     const fetchBalance = async () => {
       if (!symbol) return;
@@ -105,7 +164,7 @@ export default function CoinDetailPage() {
   }, [symbol]);
 
 
-// 코인 거래 내역 조회
+  // 코인 거래 내역 조회
   useEffect(() => {
     if (!symbol) return;
     getCoinHistory(symbol)
@@ -114,60 +173,89 @@ export default function CoinDetailPage() {
   }, [isUser, symbol]);
 
 
-
-
   return (
-    <div className="flex h-full flex-col bg-gray-50">
+    <div className="flex h-full flex-col bg-gray-50 relative">
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-50">
+          <div className="w-12 h-12 rounded-full border-4 border-t-[#0a2e64] border-gray-200 animate-spin"></div>
+        </div>
+      )}
+
       <Header
         title={`${coin.name} 상세`}
         onBackClick={() => {
-          navigate(isUser ? '/user/coin' : '/store/coin')
+          // Add fade-out transition before navigating
+          setPageVisible(false);
+          setTimeout(() => navigate('/my/coin'), 200);
         }}
       />
 
-      <main className="flex-1 overflow-auto p-5">
+      <main
+        className={`flex-1 overflow-auto p-3 sm:p-4 md:p-5 transition-all duration-500 ease-in-out ${
+          pageVisible
+            ? 'opacity-100 transform translate-y-0'
+            : 'opacity-0 transform translate-y-4'
+        }`}>
         {/* 보유 자산 카드 */}
-        <div className="mb-6 rounded-2xl border-2 border-gray-200 bg-white p-12 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
+        <div
+          className="mb-4 sm:mb-5 md:mb-6 rounded-xl md:rounded-2xl border border-gray-200 md:border-2 bg-white p-4 sm:p-8 md:p-12 shadow-[0_2px_10px_rgba(0,0,0,0.04)] md:shadow-[0_4px_20px_rgba(0,0,0,0.06)] transition-all duration-500 ease-in-out"
+          style={{
+            animationName: 'fadeIn',
+            animationDuration: '0.6s',
+            animationFillMode: 'both',
+            animationDelay: '0.3s'
+          }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div
-                className={`h-10 w-10 ${coin.bg} mr-4 flex items-center justify-center rounded-full`}
+                className={`h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 ${coin.bg} mr-2 sm:mr-3 md:mr-4 flex items-center justify-center rounded-full`}
               >
                 {coin.icon}
               </div>
-              <p className="text-2xl font-semibold">총 보유</p>
+              <p className="text-lg sm:text-xl md:text-2xl font-semibold">총 보유</p>
             </div>
             <div className="text-right">
-              <p className="text-2xl font-bold">
+              <p className="text-lg sm:text-xl md:text-2xl font-bold">
                 {balance} {symbol}
               </p>
-              <p className="text-base text-gray-500">
-                = {(balance * 1000).toLocaleString()} KRW
+              <p className="text-sm sm:text-base text-gray-500">
+                = {(balance * (prices[`KRW-${symbol}`] ?? 0)).toLocaleString()} KRW
               </p>
             </div>
           </div>
         </div>
 
         {/* 버튼 영역 */}
-        <div className="mb-6 w-full">
-          <div className="flex gap-3">
+        <div
+          className="mb-4 sm:mb-5 md:mb-6 w-full"
+          style={{
+            animationName: 'slideIn',
+            animationDuration: '0.6s',
+            animationFillMode: 'both',
+            animationDelay: '0.5s'
+          }}>
+          <div className="flex gap-2 sm:gap-3">
             {/* 코인 충전 버튼 */}
             <button
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#0a2e64] py-2 text-lg font-semibold text-white shadow"
+              className="flex flex-1 items-center justify-center gap-1 sm:gap-2 rounded-lg sm:rounded-xl bg-[#0a2e64] py-1.5 sm:py-2 text-base sm:text-lg font-semibold text-white shadow"
               onClick={() => {
-                navigate(`/coin/address/${symbol}`, {
-                  state: { isUser, symbol },
-                })
+                // Add transition before navigation
+                setPageVisible(false);
+                setTimeout(() => {
+                  navigate(`/coin/address/${symbol}`, {
+                    state: { isUser, symbol },
+                  });
+                }, 200);
               }}
             >
               <CircleDollarSign
-                className="h-5 w-5"
+                className="h-4 w-4 sm:h-5 sm:w-5"
                 stroke={addressStatus === 'ACTIVE' ? 'white' : 'gray'}
               />
-              코인 충전
+              <span className="text-sm sm:text-base">코인 충전</span>
             </button>
             <button
-              className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-lg font-semibold shadow transition ${
+              className={`flex flex-1 items-center justify-center gap-1 sm:gap-2 rounded-lg sm:rounded-xl py-1.5 sm:py-2 text-base sm:text-lg font-semibold shadow transition ${
                 addressStatus === 'ACTIVE'
                   ? 'bg-[#0a2e64] text-white'
                   : 'cursor-not-allowed bg-gray-300 text-gray-400'
@@ -175,20 +263,24 @@ export default function CoinDetailPage() {
               disabled={addressStatus !== 'ACTIVE'}
               onClick={() => {
                 if (addressStatus === 'ACTIVE') {
-                  navigate('/settlement', { state: { isUser, symbol } })
+                  // Add transition before navigation
+                  setPageVisible(false);
+                  setTimeout(() => {
+                    navigate('/settlement', { state: { isUser, symbol } });
+                  }, 200);
                 }
               }}
             >
               <CircleDollarSign
-                className="h-5 w-5"
+                className="h-4 w-4 sm:h-5 sm:w-5"
                 stroke={addressStatus === 'ACTIVE' ? 'white' : 'gray'}
               />
-              코인 출금
+              <span className="text-sm sm:text-base">코인 출금</span>
             </button>
           </div>
 
           <div
-            className={`mt-3 w-full rounded-xl py-3 text-center text-base font-medium transition ${
+            className={`mt-2 sm:mt-3 w-full rounded-lg sm:rounded-xl py-2 sm:py-3 text-center text-sm sm:text-base font-medium transition ${
               addressStatus === 'REGISTERING'
                 ? 'cursor-not-allowed bg-gray-300 text-gray-400'
                 : 'cursor-pointer bg-[#0a2e64] text-white'
@@ -196,19 +288,25 @@ export default function CoinDetailPage() {
             style={{ boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.1)' }}
             onClick={() => {
               if (addressStatus === 'REGISTERING') {
-                setShowModal(true)
-              } else if (addressStatus === 'NOT_REGISTERED') {
-                navigate('/coin/address/add', { state: { isUser, symbol } })
-              } else if (addressStatus === 'ACTIVE' && addressInfo) {
-                navigate('/coin/address/add', {
-                  state: {
-                    symbol,
-                    isUser: false,
-                    useExistingAddress: true,
-                    address: addressInfo.address,
-                    tag: addressInfo.tag,
-                  },
-                })
+                setShowModal(true);
+              } else if (addressStatus === 'NOT_REGISTERED' || (addressStatus === 'ACTIVE' && addressInfo)) {
+                // Add transition before navigation
+                setPageVisible(false);
+                setTimeout(() => {
+                  if (addressStatus === 'NOT_REGISTERED') {
+                    navigate('/coin/address/add', { state: { isUser, symbol } });
+                  } else if (addressStatus === 'ACTIVE' && addressInfo) {
+                    navigate('/coin/address/add', {
+                      state: {
+                        symbol,
+                        isUser: false,
+                        useExistingAddress: true,
+                        address: addressInfo.address,
+                        tag: addressInfo.tag,
+                      },
+                    });
+                  }
+                }, 200);
               }
             }}
           >
@@ -230,14 +328,21 @@ export default function CoinDetailPage() {
           </div>
         </div>
 
-        {/* 기간 선택 탭 - 계좌등록 버튼 아래로 이동 */}
-        <div className="mb-6">
-          <div className="flex rounded-xl bg-white p-1 shadow-sm">
+        {/* 기간 선택 탭 */}
+        <div
+          className="mb-4 sm:mb-5 md:mb-6"
+          style={{
+            animationName: 'slideIn',
+            animationDuration: '0.6s',
+            animationFillMode: 'both',
+            animationDelay: '0.7s'
+          }}>
+          <div className="flex rounded-lg sm:rounded-xl bg-white p-1 shadow-sm">
             {['day', 'week', 'month', 'year'].map(period => (
               <button
                 key={period}
                 onClick={() => setSelectedPeriod(period)}
-                className={`flex-1 rounded-lg py-2 text-center text-sm font-medium transition ${
+                className={`flex-1 rounded-md sm:rounded-lg py-1.5 sm:py-2 text-center text-xs sm:text-sm font-medium transition-all duration-300 ${
                   selectedPeriod === period
                     ? 'bg-[#0a2e64] text-white'
                     : 'text-gray-500 hover:bg-gray-50'
@@ -263,13 +368,20 @@ export default function CoinDetailPage() {
         )}
 
         {/* 거래 내역 섹션 */}
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-bold text-gray-800">거래 내역</h3>
-          <button className="flex items-center text-sm font-medium text-[#0a2e64]">
+        <div
+          className="mb-3 sm:mb-4 flex items-center justify-between"
+          style={{
+            animationName: 'slideIn',
+            animationDuration: '0.6s',
+            animationFillMode: 'both',
+            animationDelay: '0.9s'
+          }}>
+          <h3 className="text-base sm:text-lg font-bold text-gray-800">거래 내역</h3>
+          <button className="flex items-center text-xs sm:text-sm font-medium text-[#0a2e64]">
             전체보기
             <svg
-              width="16"
-              height="16"
+              width="14"
+              height="14"
               viewBox="0 0 16 16"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -287,36 +399,52 @@ export default function CoinDetailPage() {
         </div>
 
         {/* 거래 내역 */}
-        <div className="space-y-6 pb-10 text-[20px]">
-          {(history ?? []).map((item, idx) => (
-            <TransactionItem
-              key={idx}
-              date={new Date(item.transferredAt).toLocaleString()}
-              type={
-                item.type === 'DEPOSIT'
-                  ? item.status === 'ACCEPTED'
-                    ? '입금 완료'
-                    : '입금 대기중'
-                  : item.type === 'WITHDRAW'
-                    ? item.status === 'ACCEPTED'
-                      ? '출금 완료'
-                      : '출금 대기중'
-                    : item.type === 'PAY'
+        <div className="space-y-4 sm:space-y-5 md:space-y-6 pb-16 sm:pb-10 text-sm sm:text-base md:text-lg lg:text-xl">
+          {/* Fade-in animation for each transaction item */}
+          {(history ?? []).map((item, idx) => {
+            const rate = prices[`KRW-${symbol}`] ?? 0;
+            const krw = Math.floor(item.amount * rate).toLocaleString();
+
+            return (
+              <div
+                key={idx}
+                className="transition-all duration-300 ease-in-out"
+                style={{
+                  animationName: 'fadeInUp',
+                  animationDuration: '0.5s',
+                  animationDelay: `${idx * 0.1}s`,
+                  animationFillMode: 'both'
+                }}
+              >
+                <TransactionItem
+                  date={new Date(item.transferredAt).toLocaleString()}
+                  type={
+                    item.type === 'DEPOSIT'
                       ? item.status === 'ACCEPTED'
-                        ? '결제 완료'
-                        : item.status === 'PENDING'
-                          ? '정산 대기중'
-                          : '결제 취소'
-                      : '알 수 없음'
-              }
-              balance={`${balance} ${symbol}`}
-              amount={item.amount + ' ' + symbol}
-              krw={Math.floor(item.amount * 1000).toLocaleString()}
-              isDeposit={item.type === 'DEPOSIT'}
-            />
-          ))}
+                        ? '입금 완료'
+                        : '입금 대기중'
+                      : item.type === 'WITHDRAW'
+                        ? item.status === 'ACCEPTED'
+                          ? '출금 완료'
+                          : '출금 대기중'
+                        : item.type === 'PAY'
+                          ? item.status === 'ACCEPTED'
+                            ? '결제 완료'
+                            : item.status === 'PENDING'
+                              ? '정산 대기중'
+                              : '결제 취소'
+                          : '알 수 없음'
+                  }
+                  balance={`${balance} ${symbol}`}
+                  amount={item.amount + ' ' + symbol}
+                  krw={`${krw} KRW`}
+                  isDeposit={item.type === 'DEPOSIT'}
+                />
+              </div>
+            );
+          })}
           {(history?.length ?? 0) === 0 && (
-            <p className="text-sm text-gray-500">거래 내역이 없습니다.</p>
+            <p className="text-xs sm:text-sm text-gray-500">거래 내역이 없습니다.</p>
           )}
         </div>
       </main>

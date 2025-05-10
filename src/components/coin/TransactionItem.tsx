@@ -14,10 +14,10 @@ export default function TransactionItem({ date, type, balance, amount, krw, isDe
       <div className="flex justify-between items-start">
         <div>
           <p className={`text-xl font-bold ${isDeposit ? 'text-sky-700' : 'text-red-500'} mb-2`}>{type}</p>
-          <p className="text-l text-gray-600 font-medium">잔액: {balance}</p>
+          <p className="text-sm text-gray-600 font-medium">잔액: {balance}</p>
         </div>
         <div className="text-right">
-          <p className={`text-xl font-bold ${isDeposit ? 'text-sky-700' : 'text-red-500'} mb-2`}>
+          <p className={`text-lg font-bold ${isDeposit ? 'text-sky-700' : 'text-red-500'} mb-2`}>
             <span>{amount.split(' ')[0]}</span>{" "}
             <span className="text-gray-600">{amount.split(' ')[1]}</span>
           </p>

@@ -46,6 +46,8 @@ import TokenProductSignup from "./app/token/onsale-product/signup/product-signup
 import TokenProductSignupComplete from "./app/token/onsale-product/signup/signup-complete/product-signup-complete";
 import OnSaleTokenProductListPage from "./app/token/onsale-product/onsale-product-list";
 import BusinessCertificateVerifyPage from "./app/sign-up/store-register/business-verification/BusinessCertificateVerifyPage";
+import MenuAddPage from "./app/store/store-settings/add-store-menu/page";
+import MenuEditPage from "./app/store/store-settings/edit-store-menu/page";
 
 
 
@@ -103,8 +105,8 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
 
         {/* 가맹점 가게 및 주문 관리 페이지 */}
         <Route path="/store/manage" element={<MyStoreManagePage />} />
-        <Route path="/store/menu/add" element={<MenuEdit />} />
-        <Route path="/store/menu/edit" element={<MenuEdit />} />
+        <Route path="/store/menu/add" element={<MenuAddPage />} />
+        <Route path="/store/menu/edit/:menuId" element={<MenuEditPage/>} />
         <Route path="/store" element={<OrderStatusPage />} />
 
 
