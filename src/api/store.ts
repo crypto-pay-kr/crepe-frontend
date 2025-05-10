@@ -12,6 +12,23 @@ export async function signUpStore(formData: FormData) {
   return response;
 }
 
+// 사업자등록증 OCR
+export async function uploadBusinessLicense(file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await fetch(`${API_BASE_URL}/api/ocr/business-license`, {
+    method: "POST",
+    body: formData,
+  });
+  if (!response.ok) {
+    throw new Error("사업자등록증 업로드 중 오류가 발생했습니다.");
+  }
+  return await response.json();
+}
+
+
+
+
 export async function fetchMyStoreAllDetails(token: string) {
   const response = await fetch(API_BASE_URL + "/store/my", {
     headers: {

@@ -5,7 +5,7 @@ const API_BASE_URL = import.meta.env.VITE_API_SERVER_URL || "http://localhost:80
 
 // 인증 문자 전송 (SMS)
 export async function sendSMS(phone: string, smsType: string) {
-  const response = await fetch(API_BASE_URL + "/sms/code", {
+  const response = await fetch(`${API_BASE_URL}/api/sms/code`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ phone, smsType }),
@@ -15,7 +15,7 @@ export async function sendSMS(phone: string, smsType: string) {
 
 // 인증 코드 검증
 export async function verifySMS(code: string, phone: string, smsType: string) {
-  const response = await fetch(API_BASE_URL + "/sms/verify", {
+  const response = await fetch(`${API_BASE_URL}/api/sms/verify`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ code, phone, smsType }),
@@ -25,7 +25,7 @@ export async function verifySMS(code: string, phone: string, smsType: string) {
 
 //  회원가입
 export async function signUpUser(requestBody: any) {
-  const response = await fetch(API_BASE_URL + "/api/auth/signup", {
+  const response = await fetch(`${API_BASE_URL}api/auth/signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(requestBody),
@@ -37,7 +37,7 @@ export async function signUpUser(requestBody: any) {
 // 로그인(가맹점 및 일반회원 공통)
 export async function loginUser(email: string, password: string) {
   
-  const response = await fetch(API_BASE_URL + "/api/login", {
+  const response = await fetch(`${API_BASE_URL}/api/login`, {
 
 
     method: "POST",
@@ -52,7 +52,7 @@ export async function changePassword(
   token: string,
   data: { oldPassword: string; newPassword: string }
 ): Promise<void> {
-  const response = await fetch(API_BASE_URL + "/api/auth/change/password", {
+  const response = await fetch(`${API_BASE_URL}/api/auth/change/password`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -72,7 +72,7 @@ export async function changePhone(
   token: string,
   data: { phoneNumber: string }
 ): Promise<void> {
-  const response = await fetch(API_BASE_URL +"/api/auth/change/phone", {
+  const response = await fetch(`${API_BASE_URL}/api/auth/change/phone`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -92,7 +92,7 @@ export async function changeNickname(
   token: string,
   data: { newNickname: string }
 ): Promise<void> {
-  const response = await fetch(API_BASE_URL +"/api/auth/change/nickname", {
+  const response = await fetch(`${API_BASE_URL}/api/auth/change/nickname`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -109,7 +109,7 @@ export async function changeNickname(
 
 // 사용자 정보 조회
 export async function fetchMyUserInfo(token: string) {
-  const response = await fetch(API_BASE_URL +"/api/auth/myInfo", {
+  const response = await fetch(`${API_BASE_URL}/api/auth/myInfo`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -120,6 +120,20 @@ export async function fetchMyUserInfo(token: string) {
     throw new Error("사용자 정보를 불러오지 못했습니다.");
   }
 
+  return await response.json();
+}
+
+// 신분증/면허증 OCR 처리 API 호출
+export async function processIdentityCard(file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await fetch(`${API_BASE_URL}/api/ocr/id-card`, {
+    method: "POST",
+    body: formData,
+  });
+  if (!response.ok) {
+    throw new Error("OCR 처리 중 오류가 발생했습니다.");
+  }
   return await response.json();
 }
 

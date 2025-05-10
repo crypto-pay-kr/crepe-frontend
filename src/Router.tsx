@@ -3,7 +3,6 @@ import { useEffect } from "react"
 import SplashPage from "./app/splash/page";
 import MyPage from "./app/mypage/page";
 import EditInfo from "./app/mypage/edit-info/page";
-import BusinessVerificationPage from "./app/sign-up/store-verification/page";
 import SettlementReport from "./app/store/store-coin/store-coin-report/page";
 import WelcomePage from "./app/welcome/welcome";
 import TermsAgreementPage from "./app/sign-up/common/terms/page";
@@ -13,7 +12,7 @@ import PhoneVerificationPage from "./app/sign-up/common/phone-verification/page"
 import AdditionalUserInfoPage from "./app/sign-up/additional-info/page";
 import SignupCompletePage from "./app/sign-up/success/page";
 import LoginPage from "./app/login/page";
-import AdditionalStoreInfoPage from "./app/sign-up/store-additional-info/page";
+import AdditionalStoreInfoPage from "./app/sign-up/store-register/business-verification/success/AdditionalStoreInfoPage";
 import MyStoreManagePage from "./app/store/store-settings/page";
 import MenuEdit from "./app/store/store-settings/add-store-menu/page";
 import LoadingPage from "./app/loading/page";
@@ -46,6 +45,7 @@ import OnSaleTokenProductDetail from "./app/token/onsale-product/detail/onsale-p
 import TokenProductSignup from "./app/token/onsale-product/signup/product-signup";
 import TokenProductSignupComplete from "./app/token/onsale-product/signup/signup-complete/product-signup-complete";
 import OnSaleTokenProductListPage from "./app/token/onsale-product/onsale-product-list";
+import BusinessCertificateVerifyPage from "./app/sign-up/store-register/business-verification/BusinessCertificateVerifyPage";
 
 
 
@@ -87,7 +87,10 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/store/email" element={<EmailPasswordPage />} />
         <Route path="/store/phone" element={<PhoneNumberPage />} />
         <Route path="/store/phone/verification" element={<PhoneVerificationPage />} />
-        <Route path="/store/verification" element={<BusinessVerificationPage />} />
+        {/* 사업자등록증 업로드 */}
+        <Route path="/store/register" element={<BusinessCertificateVerifyPage/>} />
+        {/* 사업자 정보 입력  */}
+        <Route path="/store/register/info" element={<AdditionalStoreInfoPage />} />
 
 
         {/* 가맹점 및 유저 정보 관리 및 수정 페이지 */}
@@ -99,7 +102,6 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
 
 
         {/* 가맹점 가게 및 주문 관리 페이지 */}
-        <Route path="/store/info" element={<AdditionalStoreInfoPage />} />
         <Route path="/store/manage" element={<MyStoreManagePage />} />
         <Route path="/store/menu/add" element={<MenuEdit />} />
         <Route path="/store/menu/edit" element={<MenuEdit />} />
@@ -141,8 +143,6 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/token/detail/:bank" element={<TokenGroupDetailPage/>} />
         <Route path="/token/exchange/:bank" element={<TokenExchangePage/>} />
         <Route path="/token/exchange/complete" element={<TokenExchangeCompletePage/>} />
-        <Route path="/token/exchange/complete" element={<TokenExchangeCompletePage/>} />
-
 
         {/*Token Product 관련 페이지 */}
         <Route path="/token/onsale/products/detail" element={<OnSaleTokenProductDetail />} />
