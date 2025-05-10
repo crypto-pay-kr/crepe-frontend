@@ -30,7 +30,7 @@ export async function uploadBusinessLicense(file: File) {
 
 
 export async function fetchMyStoreAllDetails(token: string) {
-  const response = await fetch(API_BASE_URL + "/store/my", {
+  const response = await fetch(`${API_BASE_URL}/api/store/my`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

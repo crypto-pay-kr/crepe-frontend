@@ -23,8 +23,12 @@ const NavButton: React.FC<NavButtonProps> = ({icon,label,isActive,onClick}) => (
 const BottomNav: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const isSeller = location.pathname.includes("/store");
   const isUser = location.pathname.includes("/user");
+
+  const role = localStorage.getItem("role");
+  const isSeller = role === "SELLER";
+
+
   const navItems = [
     {
       icon: <Home className="w-6 h-6" color="white" />,
