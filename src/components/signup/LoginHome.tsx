@@ -63,6 +63,7 @@ export default function LoginHome({ onSignup, buttonClassName }: LoginHomeProps)
       // 토큰을 localStorage 등에 저장
       localStorage.setItem("accessToken", accessToken);
       localStorage.setItem("refreshToken", refreshToken);
+      localStorage.setItem("role", role);
 
       navigate("/user/coin");
 

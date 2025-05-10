@@ -58,8 +58,10 @@ export default function SettlementCoin() {
         state: { symbol }
       });
     } catch (e) {
-      alert("정산 요청 실패: " + e.message);
-      console.error(e);
+      if (e instanceof Error) {
+        alert("정산 요청 실패: " + e.message);
+        console.error(e);
+      }
     }
   }
 

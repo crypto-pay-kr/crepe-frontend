@@ -48,7 +48,8 @@ export async function loginUser({ email, password, captchaKey, captchaValue }: {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password, captchaKey, captchaValue }),
   });
-  return response; 
+
+  return response;
 }
 
 // 비밀번호 변경
