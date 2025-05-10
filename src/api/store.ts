@@ -71,6 +71,17 @@ export async function updateStoreAddress(token: string, newAddress: string) {
   return response;
 }
 
+// 가맹점 메뉴 상세 조회
+export async function fetchStoreMenuDetail(token: string, menuId: string) {
+  const response = await fetch(`${API_BASE_URL}/api/store/menu/${menuId}`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    throw new Error("메뉴 상세 조회에 실패했습니다.");
+  }
+  return await response.json();
+}
 
 
 // 가맹점 메뉴 등록
@@ -83,6 +94,41 @@ export async function storeMenuAdd(formData: FormData) {
     body: formData,
   });
   return response;
+}
+
+// 가맹점 메뉴 수정
+
+export async function patchStoreMenu(
+  token: string,
+  menuId: string,
+  formData: FormData
+) {
+  const response = await fetch(`${API_BASE_URL}/api/store/menu/${menuId}`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "메뉴 수정에 실패했습니다.");
+  }
+}
+
+
+
+// 가맹점 메뉴 삭제
+
+export async function deleteStoreMenu(token: string, menuId: string) {
+  const response = await fetch(`${API_BASE_URL}/api/store/menu/${menuId}/status`, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "메뉴 삭제에 실패했습니다.");
+  }
 }
 
 
