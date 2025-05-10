@@ -65,7 +65,7 @@ export default function LoginHome({ onSignup, buttonClassName }: LoginHomeProps)
       localStorage.setItem("refreshToken", refreshToken);
       localStorage.setItem("role", role);
 
-      navigate("/user/coin");
+      navigate("/my/coin");
 
     } catch (err) {
       console.error("로그인 오류:", err);
