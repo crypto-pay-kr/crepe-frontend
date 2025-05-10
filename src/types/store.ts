@@ -5,6 +5,7 @@ export interface CoinStatus {
   // 실제 필드는 백엔드 정의에 따라 추가
   name?: string;
   code?: string;
+  currency?: string;
   type?: string;
 }
 
