@@ -86,7 +86,7 @@ const BusinessVerificationPage: React.FC = () => {
       }
 
       // 회원가입 성공 시 저장된 정보 삭제
-      localStorage.removeItem("signUpData");
+      sessionStorage.removeItem("signUpData");
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
       sessionStorage.clear();
