@@ -1,11 +1,15 @@
-import { X, Wallet, ArrowUpRight } from "lucide-react";
+import { X, Wallet, ShoppingCart } from "lucide-react";
 import Header from '@/components/common/Header';
 import BottomNav from '@/components/common/BottomNavigate';
 import { useNavigate, useLocation } from "react-router-dom";
 import React, { useState, useEffect } from 'react';
 import { OrderSection } from '@/components/coin/OrderSection';
 import { Coin, Order } from '@/constants/coinData';
+import { getUserBalance } from '@/api/coin';
+import CoinAssets from '@/components/coin/CoinAssets';
+import TokenAssets from '@/components/token/TokenAssets';
 import { getCoinBalance } from '@/api/coin';
+
 
 // 수신 데이터 타입 정의
 interface RawCoinBalance {
@@ -48,8 +52,10 @@ export default function CoinHome() {
   const navigate = useNavigate();
   const location = useLocation();
   const isUser = location.state?.isUser ?? true;
-  const [activeTab, setActiveTab] = useState('assets');
+  //const [activeTab, setActiveTab] = useState('assets');
   const [coins, setCoins] = useState<Coin[]>([]);
+  const [activeTab, setActiveTab] = useState<'coin' | 'token'>('coin');
+
 
   const handleCoinClick = (symbol: string) => {
     navigate(`/coin-detail/${symbol}`, { state: { isUser } });
@@ -101,27 +107,6 @@ export default function CoinHome() {
     return sum + (isNaN(n) ? 0 : n);
   }, 0);
 
-  const SAMPLE_ORDERS: Order[] = [
-    {
-      id: "90897",
-      status: "completed",
-      storeName: "명동 칼국수 마장동",
-      orderItems: "칼국수 외 1개",
-      orderDate: "2024년 12월 20일 9시 52분",
-      orderNumber: "11YPD000PM12",
-      storeLocation: "명동지점",
-    },
-    {
-      id: "90897",
-      status: "cancelled",
-      reason: "자리 없음",
-      storeName: "명동 칼국수 마장동",
-      orderItems: "칼국수 외 1개",
-      orderDate: "2024년 12월 20일 9시 52분",
-      orderNumber: "11YPD000PM12",
-      storeLocation: "명동지점",
-    },
-  ];
 
   return (
     <div className="flex h-full flex-col bg-gray-50">
@@ -135,7 +120,7 @@ export default function CoinHome() {
             </div>
             <h2 className="mb-1 text-3xl font-bold text-white">{totalBalanceKRW.toLocaleString()} KRW</h2>
             <div className="flex items-center text-green-300">
-              <ArrowUpRight className="mr-1 h-4 w-4" />
+              <ShoppingCart className="h-6 w-6 stroke-white" />
               <span className="text-sm">+2.4% 오늘</span>
             </div>
           </div>
@@ -143,54 +128,38 @@ export default function CoinHome() {
 
         <div className="mb-4 flex border-b border-gray-200 bg-white">
           <button
-            className={`flex-1 py-3 text-center text-sm font-medium ${activeTab === 'assets' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-gray-500'}`}
-            onClick={() => setActiveTab('assets')}
+            className={`flex-1 py-3 text-center text-sm font-medium ${activeTab === 'coin' ? 'border-b-2 border-indigo-400 text-indigo-400' : 'text-gray-500'}`}
+            onClick={() => setActiveTab('coin')}
           >
-            보유 자산
+            가상 자산
           </button>
           {isUser && (
             <button
-              className={`flex-1 py-3 text-center text-sm font-medium ${activeTab === 'orders' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-gray-500'}`}
-              onClick={() => setActiveTab('orders')}
+              className={`flex-1 py-3 text-center text-sm font-medium ${activeTab === 'token' ? 'border-b-2 border-indigo-400 text-indigo-400' : 'text-gray-500'}`}
+              onClick={() => setActiveTab('token')}
             >
-              거래 내역
+             K-토큰
             </button>
           )}
         </div>
 
         <div className="px-4">
-          {activeTab === 'assets' ? (
-            <div className="rounded-xl bg-white p-4 shadow-sm">
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-bold text-gray-800">보유 코인</h3>
-                <button className="text-sm font-medium text-indigo-600">전체보기</button>
-              </div>
-              <div className="space-y-3">
-                {coins.map((coin) => (
-                  <div key={coin.currency} onClick={() => handleCoinClick(coin.currency)} className="flex cursor-pointer items-center justify-between rounded-lg p-3 transition hover:bg-gray-50">
-                    <div className="flex items-center">
-                      <div className={`flex h-10 w-10 items-center justify-center rounded-full ${coin.bg}`}>
-                        {coin.icon}
-                      </div>
-                      <div className="ml-3">
-                        <h4 className="font-medium text-gray-900">
-                          {coin.coinName} <span className="text-sm text-gray-500">{coin.currency}</span>
-                        </h4>
-                        <div className="text-sm text-green-500">{coin.change}</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-medium text-gray-900">{coin.balance}</div>
-                      <div className="text-sm text-gray-500">{coin.krw}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+          {activeTab === 'coin' ? (
+            <CoinAssets coins={coins} onClick={handleCoinClick} />
           ) : (
-            isUser && <OrderSection orders={SAMPLE_ORDERS} />
+            <TokenAssets />
           )}
         </div>
+
+        {isUser && (
+          <button
+            onClick={() => navigate('/user/order-history')}
+            className="fixed bottom-24 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-500 text-white shadow-lg hover:bg-indigo-500"
+            aria-label="주문 내역으로 이동"
+          >
+            <ShoppingCart className="h-6 w-6 stroke-white" />
+          </button>
+        )}
       </main>
       <BottomNav />
     </div>

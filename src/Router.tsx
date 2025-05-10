@@ -31,6 +31,13 @@ import CartPage from "./app/order/cart/cartPage";
 import PayCompletePage from "./app/order/complete-pay/payComplete";
 import StoreCoinHome from "./app/store/store-coin/page";
 import ShoppingMall from "./app/shop/shopPage";
+import OrderHistoryPage from "./app/order/user/orderHistoryPage";
+import TokenDetailPage from "./app/token/product/product-detail";
+import TokenGroupDetailPage from "./app/token/token-detail";
+import TokenExchangePage from "./app/token/token-exchange";
+import TokenExchangeCompletePage from "./app/token/exchangecomplete";
+import TokenDepositPage from "./app/token/product/product-deposit";
+import TokenCancelPage from "./app/token/product/product-cancel";
 import KTokenProductDetail from "./app/k-token/products/detail/page";
 import KTokenProductSignup from "./app/k-token/products/signup/page";
 import KTokenProductSignupComplete from "./app/k-token/products/signup-complete/page";
@@ -98,6 +105,10 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/store/menu/edit" element={<MenuEdit />} />
         <Route path="/store" element={<OrderStatusPage />} />
 
+        {/* 유저 주문 관리 페이지 */}
+        <Route path="/user/order-history" element={<OrderHistoryPage />} />
+
+
         {/* 유저 쇼핑몰 페이지 */}
         <Route path="/mall" element={<ShoppingMall />} />
         <Route path="/mall/store/:id" element={<MallDetailPage />} />
@@ -125,7 +136,17 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         {/*가맹점 코인 정산 페이지*/}
         <Route path="/settlement" element={<SettlementCoin />} />
 
+        /*토큰 관련 페이지*/
+        {/*토큰 상품 페이지*/}
+        <Route path="/token/product/detail/:tokenCode" element={<TokenDetailPage/>} />
+        <Route path="/token/product/deposit/:tokenCode" element={<TokenDepositPage/>} />
+        <Route path="/token/product/cancel/:tokenCode" element={<TokenCancelPage/>} />
 
+        {/*토큰 상세 페이지*/}
+        <Route path="/token/detail/:bank" element={<TokenGroupDetailPage/>} />
+        <Route path="/token/exchange/:bank" element={<TokenExchangePage/>} />
+        <Route path="/token/exchange/complete" element={<TokenExchangeCompletePage/>} />
+        <Route path="/token/exchange/complete" element={<TokenExchangeCompletePage/>} />
 
 
         {/* K-Token 관련 페이지 */}
