@@ -2,10 +2,11 @@ import React from 'react';
 import { CoinStatus } from '@/types/store';
 
 interface CryptocurrencyTagsProps {
+  coinName?: string;
   coins: CoinStatus[];
 }
 
-const CryptocurrencyTags: React.FC<CryptocurrencyTagsProps> = ({ coins }) => {
+const CryptocurrencyTags: React.FC<CryptocurrencyTagsProps> = ({ coinName,  coins }) => {
   // coinStatus 데이터 구조 디버깅
   console.log('CoinStatus 데이터:', coins);
   
@@ -18,17 +19,16 @@ const CryptocurrencyTags: React.FC<CryptocurrencyTagsProps> = ({ coins }) => {
 
   // 암호화폐 배경색 매핑 
   const cryptoColors: Record<string, string> = {
-    'XRP': 'bg-blue-100 text-blue-800',
-    'USDT': 'bg-green-100 text-green-800',
-    'SOL': 'bg-purple-100 text-purple-800',
-    // 기본 스타일
-    'default': 'bg-gray-100 text-gray-800',
+    XRP: "bg-yellow-100 text-yellow-800",
+    USDT: "bg-green-100 text-green-800",
+    SOL: "bg-purple-100 text-purple-800",
+    default: "bg-gray-500 text-gray-800",
   };
+
 
   if (!coins || coins.length === 0) {
     return <div className="text-xs text-gray-400">지원하는 암호화폐가 없습니다</div>;
   }
-
   // CoinStatus 객체에서 코인 코드 추출
   const getCoinCode = (coin: CoinStatus): string => {
     console.log('코인 데이터:', coin);
