@@ -8,6 +8,7 @@ import { Coin, Order } from '@/constants/coinData';
 import { getUserBalance } from '@/api/coin';
 import CoinAssets from '@/components/coin/CoinAssets';
 import TokenAssets from '@/components/token/TokenAssets';
+import { getCoinBalance } from '@/api/coin';
 
 
 // 수신 데이터 타입 정의
@@ -66,7 +67,7 @@ export default function CoinHome() {
   useEffect(() => {
     const fetchBalance = async () => {
       try {
-        const data: RawCoinBalance[] = await getUserBalance();
+        const data: RawCoinBalance[] = await getCoinBalance();
         const currencies = ["XRP", "USDT", "SOL"];
         const coinMap = new Map(data.map((raw) => [raw.currency, raw]));
 

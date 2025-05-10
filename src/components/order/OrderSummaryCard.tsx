@@ -1,6 +1,5 @@
 import React from "react"
 
-
 interface OrderDetail {
   menuName: string;
   menuCount: number;
@@ -13,6 +12,23 @@ interface OrderSummaryCardProps {
   orderStatus: string;
   orderType: string;
   orderDetails: OrderDetail[];
+  // 주문 거절 사유가 있다면 optional로 추가 (필요 시)
+  reason?: string;
+}
+
+const getOrderStatusLabel = (status: string, reason?: string) => {
+  switch (status) {
+    case "WAITING":
+      return <div className="text-xs text-blue-500">주문 접수</div>;
+    case "PAID":
+      return <div className="text-xs text-green-500">주문 수락</div>;
+    case "COMPLETED":
+      return <div className="text-xs text-green-500">준비 완료</div>;
+    case "CANCELLED":
+      return <div className="text-xs text-red-500">주문 거절{reason ? " - " + reason : ""}</div>;
+    default:
+      return <div className="text-xs text-gray-500">알 수 없는 상태</div>;
+  }
 }
 
 const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({
@@ -21,6 +37,7 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({
   orderStatus,
   orderType,
   orderDetails,
+  reason,
 }) => {
   return (
     <div className="border rounded-lg p-4 mb-4">
@@ -30,7 +47,7 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({
         </div>
         <div>
           <div className="font-bold">Order #{orderId}</div>
-          <div className="text-xs text-green-500">주문 완료</div>
+          {getOrderStatusLabel(orderStatus, reason)}
         </div>
       </div>
 

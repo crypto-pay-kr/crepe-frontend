@@ -12,12 +12,13 @@ export interface Coin {
 
 export interface Order {
   id: string;
-  status: 'completed' | 'cancelled';
+  status: string;
   reason?: string;
   storeName: string;
   orderItems: string;
   orderDate: string;
   orderNumber: string;
   storeLocation: string;
+  totalPrice: string;
 }
 
