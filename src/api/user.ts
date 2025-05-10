@@ -27,7 +27,7 @@ export async function verifySMS(code: string, phone: string, smsType: string) {
 
 //  회원가입
 export async function signUpUser(requestBody: any) {
-  const response = await fetch(`${API_BASE_URL}api/auth/signup`, {
+  const response = await fetch(`${API_BASE_URL}/api/user/signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(requestBody),
@@ -43,11 +43,12 @@ export async function loginUser({ email, password, captchaKey, captchaValue }: {
   captchaKey: string;
   captchaValue: string;
 }) {
-   const response = await fetch(`${API_BASE_URL}/api/login`, {
+  const response = await fetch("/api/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password, captchaKey, captchaValue }),
   });
+  return response; 
 }
 
 // 비밀번호 변경
@@ -55,7 +56,7 @@ export async function changePassword(
   token: string,
   data: { oldPassword: string; newPassword: string }
 ): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}/api/auth/change/password`, {
+  const response = await fetch(`${API_BASE_URL}/api/change/password`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -75,7 +76,7 @@ export async function changePhone(
   token: string,
   data: { phoneNumber: string }
 ): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}/api/auth/change/phone`, {
+  const response = await fetch(`${API_BASE_URL}/api/change/phone`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -95,7 +96,7 @@ export async function changeNickname(
   token: string,
   data: { newNickname: string }
 ): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}/api/auth/change/nickname`, {
+  const response = await fetch(`${API_BASE_URL}/api/change/nickname`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -112,7 +113,7 @@ export async function changeNickname(
 
 // 사용자 정보 조회
 export async function fetchMyUserInfo(token: string) {
-  const response = await fetch(`${API_BASE_URL}/api/auth/myInfo`, {
+  const response = await fetch(`${API_BASE_URL}/api/user/my`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
