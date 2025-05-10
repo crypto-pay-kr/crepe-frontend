@@ -142,6 +142,10 @@ export default function SelectPaymentPage() {
         }));
 
         const selectedPrice = prices[`KRW-${selectedPayment}`];
+        if (!selectedPrice) {
+            alert("시세 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
+            return;
+        }
         // orderRequest 객체 생성
         const orderRequest = {
             storeId,

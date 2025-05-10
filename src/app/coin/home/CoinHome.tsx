@@ -7,7 +7,7 @@ import { OrderSection } from '@/components/coin/OrderSection';
 import { Coin, Order } from '@/constants/coinData';
 import CoinAssets from '@/components/coin/CoinAssets';
 import TokenAssets from '@/components/token/my-product/TokenAssets';
-import { getCoinBalance } from '@/api/coin';
+import { fetchCoinPrices, getCoinBalance } from '@/api/coin'
 
 
 // 수신 데이터 타입 정의
@@ -51,16 +51,29 @@ export default function CoinHome() {
   const navigate = useNavigate();
   const location = useLocation();
   const isUser = location.state?.isUser ?? true;
-  //const [activeTab, setActiveTab] = useState('assets');
   const [coins, setCoins] = useState<Coin[]>([]);
   const [activeTab, setActiveTab] = useState<'coin' | 'token'>('coin');
-
+  const [prices, setPrices] = useState<{ [key: string]: number }>({
+    "KRW-XRP": 0,
+    "KRW-USDT": 0,
+    "KRW-SOL": 0,
+  });
 
   const handleCoinClick = (symbol: string) => {
     navigate(`/coin-detail/${symbol}`, { state: { isUser } });
   };
 
-
+  useEffect(() => {
+    const fetchPrices = async () => {
+      try {
+        const updated = await fetchCoinPrices();
+        setPrices(updated);
+      } catch (err) {
+        console.error("시세 조회 실패:", err);
+      }
+    };
+    fetchPrices();
+  }, []);
 
 
   useEffect(() => {
@@ -75,10 +88,7 @@ export default function CoinHome() {
           const info = COIN_INFO[symbol];
 
           const amount = raw?.balance ?? 0;
-          const krwRate =
-            symbol === "XRP" ? 1000 :
-              symbol === "USDT" ? 1300 :
-                symbol === "SOL" ? 100000 : 0;
+          const krwRate = prices[`KRW-${symbol}`] ?? 0;
           const krw = amount * krwRate;
 
           return {
@@ -98,8 +108,12 @@ export default function CoinHome() {
       }
     };
 
-    fetchBalance();
-  }, []);
+
+    const isReady = ["XRP", "USDT", "SOL"].every(
+      (symbol) => prices[`KRW-${symbol}`] !== 0
+    );
+    if (isReady) fetchBalance();
+  }, [prices]);
 
   const totalBalanceKRW = coins.reduce((sum, coin) => {
     const n = Number(coin.krw.replace(/[^0-9]/g, ''));
