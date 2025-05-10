@@ -97,7 +97,6 @@ export async function storeMenuAdd(formData: FormData) {
 }
 
 // 가맹점 메뉴 수정
-
 export async function patchStoreMenu(
   token: string,
   menuId: string,
@@ -119,7 +118,6 @@ export async function patchStoreMenu(
 
 
 // 가맹점 메뉴 삭제
-
 export async function deleteStoreMenu(token: string, menuId: string) {
   const response = await fetch(`${API_BASE_URL}/api/store/menu/${menuId}/status`, {
     method: "PATCH",
@@ -130,6 +128,26 @@ export async function deleteStoreMenu(token: string, menuId: string) {
     throw new Error(errorText || "메뉴 삭제에 실패했습니다.");
   }
 }
+
+// 가맹점 결제 수단 설정
+export async function patchStoreCoin(token: string, supportedCoins: string[]) {
+  const response = await fetch(`${API_BASE_URL}/api/store/select/coin`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      supportedCoins,
+    }),
+  });
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "코인 지원 설정 업데이트 실패");
+  }
+  return await response.json();
+}
+
 
 
 

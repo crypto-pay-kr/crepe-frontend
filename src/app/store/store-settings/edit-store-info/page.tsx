@@ -1,11 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '@/components/common/Header'
 import Button from '@/components/common/Button'
 import { ChevronRight } from 'lucide-react'
 import BottomNav from '@/components/common/BottomNavigate'
 import Input from "@/components/common/Input";
-import { useEffect } from 'react';
+import PaymentCurrencySetModal from "@/components/shoppingmall/PaymentCurrencySetModal";
 import {
   updateStoreName,
   updateStoreAddress,
@@ -24,8 +24,7 @@ export default function StoreEditInfoPage() {
   const [newAddress, setAddress] = useState("")
   const navigate = useNavigate()
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-  const isSeller = location.pathname.includes('/store');
-
+  const [isModalOpen, setModalOpen] = useState(false);
   const token = localStorage.getItem("accessToken");
 
   const handleStoreNameUpdate = async () => {
@@ -33,10 +32,8 @@ export default function StoreEditInfoPage() {
       alert("가게명을 입력해주세요!");
       return;
     }
-
     try {
       const response = await updateStoreName(token!, newStoreName);
-
       alert(`가게명이 "${newStoreName}"(으)로 변경되었습니다.`);
     } catch (err) {
       console.error("가게명 변경 실패:", err);
@@ -44,21 +41,17 @@ export default function StoreEditInfoPage() {
     }
   };
 
-
   const handleAddressUpdate = async () => {
     if (!newAddress.trim()) {
       alert("주소를 입력해주세요!");
       return;
     }
-
     try {
       const response = await updateStoreAddress(token!, newAddress);
-
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(errorText || "주소 변경에 실패했습니다.");
       }
-
       alert(`주소가 "${newAddress}"(으)로 변경되었습니다.`);
     } catch (err) {
       console.error("주소 변경 실패:", err);
@@ -71,7 +64,6 @@ export default function StoreEditInfoPage() {
       state: { isUser: true }
     });
   }
-
 
   const isButtonDisabled = false
 
@@ -87,7 +79,6 @@ export default function StoreEditInfoPage() {
         alert("메뉴 정보를 불러오는 데 실패했습니다.");
       }
     };
-
     loadMenus();
   }, []);
 
@@ -106,9 +97,11 @@ export default function StoreEditInfoPage() {
             onChange={(e) => setStoreName(e.target.value)}
             placeholder="가게명을 입력해주세요."
           />
-          <Button text="변경하기"
-                  onClick={handleStoreNameUpdate}
-                  className="mt-3 w-full bg-[#0a2158] text-white py-3 rounded-lg font-medium"></Button>
+          <Button 
+            text="변경하기"
+            onClick={handleStoreNameUpdate}
+            className="mt-3 w-full bg-[#0a2158] text-white py-3 rounded-lg font-medium"
+          />
         </div>
 
         {/* 주소 변경 */}
@@ -120,20 +113,26 @@ export default function StoreEditInfoPage() {
             onChange={(e) => setAddress(e.target.value)}
             placeholder="주소를 입력해주세요."
           />
-          <Button text="변경하기"
-                  onClick={handleAddressUpdate}
-                  className="mt-3 w-full bg-[#0a2158] text-white py-3 rounded-lg font-medium"></Button>
+          <Button 
+            text="변경하기"
+            onClick={handleAddressUpdate}
+            className="mt-3 w-full bg-[#0a2158] text-white py-3 rounded-lg font-medium"
+          />
         </div>
 
-        {/* 결제 수단 */}
-        <div className="bg-white p-4 mb-2">
+        {/* 결제 수단 지원 설정 */}
+        <div className="bg-white p-4 mb-2 cursor-pointer" onClick={() => setModalOpen(true)}>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold">결제 수단 지원 설정</h2>
             <ChevronRight className="w-5 h-5 text-gray-400" />
           </div>
 
           {menuItems.map((item) => (
-            <div key={item.menuId} className="flex justify-between items-center py-2 border-t border-gray-200">
+            <div
+              key={item.menuId}
+              className="flex justify-between items-center py-2 border-t border-gray-200 cursor-pointer"
+              onClick={() => navigate(`/store/menu/edit/${item.menuId}`)}
+            >
               <div>
                 <h3 className="font-medium">{item.menuName}</h3>
                 <p className="text-sm text-gray-600">{item.menuPrice.toLocaleString()} KRW</p>
@@ -148,12 +147,27 @@ export default function StoreEditInfoPage() {
 
           {/* 메뉴 추가 버튼 */}
           <div className="p-3">
-            <Button text="메뉴 추가하기" onClick={onNext} color={isButtonDisabled ? "gray" : "blue"} className="mt-3 w-full bg-[#0a2158] text-white py-3 rounded-lg font-medium" />
+            <Button 
+              text="메뉴 추가하기" 
+              onClick={onNext} 
+              color={isButtonDisabled ? "gray" : "blue"}
+              className="mt-3 w-full bg-[#0a2158] text-white py-3 rounded-lg font-medium" 
+            />
           </div>
         </div>
       </div>
 
-      {/* Bottom Navigation */}
+      <PaymentCurrencySetModal
+        isOpen={isModalOpen}
+        onClose={() => setModalOpen(false)}
+        title="결제 수단 선택"
+        coins={[
+          { name: "XRP" },
+          { name: "USDT" },
+          { name: "SOL" }
+        ]}
+      />
+
       <BottomNav />
     </div>
   )

@@ -1,5 +1,5 @@
 import React from "react";
-import CryptocurrencyTags from "./CryptocurrencyTags";
+import CryptocurrencyTags from "../common/CryptocurrencyTags";
 import { CoinStatus } from '@/types/store';
 
 interface ShopInfoProps {
