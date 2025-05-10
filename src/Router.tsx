@@ -94,8 +94,8 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
 
 
         {/* 가맹점 및 유저 정보 관리 및 수정 페이지 */}
-        <Route path="/home/my" element={<MyPage />} />
-        <Route path="/home/my/edit" element={<EditInfo />} />
+        <Route path="/user/my" element={<MyPage />} />
+        <Route path="/user/my/edit" element={<EditInfo />} />
         <Route path="/store/my" element={<MyPage />} />
         <Route path="/store/my/settlement-report" element={<SettlementReport />} />
         <Route path="/store/my/edit" element={<StoreEditInfoPage />} />
@@ -120,7 +120,7 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
 
 
         {/*유저 코인 내역*/}
-        <Route path="/user/coin" element={<CoinHome />} />
+        <Route path="/my/coin" element={<CoinHome />} />
         {/*코인 상세내역 보여주는 페이지*/}
         <Route path="/coin-detail/:symbol" element={<CoinDetailPage />} />
         {/*입금주소 보여주는 페이지*/}
