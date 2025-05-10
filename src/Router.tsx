@@ -38,6 +38,11 @@ import TokenExchangePage from "./app/token/token-exchange";
 import TokenExchangeCompletePage from "./app/token/exchangecomplete";
 import TokenDepositPage from "./app/token/product/product-deposit";
 import TokenCancelPage from "./app/token/product/product-cancel";
+import KTokenProductDetail from "./app/k-token/products/detail/page";
+import KTokenProductSignup from "./app/k-token/products/signup/page";
+import KTokenProductSignupComplete from "./app/k-token/products/signup-complete/page";
+import KTokenHomePage from "./app/k-token/products/page";
+
 
 
 
@@ -131,10 +136,15 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/token/exchange/complete" element={<TokenExchangeCompletePage/>} />
 
 
+        {/* K-Token 관련 페이지 */}
+        <Route path="/k-token/products/detail" element={<KTokenProductDetail/>} />
+        <Route path="/k-token/products/signup" element={<KTokenProductSignup/>} />
+        <Route path="/k-token/products/signup-complete" element={<KTokenProductSignupComplete/>} />
+        <Route path="/k-token/products" element={<KTokenHomePage/>} />
 
       </Routes>
     </BrowserRouter>
   )
-}
+} 
 
 export default Router
