@@ -64,14 +64,8 @@ export default function LoginHome({ onSignup, buttonClassName }: LoginHomeProps)
       localStorage.setItem("accessToken", accessToken);
       localStorage.setItem("refreshToken", refreshToken);
 
-      // role에 따라 페이지 이동
-      if (role === "USER") {
-        navigate("/user/coin");
-      } else if (role === "SELLER") {
-        navigate("/store/coin");
-      } else {
-        alert("알 수 없는 사용자 유형입니다.");
-      }
+      navigate("/user/coin");
+
     } catch (err) {
       console.error("로그인 오류:", err);
       alert("로그인 중 오류가 발생했습니다.");

@@ -141,11 +141,13 @@ export default function SelectPaymentPage() {
             menuCount: item.quantity,
         }));
 
+        const selectedPrice = prices[`KRW-${selectedPayment}`];
         // orderRequest 객체 생성
         const orderRequest = {
             storeId,
             orderDetails,
             currency: selectedPayment,
+            exchangeRate: selectedPrice,
         };
 
         try {
