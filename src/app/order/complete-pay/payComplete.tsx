@@ -27,7 +27,6 @@ export default function PayCompletePage() {
     }
   };
 
-
   useEffect(() => {
     if (!orderId) return;
     const fetchAndUpdate = async () => {
@@ -45,6 +44,12 @@ export default function PayCompletePage() {
     const interval = setInterval(fetchAndUpdate, 10000);
     return () => clearInterval(interval);
   }, [orderId]);
+
+  // 페이지 로드시 localStorage에서 totalPrice와 cartItems 제거
+  useEffect(() => {
+    localStorage.removeItem("totalPrice");
+    localStorage.removeItem("cartItems");
+  }, []);
 
   const containerVariants = {
     hidden: { opacity: 0 },

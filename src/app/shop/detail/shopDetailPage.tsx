@@ -317,6 +317,7 @@ function MallDetailPage() {
                                         setShowCartPreview(false);
                                         setCartExpanded(false);
                                         localStorage.setItem("cartItems", JSON.stringify([]));
+                                        localStorage.setItem("totalPrice", JSON.stringify([]));
                                     }}
                                     className="w-1/2 py-3 rounded-lg font-medium bg-gray-100 text-gray-700 border border-gray-200"
                                 />
