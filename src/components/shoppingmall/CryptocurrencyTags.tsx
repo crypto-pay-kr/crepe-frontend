@@ -1,8 +1,10 @@
 import React from 'react';
 import { CoinStatus } from '@/types/store';
 
+type CoinLike = string | CoinStatus;
+
 interface CryptocurrencyTagsProps {
-  coins: CoinStatus[];
+  coins:  CoinLike[];
 }
 
 const CryptocurrencyTags: React.FC<CryptocurrencyTagsProps> = ({ coins }) => {
@@ -18,7 +20,7 @@ const CryptocurrencyTags: React.FC<CryptocurrencyTagsProps> = ({ coins }) => {
 
   // 암호화폐 배경색 매핑 
   const cryptoColors: Record<string, string> = {
-    'XRP': 'bg-blue-100 text-blue-800',
+    'XRP': 'bg-cyan-100 text-cyan-700',
     'USDT': 'bg-green-100 text-green-800',
     'SOL': 'bg-purple-100 text-purple-800',
     // 기본 스타일
@@ -29,15 +31,19 @@ const CryptocurrencyTags: React.FC<CryptocurrencyTagsProps> = ({ coins }) => {
     return <div className="text-xs text-gray-400">지원하는 암호화폐가 없습니다</div>;
   }
 
+
   // CoinStatus 객체에서 코인 코드 추출
-  const getCoinCode = (coin: CoinStatus): string => {
+  const getCoinCode = (coin: CoinLike): string => {
     console.log('코인 데이터:', coin);
-    
+
+
     // CoinStatus가 단순히 문자열이라면
     if (typeof coin === 'string') {
       return coin;
     }
-    
+
+    if (coin.currency) return coin.currency;
+
     // 직접 코인 이름을 확인
     // Java enum을 직렬화할 때 종종 이름만 문자열로 보내는 경우가 있음
     if (coin.name === 'XRP' || coin.name === 'USDT' || coin.name === 'SOL') {
@@ -63,6 +69,7 @@ const CryptocurrencyTags: React.FC<CryptocurrencyTagsProps> = ({ coins }) => {
     if (coinString === 'XRP' || coinString === 'USDT' || coinString === 'SOL') {
       return coinString;
     }
+
     
     // 기본값으로 객체를 문자열화
     return 'default';
@@ -78,10 +85,9 @@ const CryptocurrencyTags: React.FC<CryptocurrencyTagsProps> = ({ coins }) => {
         return (
           <div 
             key={`coin-${index}-${coinCode}`}
-            className={`text-xs px-2 py-1 rounded-full ${cryptoColors[coinCode] || cryptoColors.default}`}
+            className={`flex items-center justify-center text-xs px-1.5 h-6 rounded-full ${cryptoColors[coinCode] || cryptoColors.default}`}
           >
             <span className="font-semibold mr-1">{cryptoIcons[coinCode] || ''}</span>
-            {coinCode}
           </div>
         );
       })}

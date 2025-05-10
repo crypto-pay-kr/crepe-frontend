@@ -83,8 +83,41 @@ export async function storeMenuAdd(formData: FormData) {
     body: formData,
   });
   return response;
+
 }
 
+// 가게 영업상태 변경
+export const changeStoreStatus = async (newStatus: "OPEN" | "CLOSED", token: string) => {
+  const res = await fetch(`${API_BASE_URL}/api/store/change/status`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ storeStatus: newStatus }),
+  });
+  if (!res.ok) throw new Error("상태 변경 실패");
+};
+
+// 가게 좋아요
+export const likeStore = async (storeId: number, token: string) => {
+  return await fetch(`${API_BASE_URL}/api/like/${storeId}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+// 가게 좋아요 취소
+export const unlikeStore = async (storeId: number, token: string) => {
+  return await fetch(`${API_BASE_URL}/api/like/${storeId}`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
 
 
 

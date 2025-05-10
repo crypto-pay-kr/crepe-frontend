@@ -2,11 +2,10 @@ import BottomNav from "@/components/common/BottomNavigate";
 import Header from "@/components/common/Header";
 import MenuList, { MenuItemData } from "@/components/shoppingmall/MenuList";
 import ShopInfo from "@/components/shoppingmall/ShoppingmallInfo";
-import React from "react";
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from "react-router-dom";
-import { Home, ShoppingBag, User } from "lucide-react";
-import { stores, menuItems } from "@/mocks/stores";
 import Button from "@/components/common/Button";
+
 
 export default function StoreSettingsPage() {
     const navigate = useNavigate();
@@ -17,14 +16,8 @@ export default function StoreSettingsPage() {
         <>
             <Header title="내 가게 관리" isStore={true} />
             <div className="relative overflow-auto bg-white pb-36">
-                <div className="pb-24"> {/* 버튼 높이만큼 아래쪽 패딩 추가 */}
-                    <ShopInfo storeId={1} />
-                    <img
-                        src="/store-image.png"
-                        alt="명동칼국수 가게사진"
-                        className="object-contain mt-6 w-full aspect-[0.8]"
-                    />
-                    <MenuList menuItems={menuItems} />
+                <div className="pb-24">
+                  <ShopInfo />
                 </div>
             </div>
                             
