@@ -69,6 +69,12 @@ export default function MyPage(): React.ReactElement {
         onClick: () => navigate("/settlement"),
         icon: <BarChart2 size={18} color="#10b981" />
       });
+    } else {
+      baseMenuItems.push({
+        label: "내 주문 내역",
+        onClick: () => navigate("/my/orders"),
+        icon: <ShoppingBag size={18} color="#10b981" />
+      });
     }
 
     baseMenuItems.push(
@@ -99,7 +105,7 @@ export default function MyPage(): React.ReactElement {
         />
         <MenuList menuItems={getMenuItems()} />
       </main>
-      <BottomNav  />
+      <BottomNav />
     </div>
   );
 }
