@@ -84,7 +84,7 @@ export default function TokenProductSignup() {
     if (step < 3) {
       setStep(step + 1)
     } else {
-      navigate("/k-token/products/signup-complete")
+      navigate("/token/onsale/products/signup-complete")
     }
   }
 

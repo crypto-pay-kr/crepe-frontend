@@ -5,7 +5,8 @@ import BottomNav from "@/components/common/BottomNavigate";
 import React, { useState } from 'react'
 import { BankLogo } from '@/components/common/BankLogo'
 import Button from '@/components/common/Button'
-import TokenDistributionItem from "@/components/token/TokenDistributionItem";
+import TokenDistributionItem from "@/components/token/exchange/TokenDistributionItem";
+
 
 
 export default function TokenExchangePage() {

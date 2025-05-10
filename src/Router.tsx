@@ -32,16 +32,11 @@ import PayCompletePage from "./app/order/complete-pay/payComplete";
 import StoreCoinHome from "./app/store/store-coin/page";
 import ShoppingMall from "./app/shop/shopPage";
 import OrderHistoryPage from "./app/order/user/orderHistoryPage";
-import TokenDetailPage from "./app/token/my-product/my-product-list";
 import TokenGroupDetailPage from "./app/token/my-product/detail/my-product-detail";
 import TokenExchangePage from "./app/token/exchange/token-exchange";
 import TokenExchangeCompletePage from "./app/token/exchange/exchange-complete/exchange-complete";
 import TokenDepositPage from "./app/token/my-product/detail/deposit/product-deposit";
 import TokenCancelPage from "./app/token/my-product/detail/cancel/product-cancel";
-import KTokenProductDetail from "./app/token/onsale-product/detail/onsale-product-detail";
-import KTokenProductSignup from "./app/token/onsale-product/signup/product-signup";
-import KTokenProductSignupComplete from "./app/token/onsale-product/signup/signup-complete/product-signup-complete";
-import KTokenHomePage from "./app/token/onsale-product/onsale-product-list";
 import MyOrderHistoryPage from "./app/order/order-history/page";
 import IDVerificationStep1 from "./app/sign-up/common/idcard-verification/step01/page";
 import IDVerificationStep2 from "./app/sign-up/common/idcard-verification/step02/page";
@@ -81,7 +76,7 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/additional/info" element={<AdditionalUserInfoPage />} />
         <Route path="/signup-complete" element={<SignupCompletePage />} />
         <Route path="/login" element={<LoginPage />} />
-
+        {/* 신분증 인증 */}
         <Route path="/id/verification" element={<IDVerificationStep1 />} />
         <Route path="/id/verification/step2" element={<IDVerificationStep2/>} />
         <Route path="/id/verification/step3" element={<IDVerificationStep3/>} />
@@ -110,20 +105,16 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/store/menu/edit" element={<MenuEdit />} />
         <Route path="/store" element={<OrderStatusPage />} />
 
-        {/* 유저 주문 관리 페이지 */}
-        <Route path="/user/order-history" element={<OrderHistoryPage />} />
 
-
-        {/* 유저 쇼핑몰 페이지 */}
+        {/* 유저 쇼핑몰 이용 및 주문 페이지 */}
         <Route path="/mall" element={<ShoppingMall />} />
         <Route path="/mall/store/:id" element={<MallDetailPage />} />
         <Route path="/mall/store/cart" element={<CartPage />} />
         <Route path="/mall/store/order" element={<SelectPaymentPage />} />
         <Route path="/mall/store/order-pending" element={<LoadingPage />} />
         <Route path="/mall/store/pay-complete/:orderId" element={<PayCompletePage />} />
-
-        {/* 유저 주문 관리 페이지 */}
         <Route path="/user/orders" element={<MyOrderHistoryPage/>} />
+        <Route path="/user/order-history" element={<OrderHistoryPage />} />
 
 
         {/*가맹점코인 내역*/}
@@ -154,10 +145,10 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
 
 
         {/*Token Product 관련 페이지 */}
-        <Route path="/k-token/products/detail" element={<OnSaleTokenProductDetail />} />
-        <Route path="/k-token/products/signup" element={<TokenProductSignup />} />
-        <Route path="/k-token/products/signup-complete" element={<TokenProductSignupComplete/>} />
-        <Route path="/k-token/products" element={<OnSaleTokenProductListPage />} />
+        <Route path="/token/onsale/products/detail" element={<OnSaleTokenProductDetail />} />
+        <Route path="/token/onsale/products/signup" element={<TokenProductSignup />} />
+        <Route path="/token/onsale/products/signup-complete" element={<TokenProductSignupComplete/>} />
+        <Route path="/token/onsale/products" element={<OnSaleTokenProductListPage />} />
 
       </Routes>
     </BrowserRouter>

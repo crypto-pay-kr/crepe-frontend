@@ -4,16 +4,16 @@ import { BankLogo } from "@/components/common/BankLogo";
 import { ProductTag } from "@/components/token/onsale-product/ProductTag";
 import { useNavigate } from "react-router-dom"
 import { productInfoData, additionalInfoData, bankProductData,productTags } from "@/mocks/token";
-import ProductAdditionalInfo from "@/components/k-token/product/ProductAdditionalInfo";
 import BankProductInfo from "@/components/token/onsale-product/TokenProductInfo";
-import ProductDetailInfo from "@/components/k-token/product/ProductDetailInfo";
+import ProductDetailInfo from "@/components/token/onsale-product/ProductDetailInfo";
+import ProductAdditionalInfo from "@/components/token/onsale-product/ProductAdditionalInfo";
 
 
 export default function OnSaleTokenProductDetail() {
   const navigate = useNavigate();
 
   const handleSignupClick = () => {
-    navigate("/k-token/products/signup", { state: { product: "woori" } })
+    navigate("/token/onsale/products/signup", { state: { product: "woori" } })
   }
 
   const tagColorMapping: { [key: string]: string } = {
