@@ -5,7 +5,7 @@ import BottomNav from '@/components/common/BottomNavigate'
 import { useState } from 'react'
 import TransactionIdInput from '@/components/coin/TransactionIdInput'
 import InstructionGuide from '@/components/coin/InstructionGuide'
-import { requestUserDeposit } from '@/api/coin'
+import { requestDeposit } from '@/api/coin'
 
 type RouteParams = {
   symbol: string;
@@ -37,7 +37,7 @@ export default function CoinTransaction() {
     }
 console.log(symbol,transactionId);
     try {
-      await requestUserDeposit(symbol, transactionId);
+      await requestDeposit(symbol, transactionId);
       navigate(`/coin-detail/${symbol}`, {
         state: {
           isUser: true,
