@@ -45,8 +45,8 @@ export default function BankProductItem({
             )}
             {StatusIcon && statusText && (
                 <div className="flex items-center mb-2 mt-2">
-                    <StatusIcon size={20} className={statusIconColor} />
-                    <span className={`ml-1 text-sm ${statusIconColor}`}>{statusText}</span>
+                    <StatusIcon size={20} className={statusIconColor}/>
+                    <span className="ml-1 text-sm text-red-500">{statusText}</span>
                 </div>
             )}
             <div className="flex gap-2 mt-2 mb-4">
