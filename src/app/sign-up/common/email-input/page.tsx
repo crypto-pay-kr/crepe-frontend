@@ -12,7 +12,7 @@ export default function EmailPasswordPage() {
 
   // 비밀번호 검증 로직
   const isPasswordValid = (password: string) => {
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{10,}$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%?&])[A-Za-z\d@$!%?&]{10,}$/;
     return passwordRegex.test(password);
   };
 
@@ -23,7 +23,7 @@ export default function EmailPasswordPage() {
     }
 
     if (!isPasswordValid(password)) {
-      setErrorMessage("비밀번호는 10자 이상, 숫자/대문자/소문자/특수문자를 포함해야 합니다.");
+      setErrorMessage("비밀번호는 10자 이상, 숫자/대문자/소문자/특수문자(@$!%?&)를 포함해야 합니다.");
       return;
     }
 
