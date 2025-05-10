@@ -292,13 +292,23 @@ export default function CoinDetailPage() {
             <TransactionItem
               key={idx}
               date={new Date(item.transferredAt).toLocaleString()}
-              type={ item.status === 'ACCEPTED'
-                ? item.type === 'DEPOSIT'
-                  ? '입금 완료'
-                  : '출금 완료'
-                : item.type === 'DEPOSIT'
-                  ? '입금 대기중'
-                  : '출금 대기중'}
+              type={
+                item.type === 'DEPOSIT'
+                  ? item.status === 'ACCEPTED'
+                    ? '입금 완료'
+                    : '입금 대기중'
+                  : item.type === 'WITHDRAW'
+                    ? item.status === 'ACCEPTED'
+                      ? '출금 완료'
+                      : '출금 대기중'
+                    : item.type === 'PAY'
+                      ? item.status === 'ACCEPTED'
+                        ? '결제 완료'
+                        : item.status === 'PENDING'
+                          ? '정산 대기중'
+                          : '결제 취소'
+                      : '알 수 없음'
+              }
               balance={`${balance} ${symbol}`}
               amount={item.amount + ' ' + symbol}
               krw={Math.floor(item.amount * 1000).toLocaleString()}
