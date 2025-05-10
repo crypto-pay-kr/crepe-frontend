@@ -5,7 +5,7 @@ const API_BASE_URL = import.meta.env.VITE_API_SERVER_URL || "http://localhost:80
 
 // 인증 문자 전송 (SMS)
 export async function sendSMS(phone: string, smsType: string) {
-  const response = await fetch(API_BASE_URL + "/sms/code", {
+  const response = await fetch(API_BASE_URL + "/api/sms/code", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ phone, smsType }),
@@ -15,7 +15,7 @@ export async function sendSMS(phone: string, smsType: string) {
 
 // 인증 코드 검증
 export async function verifySMS(code: string, phone: string, smsType: string) {
-  const response = await fetch(API_BASE_URL + "/sms/verify", {
+  const response = await fetch(API_BASE_URL + "/api/sms/verify", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ code, phone, smsType }),
@@ -35,16 +35,17 @@ export async function signUpUser(requestBody: any) {
 
 
 // 로그인(가맹점 및 일반회원 공통)
-export async function loginUser(email: string, password: string) {
-  
-  const response = await fetch(API_BASE_URL + "/api/login", {
-
-
+export async function loginUser({ email, password, captchaKey, captchaValue }: {
+  email: string;
+  password: string;
+  captchaKey: string;
+  captchaValue: string;
+}) {
+  return fetch("/api/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password, captchaKey, captchaValue }),
   });
-  return response;
 }
 
 // 비밀번호 변경
