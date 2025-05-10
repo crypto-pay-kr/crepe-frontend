@@ -22,7 +22,7 @@ const BusinessVerificationPage: React.FC = () => {
     setCertificate(file);
   };
 
-  // 유틸 함수: Base64 문자열을 Blob으로 변환
+  // Base64 → Blob 변환
   const base64ToBlob = (base64: string, contentType = "image/png"): Blob => {
     const parts = base64.split(",");
     const byteCharacters = atob(parts[1]);
@@ -42,6 +42,10 @@ const BusinessVerificationPage: React.FC = () => {
     }
     const signUpData = JSON.parse(storedData);
 
+    // 서버가 요구하는 필드명: storeAddress
+    // signUpData.address가 있다면 그대로 전달
+    signUpData.storeAddress = signUpData.address ?? "";
+
     if (!businessNumber.trim()) {
       alert("사업자 등록번호를 입력해주세요.");
       return;
@@ -51,18 +55,17 @@ const BusinessVerificationPage: React.FC = () => {
       return;
     }
 
-    // 추가 정보 병합 (사업자 등록번호 추가)
+    // 사업자 등록번호 추가
     signUpData.businessNumber = businessNumber.trim();
 
     // FormData 구성
     const formData = new FormData();
-    // "storeData" 파트: JSON 데이터를 Blob으로 감싸서 추가
     formData.append(
       "storeData",
       new Blob([JSON.stringify(signUpData)], { type: "application/json" })
     );
 
-    // storeImage: localStorage에 저장된 Base64 문자열을 Blob으로 변환하여 추가 (파일명은 임의로 지정)
+    // 가게 대표이미지 첨부
     if (signUpData.storeImageBase64) {
       const blob = base64ToBlob(signUpData.storeImageBase64);
       formData.append("storeImage", blob, "storeImage.png");
@@ -71,7 +74,7 @@ const BusinessVerificationPage: React.FC = () => {
       return;
     }
 
-    // businessImage: 사업자 등록증 이미지 File 객체 추가
+    // 사업자 등록증 파일 첨부
     formData.append("businessImage", certificate, certificate.name);
 
     try {
@@ -82,7 +85,7 @@ const BusinessVerificationPage: React.FC = () => {
         return;
       }
 
-      // 회원가입 성공 시 localStorage와 sessionStorage 데이터 삭제
+      // 회원가입 성공 시 저장된 정보 삭제
       localStorage.removeItem("signUpData");
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
@@ -100,13 +103,11 @@ const BusinessVerificationPage: React.FC = () => {
 
   return (
     <div className="h-full flex flex-col bg-white">
-      <Header title="회원가입" progress={4} isStore={false} />
-
+      <Header title="회원가입" progress={4} isStore={isStore} />
       <main className="flex-1 overflow-auto px-6 pt-6 pb-24 flex flex-col">
         <div className="mb-10">
           <h2 className="text-2xl font-bold mb-2">사업자 인증</h2>
         </div>
-
         <div className="flex-1">
           <div className="mb-6">
             <Input
@@ -116,7 +117,6 @@ const BusinessVerificationPage: React.FC = () => {
               placeholder="사업자 등록번호 10자리를 입력해주세요"
             />
           </div>
-
           <div className="mb-8">
             <ImageUploader
               label="사업자 등록증 업로드"
@@ -127,7 +127,6 @@ const BusinessVerificationPage: React.FC = () => {
           </div>
         </div>
       </main>
-
       <div className="p-5 bg-white">
         <Button
           text="인증하기"

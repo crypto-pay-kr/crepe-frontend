@@ -38,7 +38,7 @@ export default function PhoneVerificationPage() {
         if (!isStore) {
           navigate("/additional/info");
         } else {
-          navigate("/store/info");
+          navigate("/store/register");
         }
       } else {
         const errorData = await response.json();
