@@ -34,19 +34,19 @@ const BottomNav: React.FC = () => {
       icon: <Home className="w-6 h-6" color="white" />,
       label: "홈",
       isActive: location.pathname === "/coin",
-      onClick: () => navigate("/user/coin" ),
+      onClick: () => navigate("/my/coin" ),
     },
     {
       icon: <ShoppingBag className="w-6 h-6" color="white" />,
       label: "쇼핑몰",
-      isActive: location.pathname === "/shop",
-      onClick: () => navigate("/mall"),
+      isActive: location.pathname === "/",
+      onClick: () => navigate(isSeller ? "/store" : "/mall"),
     },
     {
       icon: <User className="w-6 h-6" color="white" />,
       label: "마이페이지",
       isActive: location.pathname.includes("/my"),
-      onClick: () => navigate(isSeller ? "/store/my" : "/home/my"),
+      onClick: () => navigate(isSeller ? "/store/my" : "/user/my"),
     },
   ];
 

@@ -24,7 +24,7 @@ export default function MyPage(): React.ReactElement {
     if (isSeller) {
       navigate("/store/my/edit");
     } else {
-      navigate("/home/my/edit");
+      navigate("/user/my/edit");
     }
   };
 
