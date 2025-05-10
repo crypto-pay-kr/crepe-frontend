@@ -2,14 +2,13 @@
 
 import Button from "@/components/common/Button"
 import Header from "@/components/common/Header"
-import AutoDebitInfo from "@/components/k-token/signup/AutoDebitInfo"
+import AutoDebitInfo from "@/components/token/signup/AutoDebitInfo"
 
-import SignUpCompleteBanner from "@/components/k-token/signup/SignUpCompleteBanner"
-import SignUpCompleteProductInfo from "@/components/k-token/signup/SignUpCompleteProductInfo"
-import { CheckCircle } from "lucide-react"
+import SignUpCompleteBanner from "@/components/token/signup/SignUpCompleteBanner"
+import SignUpCompleteProductInfo from "@/components/token/signup/SignUpCompleteProductInfo"
 import { useNavigate } from "react-router-dom"
 
-export default function KTokenProductSignupComplete() {
+export default function TokenProductSignupComplete() {
   const navigate = useNavigate()
 
   const handleHomeClick = () => {

@@ -32,20 +32,25 @@ import PayCompletePage from "./app/order/complete-pay/payComplete";
 import StoreCoinHome from "./app/store/store-coin/page";
 import ShoppingMall from "./app/shop/shopPage";
 import OrderHistoryPage from "./app/order/user/orderHistoryPage";
-import TokenDetailPage from "./app/token/product/product-detail";
-import TokenGroupDetailPage from "./app/token/token-detail";
-import TokenExchangePage from "./app/token/token-exchange";
-import TokenExchangeCompletePage from "./app/token/exchangecomplete";
-import TokenDepositPage from "./app/token/product/product-deposit";
-import TokenCancelPage from "./app/token/product/product-cancel";
-import KTokenProductDetail from "./app/k-token/products/detail/page";
-import KTokenProductSignup from "./app/k-token/products/signup/page";
-import KTokenProductSignupComplete from "./app/k-token/products/signup-complete/page";
-import KTokenHomePage from "./app/k-token/products/page";
+import TokenDetailPage from "./app/token/my-product/my-product-list";
+import TokenGroupDetailPage from "./app/token/my-product/detail/my-product-detail";
+import TokenExchangePage from "./app/token/exchange/token-exchange";
+import TokenExchangeCompletePage from "./app/token/exchange/exchange-complete/exchange-complete";
+import TokenDepositPage from "./app/token/my-product/detail/deposit/product-deposit";
+import TokenCancelPage from "./app/token/my-product/detail/cancel/product-cancel";
+import KTokenProductDetail from "./app/token/onsale-product/detail/onsale-product-detail";
+import KTokenProductSignup from "./app/token/onsale-product/signup/product-signup";
+import KTokenProductSignupComplete from "./app/token/onsale-product/signup/signup-complete/product-signup-complete";
+import KTokenHomePage from "./app/token/onsale-product/onsale-product-list";
 import MyOrderHistoryPage from "./app/order/order-history/page";
 import IDVerificationStep1 from "./app/sign-up/common/idcard-verification/step01/page";
 import IDVerificationStep2 from "./app/sign-up/common/idcard-verification/step02/page";
 import IDVerificationStep3 from "./app/sign-up/common/idcard-verification/step03/page";
+import TokenProductListPage from "./app/token/my-product/my-product-list";
+import OnSaleTokenProductDetail from "./app/token/onsale-product/detail/onsale-product-detail";
+import TokenProductSignup from "./app/token/onsale-product/signup/product-signup";
+import TokenProductSignupComplete from "./app/token/onsale-product/signup/signup-complete/product-signup-complete";
+import OnSaleTokenProductListPage from "./app/token/onsale-product/onsale-product-list";
 
 
 
@@ -136,9 +141,8 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         {/*가맹점 코인 정산 페이지*/}
         <Route path="/settlement" element={<SettlementCoin />} />
 
-        /*토큰 관련 페이지*/
         {/*토큰 상품 페이지*/}
-        <Route path="/token/product/detail/:tokenCode" element={<TokenDetailPage/>} />
+        <Route path="/token/product/detail/:tokenCode" element={<TokenProductListPage/>} />
         <Route path="/token/product/deposit/:tokenCode" element={<TokenDepositPage/>} />
         <Route path="/token/product/cancel/:tokenCode" element={<TokenCancelPage/>} />
 
@@ -149,11 +153,11 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/token/exchange/complete" element={<TokenExchangeCompletePage/>} />
 
 
-        {/* K-Token 관련 페이지 */}
-        <Route path="/k-token/products/detail" element={<KTokenProductDetail />} />
-        <Route path="/k-token/products/signup" element={<KTokenProductSignup />} />
-        <Route path="/k-token/products/signup-complete" element={<KTokenProductSignupComplete />} />
-        <Route path="/k-token/products" element={<KTokenHomePage />} />
+        {/*Token Product 관련 페이지 */}
+        <Route path="/k-token/products/detail" element={<OnSaleTokenProductDetail />} />
+        <Route path="/k-token/products/signup" element={<TokenProductSignup />} />
+        <Route path="/k-token/products/signup-complete" element={<TokenProductSignupComplete/>} />
+        <Route path="/k-token/products" element={<OnSaleTokenProductListPage />} />
 
       </Routes>
     </BrowserRouter>

@@ -1,15 +1,15 @@
 import Button from "@/components/common/Button";
 import Header from "@/components/common/Header"
 import { BankLogo } from "@/components/common/BankLogo";
-import { ProductTag } from "@/components/k-token/product/ProductTag";
+import { ProductTag } from "@/components/token/onsale-product/ProductTag";
 import { useNavigate } from "react-router-dom"
 import { productInfoData, additionalInfoData, bankProductData,productTags } from "@/mocks/token";
 import ProductAdditionalInfo from "@/components/k-token/product/ProductAdditionalInfo";
-import BankProductInfo from "@/components/k-token/product/BankProductInfo";
+import BankProductInfo from "@/components/token/onsale-product/TokenProductInfo";
 import ProductDetailInfo from "@/components/k-token/product/ProductDetailInfo";
 
 
-export default function KTokenProductDetail() {
+export default function OnSaleTokenProductDetail() {
   const navigate = useNavigate();
 
   const handleSignupClick = () => {

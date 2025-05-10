@@ -1,5 +1,5 @@
 import React from "react"
-import BankProductItem, {BankProductItemProps} from "./BankProductItem"
+import BankProductItem, {BankProductItemProps} from "./TokenProductItem"
 
 
 interface BankProductListProps {
