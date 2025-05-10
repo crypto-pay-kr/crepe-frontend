@@ -6,7 +6,7 @@ export async function createOrder(orderRequest: {
   currency: string;
 }): Promise<string> {
   const token = localStorage.getItem("accessToken");
-  const response = await fetch(`${API_BASE_URL}/orders/create`, {
+  const response = await fetch(`${API_BASE_URL}/api/orders/create`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -24,7 +24,22 @@ export async function createOrder(orderRequest: {
 
 export async function getOrderDetails(orderId: string): Promise<any> {
     const token = localStorage.getItem("accessToken");
-    const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
+    const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  
+    if (!response.ok) {
+      throw new Error(`Failed to fetch order details with status ${response.status}`);
+    }
+    return response.json();
+  }
+
+  export async function getOrderHistory() {
+    const token = localStorage.getItem("accessToken");
+    const response = await fetch(`${API_BASE_URL}/api/orders`, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,

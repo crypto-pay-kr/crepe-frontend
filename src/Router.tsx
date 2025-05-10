@@ -35,9 +35,11 @@ import KTokenProductDetail from "./app/k-token/products/detail/page";
 import KTokenProductSignup from "./app/k-token/products/signup/page";
 import KTokenProductSignupComplete from "./app/k-token/products/signup-complete/page";
 import KTokenHomePage from "./app/k-token/products/page";
+import MyOrderHistoryPage from "./app/order/order-history/page";
 import IDVerificationStep1 from "./app/sign-up/common/idcard-verification/step01/page";
 import IDVerificationStep2 from "./app/sign-up/common/idcard-verification/step02/page";
 import IDVerificationStep3 from "./app/sign-up/common/idcard-verification/step03/page";
+
 
 
 
@@ -58,78 +60,83 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
     <BrowserRouter>
       <Routes>
         {/* 회원가입 및 로그인 페이지 */}
-        <Route path="/" element={<SplashPage/>} />
+        <Route path="/" element={<SplashPage />} />
         <Route path="/welcome" element={<WelcomePage />} />
         <Route path="/terms" element={<TermsAgreementPage />} />
         <Route path="/email" element={<EmailPasswordPage />} />
-        <Route path="/phone" element={<PhoneNumberPage/>} />
+        <Route path="/phone" element={<PhoneNumberPage />} />
         <Route path="/phone/verification" element={<PhoneVerificationPage />} />
         <Route path="/additional/info" element={<AdditionalUserInfoPage />} />
         <Route path="/signup-complete" element={<SignupCompletePage />} />
         <Route path="/login" element={<LoginPage />} />
+
         <Route path="/id/verification" element={<IDVerificationStep1 />} />
         <Route path="/id/verification/step2" element={<IDVerificationStep2/>} />
         <Route path="/id/verification/step3" element={<IDVerificationStep3/>} />
 
+
         {/* 가맹점 회원가입 경로 */}
         <Route path="/store/terms" element={<TermsAgreementPage />} />
         <Route path="/store/email" element={<EmailPasswordPage />} />
-        <Route path="/store/phone" element={<PhoneNumberPage/>} />
+        <Route path="/store/phone" element={<PhoneNumberPage />} />
         <Route path="/store/phone/verification" element={<PhoneVerificationPage />} />
-        <Route path="/store/verification" element={<BusinessVerificationPage/>} />
+        <Route path="/store/verification" element={<BusinessVerificationPage />} />
 
 
         {/* 가맹점 및 유저 정보 관리 및 수정 페이지 */}
-        <Route path="/home/my" element={<MyPage/>} />
+        <Route path="/home/my" element={<MyPage />} />
         <Route path="/home/my/edit" element={<EditInfo />} />
         <Route path="/store/my" element={<MyPage />} />
-        <Route path="/store/my/settlement-report" element={<SettlementReport/>} />
+        <Route path="/store/my/settlement-report" element={<SettlementReport />} />
         <Route path="/store/my/edit" element={<StoreEditInfoPage />} />
 
 
         {/* 가맹점 가게 및 주문 관리 페이지 */}
-        <Route path="/store/info" element={<AdditionalStoreInfoPage/>} />
-        <Route path="/store/manage" element={<MyStoreManagePage/>} />
-        <Route path="/store/menu/add" element={<MenuEdit/>} />
-        <Route path="/store/menu/edit" element={<MenuEdit/>} />
+        <Route path="/store/info" element={<AdditionalStoreInfoPage />} />
+        <Route path="/store/manage" element={<MyStoreManagePage />} />
+        <Route path="/store/menu/add" element={<MenuEdit />} />
+        <Route path="/store/menu/edit" element={<MenuEdit />} />
         <Route path="/store" element={<OrderStatusPage />} />
 
         {/* 유저 쇼핑몰 페이지 */}
-        <Route path="/mall" element={<ShoppingMall/>} />
-        <Route path="/mall/store/:id" element={<MallDetailPage/>} />
-        <Route path="/mall/store/cart" element={<CartPage/>} />
-        <Route path="/mall/store/order" element={<SelectPaymentPage/>} />
-        <Route path="/mall/store/order-pending" element={<LoadingPage/>} />
-        <Route path="/mall/store/pay-complete/:orderId" element={<PayCompletePage/>} />
+        <Route path="/mall" element={<ShoppingMall />} />
+        <Route path="/mall/store/:id" element={<MallDetailPage />} />
+        <Route path="/mall/store/cart" element={<CartPage />} />
+        <Route path="/mall/store/order" element={<SelectPaymentPage />} />
+        <Route path="/mall/store/order-pending" element={<LoadingPage />} />
+        <Route path="/mall/store/pay-complete/:orderId" element={<PayCompletePage />} />
+
+        {/* 유저 주문 관리 페이지 */}
+        <Route path="/user/orders" element={<MyOrderHistoryPage/>} />
 
 
         {/*가맹점코인 내역*/}
-        <Route path="/store/coin" element={<StoreCoinHome/>} />
+        <Route path="/store/coin" element={<StoreCoinHome />} />
         {/*유저 코인 내역*/}
-        <Route path="/user/coin" element={<CoinHome/>} />
+        <Route path="/user/coin" element={<CoinHome />} />
         {/*코인 상세내역 보여주는 페이지*/}
-        <Route path="/coin-detail/:symbol" element={<CoinDetailPage/>} />
+        <Route path="/coin-detail/:symbol" element={<CoinDetailPage />} />
         {/*입금주소 보여주는 페이지*/}
-        <Route path="/coin/address/:symbol" element={<CoinDeposit/>} />
+        <Route path="/coin/address/:symbol" element={<CoinDeposit />} />
         {/*거래ID 입력 페이지*/}
         <Route path="/coin/transaction/:symbol" element={<CoinTransaction />} />
         {/*입금 계좌 등록 페이지*/}
-        <Route path="/coin/address/add" element={<AddCoinAddress/>} />
+        <Route path="/coin/address/add" element={<AddCoinAddress />} />
         {/*가맹점 코인 정산 페이지*/}
-        <Route path="/settlement" element={<SettlementCoin/>} />
+        <Route path="/settlement" element={<SettlementCoin />} />
 
 
 
 
         {/* K-Token 관련 페이지 */}
-        <Route path="/k-token/products/detail" element={<KTokenProductDetail/>} />
-        <Route path="/k-token/products/signup" element={<KTokenProductSignup/>} />
-        <Route path="/k-token/products/signup-complete" element={<KTokenProductSignupComplete/>} />
-        <Route path="/k-token/products" element={<KTokenHomePage/>} />
+        <Route path="/k-token/products/detail" element={<KTokenProductDetail />} />
+        <Route path="/k-token/products/signup" element={<KTokenProductSignup />} />
+        <Route path="/k-token/products/signup-complete" element={<KTokenProductSignupComplete />} />
+        <Route path="/k-token/products" element={<KTokenHomePage />} />
 
       </Routes>
     </BrowserRouter>
   )
-} 
+}
 
 export default Router
