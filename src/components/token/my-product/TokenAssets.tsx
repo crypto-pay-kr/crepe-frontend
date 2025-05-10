@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { ChevronDown, ChevronUp ,ChevronRight} from "lucide-react";
-import { BankLogo, BankLogoProps } from "../common/BankLogo";
+
 import { useNavigate } from 'react-router-dom'
 import { dummyTokenData } from "@/constants/TokenData";
+import { BankLogo } from "@/components/common/BankLogo";
 
 
 export default function TokenAssets() {

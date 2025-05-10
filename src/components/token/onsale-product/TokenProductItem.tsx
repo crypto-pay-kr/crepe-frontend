@@ -1,6 +1,6 @@
 import React from "react"
 import { BankLogo } from "@/components/common/BankLogo"
-import { ProductTag } from "@/components/k-token/product/ProductTag";
+import { ProductTag } from "@/components/token/onsale-product/ProductTag";
 import { LucideIcon, Clock, AlertCircle } from "lucide-react"
 
 

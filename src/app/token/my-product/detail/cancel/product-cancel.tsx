@@ -10,7 +10,7 @@ import Button from '@/components/common/Button'
 
 
 
-export default function TokenDepositPage() {
+export default function TokenCancelPage() {
   const navigate = useNavigate();
   const { tokenCode } = useParams();
 

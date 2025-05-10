@@ -4,11 +4,11 @@ import Header from "@/components/common/Header"
 import Button from "@/components/common/Button"
 
 import { Clock, AlertCircle } from "lucide-react"
-import { BankProductItemProps } from "@/components/k-token/product/BankProductItem"
-import BankProductList from "@/components/k-token/product/BankProductList"
+import { BankProductItemProps } from "@/components/token/onsale-product/TokenProductItem"
+import BankProductList from "@/components/token/onsale-product/TokenProductList"
 import TokenCategoryTab from "@/components/common/TokenCategoryTab"
 
-export default function KTokenHomePage() {
+export default function OnSaleTokenProductListPage() {
   const navigate = useNavigate()
 
   const categories = ["전체", "예금", "적금", "입출금", "상품권"]

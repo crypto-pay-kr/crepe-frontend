@@ -5,9 +5,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import React, { useState, useEffect } from 'react';
 import { OrderSection } from '@/components/coin/OrderSection';
 import { Coin, Order } from '@/constants/coinData';
-import { getUserBalance } from '@/api/coin';
 import CoinAssets from '@/components/coin/CoinAssets';
-import TokenAssets from '@/components/token/TokenAssets';
+import TokenAssets from '@/components/token/my-product/TokenAssets';
 import { getCoinBalance } from '@/api/coin';
 
 

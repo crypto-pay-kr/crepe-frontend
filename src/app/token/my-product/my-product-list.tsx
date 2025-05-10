@@ -8,7 +8,7 @@ import React, { useState } from 'react'
 import { BankLogo } from '@/components/common/BankLogo'
 import Button from '@/components/common/Button'
 
-export default function TokenDetailPage() {
+export default function TokenProductListPage() {
   const { tokenCode } = useParams();
   const navigate = useNavigate();
   const [selectedPeriod, setSelectedPeriod] = useState('day')

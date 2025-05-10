@@ -3,21 +3,21 @@ import { useNavigate } from "react-router-dom"
 import { Document, Page, pdfjs } from "react-pdf"
 import Header from "@/components/common/Header"
 import { BankLogo } from "@/components/common/BankLogo"
-import { ProductTag } from "@/components/k-token/product/ProductTag"
+import { ProductTag } from "@/components/token/onsale-product/ProductTag"
 import Button from "@/components/common/Button"
-import BankProductInfo from "@/components/k-token/product/BankProductInfo";
+import BankProductInfo from "@/components/token/onsale-product/TokenProductInfo";
 import {
   bankProductData,
   productTags,
 } from "@/mocks/token";
-import ProductSignUpAgreementSection from "@/components/k-token/signup/ProductSignUpAgreementSection"
-import ProductProtectionInfo from "@/components/k-token/product/ProductProtectionInfo"
+import ProductSignUpAgreementSection from "@/components/token/signup/ProductSignUpAgreementSection"
+import ProductProtectionInfo from "@/components/token/signup/ProductProtectionInfo"
 
 // PDF.js 워커 설정
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 
-export default function KTokenProductSignup() {
+export default function TokenProductSignup() {
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [numPages, setNumPages] = useState(0)
@@ -84,7 +84,7 @@ export default function KTokenProductSignup() {
     if (step < 3) {
       setStep(step + 1)
     } else {
-      navigate("/k-token/products/signup-complete")
+      navigate("/token/onsale/products/signup-complete")
     }
   }
 
