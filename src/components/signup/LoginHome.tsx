@@ -132,9 +132,10 @@ export default function LoginHome({ onSignup, buttonClassName }: LoginHomeProps)
             <div className="sm:w-1/2 flex items-center">
               <input
                 type="text"
+                value={captchaInput}
+                onChange={(e) => setCaptchaInput(e.target.value)}
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-400 focus:border-transparent outline-none transition"
                 placeholder="보이는 대로 입력해주세요"
-                required
               />
             </div>
           </div>
