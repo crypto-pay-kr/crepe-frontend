@@ -9,7 +9,7 @@ export const registerAccountAddress = async ({ currency, address, tag, }: {
   address: string;
   tag?: string;
 }) => {
-  const res = await fetch(`${BASE_URL}/save/address`, {
+  const res = await fetch(`${BASE_URL}/api/save/address`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -27,7 +27,7 @@ export const registerAccountAddress = async ({ currency, address, tag, }: {
 
 // 계좌등록 확인
 export const isAccountAddressRegistered = async (currency: string) => {
-  const res = await fetch(`${BASE_URL}/address?currency=${currency}`, {
+  const res = await fetch(`${BASE_URL}/api/address?currency=${currency}`, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -48,7 +48,7 @@ export const reRegisterAccountAddress = async (payload: {
   address: string;
   tag?: string;
 }) => {
-  return await fetch(`${BASE_URL}/resave/address`, {
+  return await fetch(`${BASE_URL}/api/resave/address`, {
     method: 'PATCH',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -61,7 +61,7 @@ export const reRegisterAccountAddress = async (payload: {
 
 //전체 코인 잔액 조회
 export const getCoinBalance = async () => {
-  const response = await fetch(`${BASE_URL}/balance`, {
+  const response = await fetch(`${BASE_URL}/api/balance`, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -78,7 +78,7 @@ export const getCoinBalance = async () => {
 
 //특정 코인 잔액 조회
 export const getCoinBalanceByCurrency = async (currency: string) => {
-  const response = await fetch(`${BASE_URL}/balance/${currency}`, {
+  const response = await fetch(`${BASE_URL}/api/balance/${currency}`, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -96,7 +96,7 @@ export const getCoinBalanceByCurrency = async (currency: string) => {
 //코인 입금 요청
 export const requestDeposit = async (currency: string, txid: string) => {
 
-  const response = await fetch(`${BASE_URL}/deposit`, {
+  const response = await fetch(`${BASE_URL}/api/deposit`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -115,7 +115,7 @@ export const requestDeposit = async (currency: string, txid: string) => {
 
 // 코인 출금 요청
 export const requestWithdraw = async (currency: string, amount: string) => {
-  const res = await fetch(`${BASE_URL}/withdraw`, {
+  const res = await fetch(`${BASE_URL}/api/withdraw`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -136,7 +136,7 @@ export const requestWithdraw = async (currency: string, amount: string) => {
 export const getCoinHistory = async (currency: string) => {
 
 
-  const res = await fetch(`${BASE_URL}/history?currency=${currency}`, {
+  const res = await fetch(`${BASE_URL}/api/history?currency=${currency}`, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${token}`,

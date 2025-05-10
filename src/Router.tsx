@@ -29,7 +29,7 @@ import CoinHome from "./app/coin/home/CoinHome";
 import SelectPaymentPage from "./app/order/payment/selectPayment";
 import CartPage from "./app/order/cart/cartPage";
 import PayCompletePage from "./app/order/complete-pay/payComplete";
-import StoreCoinHome from "./app/store/store-coin/page";
+
 import ShoppingMall from "./app/shop/shopPage";
 import OrderHistoryPage from "./app/order/user/orderHistoryPage";
 import TokenDetailPage from "./app/token/product/product-detail";
@@ -121,8 +121,6 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/user/orders" element={<MyOrderHistoryPage/>} />
 
 
-        {/*가맹점코인 내역*/}
-        <Route path="/store/coin" element={<StoreCoinHome />} />
         {/*유저 코인 내역*/}
         <Route path="/user/coin" element={<CoinHome />} />
         {/*코인 상세내역 보여주는 페이지*/}
