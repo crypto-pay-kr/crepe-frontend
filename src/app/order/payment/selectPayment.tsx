@@ -4,7 +4,7 @@ import BottomNav from "@/components/common/BottomNavigate";
 import Header from "@/components/common/Header";
 import Button from "@/components/common/Button";
 import PaymentOptionsList from "@/components/order/PaymentOptionList";
-import { getUserBalance, fetchCoinPrices } from "@/api/coin";
+import { getCoinBalance, fetchCoinPrices } from "@/api/coin";
 import { createOrder } from "@/api/order";
 
 
@@ -47,7 +47,7 @@ export default function SelectPaymentPage() {
     useEffect(() => {
         const fetchBalances = async () => {
             try {
-                const data = await getUserBalance();
+                const data = await getCoinBalance();
                 const balanceMap = data.reduce((acc: any, item: any) => {
                     acc[item.currency] = item.balance;
                     return acc;

@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from 'react';
 import { OrderSection } from '@/components/coin/OrderSection';
 import { Coin, Order } from '@/constants/coinData';
-import { getStoreBalance, getUserBalance } from '@/api/coin'
+import { getCoinBalance } from '@/api/coin'
 
 interface RawCoinBalance {
   coinName: string;
@@ -57,12 +57,12 @@ export default function StoreCoinPage() {
   useEffect(() => {
     const fetchBalance = async () => {
       try {
-        const data: RawCoinBalance[] = await getStoreBalance();
+        const data: RawCoinBalance[] = await getCoinBalance();
         const currencies = ["XRP", "USDT", "SOL"];
         const coinMap = new Map(data.map((raw) => [raw.currency, raw]));
 
         const mapped: Coin[] = currencies.map((symbol) => {
-          const raw = coinMap.get(symbol); // 없을 수도 있음
+          const raw = coinMap.get(symbol);
           const info = COIN_INFO[symbol];
 
           const rawBalance = raw?.balance ?? "0";

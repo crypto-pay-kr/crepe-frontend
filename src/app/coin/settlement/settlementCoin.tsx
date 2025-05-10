@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Header from "@/components/common/Header"
 import { useLocation, useNavigate } from 'react-router-dom'
 import BottomNav from '@/components/common/BottomNavigate'
@@ -6,15 +6,13 @@ import AmountInput from '@/components/coin/AmountInput'
 import PercentageSelector from '@/components/coin/PercentageSelector'
 import AvailableAmount from '@/components/coin/AvailableAmount'
 import Button from '@/components/common/Button'
-import { requestSettlement } from '@/api/coin'
+import { getCoinBalanceByCurrency, requestWithdraw } from '@/api/coin'
 
 
 export default function SettlementCoin() {
   const [amount, setAmount] = useState("3.45")
   const [selectedPercentage, setSelectedPercentage] = useState(70)
-  
-  const availableAmount = 54321
-  const exchangeRate = 1000 / 3.45
+
   
   const navigate = useNavigate();
   const location = useLocation()
@@ -26,14 +24,35 @@ export default function SettlementCoin() {
   
   const handlePercentageClick = (percentage: number) => {
     setSelectedPercentage(percentage)
-    const newAmount = ((availableAmount * (percentage / 100)) / exchangeRate).toFixed(2)
+    const newAmount = ((availableAmount * (percentage / 100))).toFixed(2)
     setAmount(newAmount)
   }
 
 
+  const [availableAmount, setAvailableAmount] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (!symbol) return;
+
+      try {
+        const data = await getCoinBalanceByCurrency(symbol);
+        setAvailableAmount(data.balance ?? 0);
+        const initialAmount = ((data.balance * selectedPercentage) / 100).toFixed(2);
+        setAmount(initialAmount);
+      } catch (e) {
+        console.warn("잔액 조회 실패:", e);
+      }
+    };
+
+    fetchBalance();
+  }, [symbol]);
+
+
+
   const handleSubmit = async () => {
     try {
-      await requestSettlement(symbol, amount); // 실제 API 호출
+      await requestWithdraw(symbol, amount);
       alert("정산 요청이 완료되었습니다.");
       navigate(`/coin-detail/${symbol}`, {
         state: { symbol }
