@@ -14,7 +14,6 @@ import SignupCompletePage from "./app/sign-up/success/page";
 import LoginPage from "./app/login/page";
 import AdditionalStoreInfoPage from "./app/sign-up/store-register/business-verification/success/AdditionalStoreInfoPage";
 import MyStoreManagePage from "./app/store/store-settings/page";
-import MenuEdit from "./app/store/store-settings/add-store-menu/page";
 import LoadingPage from "./app/loading/page";
 import CoinDetailPage from "./app/store/store-coin/store-coin-detail/page";
 import OrderStatusPage from "./app/store/store-order-manage/page";
@@ -28,9 +27,7 @@ import CoinHome from "./app/coin/home/CoinHome";
 import SelectPaymentPage from "./app/order/payment/selectPayment";
 import CartPage from "./app/order/cart/cartPage";
 import PayCompletePage from "./app/order/complete-pay/payComplete";
-
 import ShoppingMall from "./app/shop/shopPage";
-import OrderHistoryPage from "./app/order/user/orderHistoryPage";
 import TokenGroupDetailPage from "./app/token/my-product/detail/my-product-detail";
 import TokenExchangePage from "./app/token/exchange/token-exchange";
 import TokenExchangeCompletePage from "./app/token/exchange/exchange-complete/exchange-complete";
@@ -48,6 +45,7 @@ import OnSaleTokenProductListPage from "./app/token/onsale-product/onsale-produc
 import BusinessCertificateVerifyPage from "./app/sign-up/store-register/business-verification/BusinessCertificateVerifyPage";
 import MenuAddPage from "./app/store/store-settings/add-store-menu/page";
 import MenuEditPage from "./app/store/store-settings/edit-store-menu/page";
+import IDVerificationStep4 from "./app/sign-up/common/idcard-verification/step04/page";
 
 
 
@@ -82,6 +80,7 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/id/verification" element={<IDVerificationStep1 />} />
         <Route path="/id/verification/step2" element={<IDVerificationStep2/>} />
         <Route path="/id/verification/step3" element={<IDVerificationStep3/>} />
+        <Route path="/id/verification/step4" element={<IDVerificationStep4/>} />
 
 
         {/* 가맹점 회원가입 경로 */}
@@ -117,8 +116,7 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/mall/store/order" element={<SelectPaymentPage />} />
         <Route path="/mall/store/order-pending" element={<LoadingPage />} />
         <Route path="/mall/store/pay-complete/:orderId" element={<PayCompletePage />} />
-        <Route path="/user/orders" element={<MyOrderHistoryPage/>} />
-        <Route path="/user/order-history" element={<OrderHistoryPage />} />
+        <Route path="/my/orders" element={<MyOrderHistoryPage/>} />
 
 
         {/*유저 코인 내역*/}
