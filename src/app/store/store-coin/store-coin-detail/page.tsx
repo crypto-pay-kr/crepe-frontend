@@ -1,4 +1,4 @@
-import { CircleDollarSign, DollarSign, X } from 'lucide-react'
+import { CircleDollarSign, X } from 'lucide-react'
 import Header from "@/components/common/Header"
 import { useNavigate, useParams, useLocation } from "react-router-dom"
 import React, { useEffect, useState, useRef } from 'react'
@@ -10,12 +10,15 @@ import {
   getCoinBalanceByCurrency,
   getCoinHistory, fetchCoinPrices,
 } from '@/api/coin'
+import { useInfiniteQuery } from '@tanstack/react-query'
 
 export interface PaymentHistory {
   status: 'ACCEPTED' | 'PENDING' | 'FAILED'; // PaymentStatus enum
   amount: number;
   transferredAt: string; // ISO string
+  afterBalance: number;
   type: string;
+
 }
 const coinMeta = {
   XRP: {
@@ -133,6 +136,8 @@ export default function CoinDetailPage() {
     "KRW-SOL": 0,
   });
 
+
+  // 코인 시세 가져오기
   useEffect(() => {
     const loadPrices = async () => {
       try {
@@ -144,6 +149,12 @@ export default function CoinDetailPage() {
     };
 
     loadPrices();
+
+    const interval = setInterval(() => {
+      loadPrices();
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
 
@@ -164,13 +175,35 @@ export default function CoinDetailPage() {
   }, [symbol]);
 
 
-  // 코인 거래 내역 조회
+  const observerElemRef = useRef<HTMLDivElement | null>(null);
+
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['coinHistory', symbol],
+    queryFn: getCoinHistory,
+    getNextPageParam: (lastPage) => {
+      return lastPage.last ? undefined : lastPage.pageable.pageNumber + 1;
+    },
+    enabled: !!symbol,
+    initialPageParam: 0
+  });
+
   useEffect(() => {
-    if (!symbol) return;
-    getCoinHistory(symbol)
-      .then(setHistory)
-      .catch(err => console.error("정산 내역 실패:", err));
-  }, [isUser, symbol]);
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    });
+    if (observerElemRef.current) observer.observe(observerElemRef.current);
+
+    return () => observer.disconnect();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+
 
 
   return (
@@ -216,7 +249,7 @@ export default function CoinDetailPage() {
             </div>
             <div className="text-right">
               <p className="text-lg sm:text-xl md:text-2xl font-bold">
-                {balance} {symbol}
+                {balance.toFixed(6)} {symbol}
               </p>
               <p className="text-sm sm:text-base text-gray-500">
                 = {(balance * (prices[`KRW-${symbol}`] ?? 0)).toLocaleString()} KRW
@@ -252,7 +285,7 @@ export default function CoinDetailPage() {
                 className="h-4 w-4 sm:h-5 sm:w-5"
                 stroke={addressStatus === 'ACTIVE' ? 'white' : 'gray'}
               />
-              <span className="text-sm sm:text-base">코인 충전</span>
+              <span className="text-sm sm:text-base, text-white">코인 충전</span>
             </button>
             <button
               className={`flex flex-1 items-center justify-center gap-1 sm:gap-2 rounded-lg sm:rounded-xl py-1.5 sm:py-2 text-base sm:text-lg font-semibold shadow transition ${
@@ -275,7 +308,7 @@ export default function CoinDetailPage() {
                 className="h-4 w-4 sm:h-5 sm:w-5"
                 stroke={addressStatus === 'ACTIVE' ? 'white' : 'gray'}
               />
-              <span className="text-sm sm:text-base">코인 출금</span>
+              <span className="text-sm sm:text-base text-white">코인 출금</span>
             </button>
           </div>
 
@@ -401,55 +434,70 @@ export default function CoinDetailPage() {
         {/* 거래 내역 */}
         <div className="space-y-4 sm:space-y-5 md:space-y-6 pb-16 sm:pb-10 text-sm sm:text-base md:text-lg lg:text-xl">
           {/* Fade-in animation for each transaction item */}
-          {(history ?? []).map((item, idx) => {
-            const rate = prices[`KRW-${symbol}`] ?? 0;
-            const krw = Math.floor(item.amount * rate).toLocaleString();
+          {data?.pages.map((page, pageIndex) =>
+            page.content.map((item: PaymentHistory, idx: number) => {
+              const rate = prices[`KRW-${symbol}`] ?? 0;
+              const krw = Math.floor(item.amount * rate).toLocaleString();
+              const showAfterBalance = item.status === 'ACCEPTED';
 
-            return (
-              <div
-                key={idx}
-                className="transition-all duration-300 ease-in-out"
-                style={{
-                  animationName: 'fadeInUp',
-                  animationDuration: '0.5s',
-                  animationDelay: `${idx * 0.1}s`,
-                  animationFillMode: 'both'
-                }}
-              >
-                <TransactionItem
-                  date={new Date(item.transferredAt).toLocaleString()}
-                  type={
-                    item.type === 'DEPOSIT'
-                      ? item.status === 'ACCEPTED'
-                        ? '입금 완료'
-                        : '입금 대기중'
-                      : item.type === 'WITHDRAW'
+              return (
+                <div
+                  key={`${pageIndex}-${idx}`}
+                  className="transition-all duration-300 ease-in-out"
+                  style={{
+                    animationName: 'fadeInUp',
+                    animationDuration: '0.5s',
+                    animationDelay: `${idx * 0.1}s`,
+                    animationFillMode: 'both'
+                  }}
+                >
+                  <TransactionItem
+                    date={new Date(item.transferredAt).toLocaleString()}
+                    type={
+                      item.type === 'DEPOSIT'
                         ? item.status === 'ACCEPTED'
-                          ? '출금 완료'
-                          : '출금 대기중'
-                        : item.type === 'PAY'
+                          ? '입금 완료'
+                          : '입금 대기중'
+                        : item.type === 'WITHDRAW'
                           ? item.status === 'ACCEPTED'
-                            ? '결제 완료'
-                            : item.status === 'PENDING'
-                              ? '정산 대기중'
-                              : '결제 취소'
-                          : '알 수 없음'
-                  }
-                  balance={`${balance} ${symbol}`}
-                  amount={item.amount + ' ' + symbol}
-                  krw={`${krw} KRW`}
-                  isDeposit={item.type === 'DEPOSIT'}
-                />
-              </div>
-            );
-          })}
-          {(history?.length ?? 0) === 0 && (
-            <p className="text-xs sm:text-sm text-gray-500">거래 내역이 없습니다.</p>
+                            ? '출금 완료'
+                            : '출금 대기중'
+                          : item.type === 'PAY'
+                            ? item.status === 'ACCEPTED'
+                              ? '결제 완료'
+                              : item.status === 'PENDING'
+                                ? '정산 대기중'
+                                : '결제 취소'
+                            : '알 수 없음'
+                    }
+                    balance={`${item.afterBalance ?? '-'} ${symbol}`}
+                    amount={item.amount.toFixed(6) + ' ' + symbol}
+                    krw={`${krw} KRW`}
+                    isDeposit={item.type === 'DEPOSIT'}
+                    showAfterBalance={showAfterBalance}
+                  />
+                </div>
+              );
+            })
           )}
-        </div>
-      </main>
-
-      <BottomNav />
+          <div
+            ref={observerElemRef}
+            className="h-10 flex items-center justify-center mt-4"
+          >
+            {isFetchingNextPage && (
+              <div className="w-8 h-8 rounded-full border-2 border-t-[#0a2e64] border-gray-200 animate-spin"></div>
+            )}
+            {!hasNextPage && data?.pages[0]?.content.length > 0 && (
+              <p className="text-gray-500 text-sm">더 이상 거래 내역이 없습니다</p>
+            )}
+            {data?.pages[0]?.content.length === 0 && (
+              <p className="text-gray-500 text-sm">거래 내역이 없습니다</p>
+            )}
+          </div>
     </div>
-  )
+</main>
+
+  <BottomNav />
+</div>
+)
 }

@@ -132,25 +132,20 @@ export const requestWithdraw = async (currency: string, amount: string) => {
 };
 
 
-//코인 내역 조회
-export const getCoinHistory = async (currency: string) => {
-
-
-  const res = await fetch(`${BASE_URL}/api/history?currency=${currency}`, {
-    method: 'GET',
+//코인 내역조회
+export const getCoinHistory = async ({ pageParam = 0, queryKey }: { pageParam?: number; queryKey: any }) => {
+  const symbol = queryKey[1];
+  const res = await fetch(`${BASE_URL}/api/history?currency=${symbol}&page=${pageParam}&size=5`, {
     headers: {
       Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    }
+      'Content-Type': 'application/json',
+    },
   });
 
-  if (!res.ok) {
-    throw new Error('입금 내역 조회 실패');
-  }
-
-  const json = await res.json();
-  return json;
+  if (!res.ok) throw new Error('입금 내역 조회 실패');
+  return res.json(); // Slice 형태의 응답 객체
 };
+
 
 
 // 코인 시세 가져오기
