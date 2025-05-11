@@ -145,7 +145,7 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/token/exchange/complete" element={<TokenExchangeCompletePage/>} />
 
         {/*Token Product 관련 페이지 */}
-        <Route path="/token/onsale/products/detail" element={<OnSaleTokenProductDetail />} />
+        <Route path="/token/onsale/products/:productId" element={<OnSaleTokenProductDetail />} />
         <Route path="/token/onsale/products/signup" element={<TokenProductSignup />} />
         <Route path="/token/onsale/products/signup-complete" element={<TokenProductSignupComplete/>} />
         <Route path="/token/onsale/products" element={<OnSaleTokenProductListPage />} />

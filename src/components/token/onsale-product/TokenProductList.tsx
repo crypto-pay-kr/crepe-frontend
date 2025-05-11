@@ -8,7 +8,7 @@ interface BankProductListProps {
 
 export default function BankProductList({ items }: BankProductListProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-3">
       {items.map((item, idx) => (
         <BankProductItem key={idx} {...item} />
       ))}

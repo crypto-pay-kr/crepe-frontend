@@ -63,6 +63,11 @@ export default function CoinHome() {
     navigate(`/coin-detail/${symbol}`, { state: { isUser } });
   };
 
+  const handleExchangeClick = () => {
+    navigate(`/token/onsale/products`, {
+    });
+  };
+
   useEffect(() => {
     const fetchPrices = async () => {
       try {
@@ -137,6 +142,14 @@ export default function CoinHome() {
               <span className="text-sm">+2.4% 오늘</span>
             </div>
           </div>
+          <div className="mt-5 w-full">
+            <button
+              className="w-full bg-[#0a2e64] text-white py-2 rounded-xl font-medium text-base shadow-sm"
+              onClick={handleExchangeClick}
+            >
+              K-토큰 상품 가입
+            </button>
+          </div>
         </div>
 
         <div className="mb-4 flex border-b border-gray-200 bg-white">
@@ -151,7 +164,7 @@ export default function CoinHome() {
               className={`flex-1 py-3 text-center text-sm font-medium ${activeTab === 'token' ? 'border-b-2 border-indigo-400 text-indigo-400' : 'text-gray-500'}`}
               onClick={() => setActiveTab('token')}
             >
-             K-토큰
+              K-토큰
             </button>
           )}
         </div>

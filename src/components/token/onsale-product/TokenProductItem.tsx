@@ -5,6 +5,7 @@ import { LucideIcon, Clock, AlertCircle } from "lucide-react"
 
 
 export interface BankProductItemProps {
+    productId: number;
     bank: "woori" | "shinhan"
     name: string
     subtitle?: string
@@ -39,21 +40,25 @@ export default function BankProductItem({
             className="border-b pb-4 cursor-pointer hover:bg-gray-50"
         >
             <BankLogo bank={bank} />
-            <div className="mt-2 font-bold text-2xl">{name}</div>
-            {subtitle && (
-                <div className="text-2xl font-bold mb-2">{subtitle}</div>
-            )}
-            {StatusIcon && statusText && (
-                <div className="flex items-center mb-2 mt-2">
-                    <StatusIcon size={20} className={statusIconColor}/>
-                    <span className="ml-1 text-sm text-red-500">{statusText}</span>
+            <div className="px-2">
+                <div className="mt-2 font-bold text-2xl">{name}</div>
+                {subtitle && (
+                    <div className="text-1xl font-bold mb-2 text-blue">{subtitle}</div>
+                )}
+                {StatusIcon && statusText && (
+                    <div className="flex items-center mb-2 mt-2">
+                        <StatusIcon size={20} className={statusIconColor} />
+                        <span className="ml-1 text-sm text-red-500">{statusText}</span>
+                    </div>
+                )}
+                <div className="flex gap-2 mt-2 mb-4">
+                    {tags.map((tag, index) => (
+                        <ProductTag key={index} text={tag} color={(tagColorMapping[tag] || "gray") as "gray" | "purple" | "green"} />
+                    ))}
                 </div>
-            )}
-            <div className="flex gap-2 mt-2 mb-4">
-                {tags.map((tag, index) => (
-                    <ProductTag key={index} text={tag} color={(tagColorMapping[tag] || "gray") as "gray" | "purple" | "green"} />
-                ))}
+
             </div>
+
         </div>
     )
 }
