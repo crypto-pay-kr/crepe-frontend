@@ -1,7 +1,7 @@
 // src/types/store.ts
 
 // CoinStatus 타입 정의
-export interface CoinStatus {
+export interface CoinList {
   // 실제 필드는 백엔드 정의에 따라 추가
   name?: string;
   code?: string;
@@ -19,7 +19,7 @@ export interface Store {
   storeImage: string;
   likeCount: number;
   storeType: string;
-  coinStatus: CoinStatus[]; // 타입을 string[] → CoinStatus[]로 변경
+  coinList: CoinList[]; // 타입을 string[] → CoinStatus[]로 변경
 }
 
 // 가게 상세 조회 응답 타입
@@ -28,7 +28,7 @@ export interface StoreDetail {
   storeName: string;
   storeAddress: string;      // 추가
   storeImageUrl: string;     // 추가
-  coinStatus: CoinStatus[];
+  coinList: CoinList[];
   menuList: GetMenuDetailResponse[]; // 추가
 }
 
@@ -53,6 +53,6 @@ export interface GetOneStoreDetailResponse {
   storeName: string;
   storeAddress: string;
   storeImageUrl: string;
-  coinStatus: CoinStatus[];
+  coinList: CoinList[];
   menuList: GetMenuDetailResponse[];
 }

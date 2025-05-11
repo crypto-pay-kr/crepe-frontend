@@ -166,7 +166,7 @@ export default function CoinHome() {
 
         {isUser && (
           <button
-            onClick={() => navigate('/user/order-history')}
+            onClick={() => navigate('/user/orders')}
             className="fixed bottom-24 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-500 text-white shadow-lg hover:bg-indigo-500"
             aria-label="주문 내역으로 이동"
           >

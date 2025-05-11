@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import CryptocurrencyTags from "../common/CryptocurrencyTags";
-import { CoinStatus } from '@/types/store';
 import { changeStoreStatus, fetchMyStoreAllDetails, likeStore, unlikeStore } from '@/api/store'
 import { Check, Heart } from 'lucide-react'
 
@@ -63,46 +62,42 @@ function ShopInfo() {
 
 
   return (
-      <div className="flex flex-col self-center mt-3 w-full text-center">
+    <div className="flex flex-col self-center mt-3 w-full text-center">
 
-        <div className="flex justify-between items-center px-4 w-full mt-2">
-          {/* 상태 표시 */}
-          <div
-            onClick={toggleStoreStatus}
-            className={`flex items-center text-base font-semibold cursor-pointer transition duration-150 ${
-              shopInfo.storeStatus === "OPEN" ? "text-green-800" : "text-red-600"
+      <div className="flex justify-between items-center px-4 w-full mt-2">
+        {/* 상태 표시 */}
+        <div
+          onClick={toggleStoreStatus}
+          className={`flex items-center text-base font-semibold cursor-pointer transition duration-150 ${shopInfo.storeStatus === "OPEN" ? "text-green-800" : "text-red-600"
             }`}
-          >
-            <div
-              className={`w-5 h-5 rounded-full flex items-center justify-center mr-2 border ${
-                shopInfo.storeStatus === "OPEN"
-                  ? "border-green-700 bg-green-100"
-                  : "border-gray-300 bg-gray-300"
+        >
+          <div
+            className={`w-5 h-5 rounded-full flex items-center justify-center mr-2 border ${shopInfo.storeStatus === "OPEN"
+                ? "border-green-700 bg-green-100"
+                : "border-gray-300 bg-gray-300"
               }`}
-            >
+          >
 
-              {shopInfo.storeStatus === "OPEN" && <Check size={14} className="text-white" />}
-            </div>
-            {shopInfo.storeStatus === "OPEN" ? "영업 중" : "영업 종료"}
+            {shopInfo.storeStatus === "OPEN" && <Check size={14} className="text-white" />}
           </div>
-
-          {/* 좋아요 버튼 */}
-          <div className="flex items-center text-sm text-zinc-500">
-            <Heart size={18} className="mr-1 fill-red-500 stroke-red-500" />
-            좋아요 {shopInfo.likeCount}개
-          </div>
+          {shopInfo.storeStatus === "OPEN" ? "영업 중" : "영업 종료"}
         </div>
 
+        {/* 좋아요 버튼 */}
+        <div className="flex items-center text-sm text-zinc-500">
+          <Heart size={18} className="mr-1 fill-red-500 stroke-red-500" />
+          좋아요 {shopInfo.likeCount}개
+        </div>
+      </div>
 
-
-        {/* 가게 이름 */}
+      {/* 가게 이름 */}
       <h2 className="text-3xl font-bold tracking-tight">
         {shopInfo.storeName}
       </h2>
 
       {/* 가게 주소 */}
       <p className="text-base tracking-tight mt-2 text-gray-700">
-        주소: {shopInfo.storeAddress}
+        {shopInfo.storeAddress}
       </p>
 
       {/* 암호화폐 태그 */}
@@ -119,8 +114,6 @@ function ShopInfo() {
         />
       </h2>
 
-
-
       {/* 메뉴 리스트 */}
       <div className="mt-6 px-4">
         <h3 className="text-lg font-semibold mb-2 text-left">메뉴 목록</h3>
@@ -131,9 +124,8 @@ function ShopInfo() {
             {shopInfo.menuList.map((menu, index) => (
               <li
                 key={menu.menuId}
-                className={`flex items-center gap-4 py-3 ${
-                  index !== shopInfo.menuList.length - 1 ? "border-b border-gray-200" : ""
-                }`}
+                className={`flex items-center gap-4 py-3 ${index !== shopInfo.menuList.length - 1 ? "border-b border-gray-200" : ""
+                  }`}
               >
                 <div className="flex-1 text-left">
                   <p className="font-semibold text-base">{menu.menuName}</p>
