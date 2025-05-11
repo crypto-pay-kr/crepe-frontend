@@ -64,15 +64,22 @@ export default function CoinHome() {
   };
 
   useEffect(() => {
-    const fetchPrices = async () => {
+    const loadPrices = async () => {
       try {
-        const updated = await fetchCoinPrices();
-        setPrices(updated);
+        const updatedPrices = await fetchCoinPrices();
+        setPrices(updatedPrices);
       } catch (err) {
-        console.error("시세 조회 실패:", err);
+        console.error("시세 조회 실패", err);
       }
     };
-    fetchPrices();
+
+    loadPrices();
+
+    const interval = setInterval(() => {
+      loadPrices();
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
 

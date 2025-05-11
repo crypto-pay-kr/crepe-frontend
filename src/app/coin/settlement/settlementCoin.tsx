@@ -6,17 +6,20 @@ import AmountInput from '@/components/coin/AmountInput'
 import PercentageSelector from '@/components/coin/PercentageSelector'
 import AvailableAmount from '@/components/coin/AvailableAmount'
 import Button from '@/components/common/Button'
-import { getCoinBalanceByCurrency, requestWithdraw } from '@/api/coin'
+import { fetchCoinPrices, getCoinBalanceByCurrency, requestWithdraw } from '@/api/coin'
 
 
 export default function SettlementCoin() {
   const [amount, setAmount] = useState("3.45")
   const [selectedPercentage, setSelectedPercentage] = useState(70)
-
-  
   const navigate = useNavigate();
   const location = useLocation()
   const symbol = location.state?.symbol || 'XRP'
+  const [prices, setPrices] = useState<{ [key: string]: number }>({
+    "KRW-XRP": 0,
+    "KRW-USDT": 0,
+    "KRW-SOL": 0,
+  });
   
   const handleAmountChange = (value: string) => {
     setAmount(value)
@@ -30,6 +33,29 @@ export default function SettlementCoin() {
 
 
   const [availableAmount, setAvailableAmount] = useState<number>(0);
+
+  useEffect(() => {
+    const loadPrices = async () => {
+      try {
+        const updatedPrices = await fetchCoinPrices();
+        setPrices(updatedPrices);
+      } catch (err) {
+        console.error("시세 조회 실패", err);
+      }
+    };
+
+    loadPrices();
+    const interval = setInterval(loadPrices, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const getKRWValue = (amount: string) => {
+    const num = parseFloat(amount);
+    const price = prices[`KRW-${symbol}`] ?? 0;
+    return isNaN(num) ? "0 KRW" : `${Math.floor(num * price).toLocaleString()} KRW`;
+  };
+
 
   useEffect(() => {
     const fetchBalance = async () => {
@@ -47,8 +73,6 @@ export default function SettlementCoin() {
 
     fetchBalance();
   }, [symbol]);
-
-
 
   const handleSubmit = async () => {
     try {
@@ -85,7 +109,7 @@ export default function SettlementCoin() {
               amount={amount} 
               onAmountChange={handleAmountChange}
               symbol={symbol}
-              equivalentValue="1000 KRW"
+              equivalentValue={getKRWValue(amount)}
             />
           </div>
 
@@ -104,7 +128,7 @@ export default function SettlementCoin() {
             <AvailableAmount 
               availableAmount={availableAmount} 
               symbol={symbol}
-              equivalentValue="1000 KRW"
+              equivalentValue={getKRWValue(String(availableAmount))}
             />
           </div>
         </div>
