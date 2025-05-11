@@ -39,10 +39,12 @@ export default function IDVerificationStep4() {
     const isButtonActive = agreements.terms && agreements.privacy;
 
     const handleRequestVerification = () => {
+        // TODO : send/sms 인증번호 요청 API 호출
         alert("인증번호가 요청되었습니다.");
     };
 
     const handleVerify = () => {
+        // TODO : verify/sms  API 호출
         alert("인증이 완료되었습니다.");
     };
 
@@ -143,7 +145,7 @@ export default function IDVerificationStep4() {
                     {/* Request verification button */}
                     <button
                         onClick={handleRequestVerification}
-                        className="w-full py-2 bg-gray-100 text-gray-700 rounded mb-3"
+                        className="w-full py-2 bg-gray-100 text-gray-700 rounded-lg mb-3"
                     >
                         인증번호 요청
                     </button>
@@ -172,7 +174,7 @@ export default function IDVerificationStep4() {
                             </svg>
                             <span>잔여시간 {remainingTime}</span>
                         </div>
-                        <button className="px-3 py-1 border border-gray-300 rounded text-sm">
+                        <button className="px-3 py-1 border border-gray-300 rounded-lg text-sm">
                             재요청
                         </button>
                     </div>
@@ -180,7 +182,7 @@ export default function IDVerificationStep4() {
                     {/* Verify button */}
                     <button
                         onClick={handleVerify}
-                        className="w-full py-2 bg-gray-100 text-gray-700 rounded mb-4"
+                        className="w-full py-2 bg-gray-100 text-gray-700 rounded-lg mb-4"
                     >
                         인증번호 확인
                     </button>
