@@ -122,7 +122,7 @@ const ShoppingMall: React.FC = () => {
 
             {/* 탭 영역 */}
             <div className="flex border-b border-gray-200">
-              {["전체", "크레페", "카페"].map((tab) => (
+              {["전체", "음식점", "카페"].map((tab) => (
                 <button
                   key={`tab-${tab}`}
                   className={`px-5 py-3 text-sm font-medium relative transition-all ${
@@ -205,7 +205,7 @@ const ShoppingMall: React.FC = () => {
                       </div>
                     </div>
 
-                    <CryptocurrencyTags coins={store.coinStatus || []} />
+                    <CryptocurrencyTags coins={store.coinList || []} />
                     <div className="flex justify-between items-center mt-2">
                       <div className="text-sm text-gray-500">
                         {store.storeType && (

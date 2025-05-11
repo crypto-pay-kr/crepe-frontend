@@ -211,7 +211,7 @@ export default function TokenProductSignup() {
                   {/* 한 페이지만 보여주는 방식으로 변경 */}
                   <Page
                     pageNumber={pageNumber}
-                    width={pageWidth}    
+                    width={pageWidth}
                     renderAnnotationLayer={false}
                     renderTextLayer={false}
                   />
@@ -234,7 +234,12 @@ export default function TokenProductSignup() {
           </button>
         )}
         {step === 2 && (
-          <Button text="다음" onClick={handleNextStep} fullWidth />
+          <Button
+            text="다음"
+            onClick={handleNextStep}
+            fullWidth
+            disabled={numPages > 0 && pageNumber < numPages}
+          />
         )}
         {step === 3 && (
           <Button text="확인했습니다" onClick={handleNextStep} fullWidth />

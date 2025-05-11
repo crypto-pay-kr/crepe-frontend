@@ -188,9 +188,9 @@ export default function AdditionalStoreInfoPage() {
                 <SelectValue placeholder="가게 업종 선택" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="restaurant">음식점</SelectItem>
-                <SelectItem value="cafe">카페</SelectItem>
-                <SelectItem value="bakery">베이커리</SelectItem>
+                <SelectItem value="음식점">음식점</SelectItem>
+                <SelectItem value="카페">카페</SelectItem>
+                <SelectItem value="베이커리">베이커리</SelectItem>
               </SelectContent>
             </Select>
           </div>

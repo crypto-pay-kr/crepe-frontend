@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "framer-motion";
 
 export interface SignUpCompleteProductInfoProps {
   productName: string;
@@ -20,7 +21,12 @@ export default function SignUpCompleteProductInfo({
   finalRate,
 }: SignUpCompleteProductInfoProps) {
   return (
-    <div className="border rounded-md p-4 mb-6">
+    <motion.div
+      className="border rounded-md p-4 mb-6"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
       <h3 className="font-medium mb-3">가입 상품 정보</h3>
       <div className="space-y-3">
         <div className="flex justify-between">
@@ -52,6 +58,6 @@ export default function SignUpCompleteProductInfo({
           <div className="font-medium">{finalRate}</div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

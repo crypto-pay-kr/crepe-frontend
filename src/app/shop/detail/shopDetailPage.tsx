@@ -2,12 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import BottomNav from "@/components/common/BottomNavigate";
 import Header from "@/components/common/Header";
-import ShopInfo from "@/components/shoppingmall/ShoppingmallInfo";
 import Button from "@/components/common/Button";
-import { ShoppingCart, ChevronUp } from "lucide-react";
+import { ShoppingCart, ChevronUp, Heart } from "lucide-react";
 import { CartItem } from "@/types/cart";
 import { getStoreDetail } from "@/api/shop";
 import { GetOneStoreDetailResponse, StoreDetail } from "@/types/store";
+import CryptocurrencyTags from "@/components/common/CryptocurrencyTags";
 
 function MallDetailPage() {
     const navigate = useNavigate();
@@ -41,7 +41,7 @@ function MallDetailPage() {
                     storeName: data.storeName,
                     storeAddress: data.storeAddress,
                     storeImageUrl: data.storeImageUrl,
-                    coinStatus: data.coinStatus,
+                    coinList: data.coinList,
                     menuList: data.menuList,
                 };
 
@@ -142,26 +142,36 @@ function MallDetailPage() {
 
             <main className="flex-1 overflow-auto pb-16">
                 {/* 가게 정보 */}
-                <div className="bg-white shadow-sm mb-2">
+                <div className="bg-white shadow-sm mb-4 min-h-[450px]">
                     <div className="relative">
                         <img
                             src={storeDetail.storeImageUrl || "/store-image.png"}
                             alt={`${storeDetail.storeName} 가게사진`}
-                            className="w-full h-56 object-cover"
+                            className="w-full h-72 object-cover"
                         />
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                            <h2 className="text-white text-xl font-bold">{storeDetail.storeName}</h2>
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
+                            <h2 className="text-white text-2xl font-bold">{storeDetail.storeName}</h2>
                         </div>
                     </div>
 
-                    <div className="p-4">
-                        <ShopInfo
-                            storeId={Number(id)}
-                            likeCount={storeDetail.likeCount}
-                            coinStatus={storeDetail.coinStatus}
-                            storeName={storeDetail.storeName}
-                            storeAddress={storeDetail.storeAddress}
-                        />
+                    <div className="flex justify-end px-6 mt-5">
+                        <div className="flex items-center text-sm text-zinc-500">
+                            <Heart size={18} className="mr-1 fill-red-500 stroke-red-500" />
+                             {storeDetail.likeCount}
+                        </div>
+                    </div>
+
+                    {/* 가게 정보 중앙 정렬 영역 */}
+                    <div className="text-center px-6 mt-4 mb-6">
+                        {/* 가게 주소 */}
+                        <p className="text-base tracking-tight mt-2 text-gray-700">
+                             {storeDetail.storeAddress}
+                        </p>
+
+                        {/* 암호화폐 태그 */}
+                        <div className="flex justify-center mt-5 mb-5">
+                            <CryptocurrencyTags coins={storeDetail.coinList} />
+                        </div>
                     </div>
                 </div>
 
@@ -173,9 +183,6 @@ function MallDetailPage() {
                                 <div className="flex justify-between">
                                     <div className="flex-1 pr-4">
                                         <h3 className="font-bold text-gray-900">{item.menuName}</h3>
-                                        <p className="text-sm text-gray-500 mt-1">
-                                            {"신선한 재료로 만든 특별한 메뉴입니다"}
-                                        </p>
                                         <div className="mt-2 font-bold text-gray-900">
                                             {item.menuPrice.toLocaleString()} KRW
                                         </div>
@@ -250,18 +257,16 @@ function MallDetailPage() {
                                     {totalPrice.toLocaleString()} KRW
                                 </span>
                                 <ChevronUp
-                                    className={`h-5 w-5 text-gray-500 transition-transform ${
-                                        cartExpanded ? "rotate-180" : ""
-                                    }`}
+                                    className={`h-5 w-5 text-gray-500 transition-transform ${cartExpanded ? "rotate-180" : ""
+                                        }`}
                                 />
                             </div>
                         </div>
 
                         {/* 장바구니 상세 */}
                         <div
-                            className={`transition-all duration-300 ${
-                                cartExpanded ? "max-h-48 overflow-y-auto" : "max-h-0 overflow-hidden"
-                            }`}
+                            className={`transition-all duration-300 ${cartExpanded ? "max-h-48 overflow-y-auto" : "max-h-0 overflow-hidden"
+                                }`}
                         >
                             <div className="px-5 pb-2">
                                 <div className="bg-gray-50 rounded-lg p-3 mb-3">
@@ -319,7 +324,7 @@ function MallDetailPage() {
                                         localStorage.setItem("cartItems", JSON.stringify([]));
                                         localStorage.setItem("totalPrice", JSON.stringify([]));
                                     }}
-                                    className="w-1/2 py-3 rounded-lg font-medium bg-gray-100 text-gray-700 border border-gray-200"
+                                    className="w-1/2 py-3 rounded-lg font-medium bg-gray-100 text-black border border-gray-200"
                                 />
                                 <Button
                                     text="주문하기"

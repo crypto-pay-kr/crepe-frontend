@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "framer-motion";
 
 export interface AutoDebitInfoProps {
   account: string;
@@ -12,7 +13,12 @@ export default function AutoDebitInfo({
   amount,
 }: AutoDebitInfoProps) {
   return (
-    <div className="bg-gray-100 p-4 rounded-md mb-6">
+    <motion.div
+      className="bg-gray-100 p-4 rounded-md mb-6"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.2 }}
+    >
       <h3 className="font-medium mb-3">자동이체 정보</h3>
       <div className="space-y-3">
         <div className="flex justify-between">
@@ -28,6 +34,6 @@ export default function AutoDebitInfo({
           <div>{amount}</div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
