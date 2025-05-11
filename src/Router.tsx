@@ -45,6 +45,7 @@ import OnSaleTokenProductListPage from "./app/token/onsale-product/onsale-produc
 import BusinessCertificateVerifyPage from "./app/sign-up/store-register/business-verification/BusinessCertificateVerifyPage";
 import MenuAddPage from "./app/store/store-settings/add-store-menu/page";
 import MenuEditPage from "./app/store/store-settings/edit-store-menu/page";
+import IDVerificationStep4 from "./app/sign-up/common/idcard-verification/step04/page";
 
 
 
@@ -79,6 +80,7 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/id/verification" element={<IDVerificationStep1 />} />
         <Route path="/id/verification/step2" element={<IDVerificationStep2/>} />
         <Route path="/id/verification/step3" element={<IDVerificationStep3/>} />
+        <Route path="/id/verification/step4" element={<IDVerificationStep4/>} />
 
 
         {/* 가맹점 회원가입 경로 */}

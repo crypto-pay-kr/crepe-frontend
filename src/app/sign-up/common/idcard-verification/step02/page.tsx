@@ -73,7 +73,7 @@ export default function IDVerificationStep2() {
 
       <div className="flex-1 px-5 flex flex-col">
         {/* 카메라/이미지 영역 */}
-        <div className="w-full aspect-[4/3] bg-white rounded-xl overflow-hidden shadow-md">
+        <div className="w-full h-80 bg-white rounded-xl overflow-hidden shadow-md">
           {capturedImage ? (
             <div className="relative w-full h-full">
               <img

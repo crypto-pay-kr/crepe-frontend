@@ -32,7 +32,7 @@ export default function IDVerificationStep3() {
 
   const handleSubmit = () => {
     // 제출 전 검증 및 제출 로직 구현
-    navigate("/terms");
+    navigate("/id/verification/step4");
   };
 
   return (
