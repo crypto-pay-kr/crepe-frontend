@@ -42,8 +42,8 @@ export default function AdditionalUserInfoPage() {
       if (response.ok) {
         // 회원가입 성공 시 localStorage와 sessionStorage 데이터 삭제
         sessionStorage.removeItem("signUpData");
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
+        sessionStorage.removeItem("accessToken");
+        sessionStorage.removeItem("refreshToken");
 
         // 완료 페이지로 이동
         navigate("/signup-complete");

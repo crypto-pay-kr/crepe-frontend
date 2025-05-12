@@ -1,7 +1,5 @@
 const BASE_URL = import.meta.env.VITE_API_SERVER_URL;
 const COIN_PRICE_URL = import.meta.env.VITE_COIN_PRICE_URL;
-const token = localStorage.getItem("accessToken");
-
 
 // 출금 계좌 등록 요청
 export const registerAccountAddress = async ({ currency, address, tag, }: {
@@ -9,6 +7,7 @@ export const registerAccountAddress = async ({ currency, address, tag, }: {
   address: string;
   tag?: string;
 }) => {
+  const token = sessionStorage.getItem("accessToken");
   const res = await fetch(`${BASE_URL}/api/save/address`, {
     method: "POST",
     headers: {
@@ -27,6 +26,7 @@ export const registerAccountAddress = async ({ currency, address, tag, }: {
 
 // 계좌등록 확인
 export const isAccountAddressRegistered = async (currency: string) => {
+  const token = sessionStorage.getItem("accessToken");
   const res = await fetch(`${BASE_URL}/api/address?currency=${currency}`, {
     method: 'GET',
     headers: {
@@ -48,6 +48,7 @@ export const reRegisterAccountAddress = async (payload: {
   address: string;
   tag?: string;
 }) => {
+  const token = sessionStorage.getItem("accessToken");
   return await fetch(`${BASE_URL}/api/resave/address`, {
     method: 'PATCH',
     headers: {
@@ -61,6 +62,7 @@ export const reRegisterAccountAddress = async (payload: {
 
 //전체 코인 잔액 조회
 export const getCoinBalance = async () => {
+  const token = sessionStorage.getItem("accessToken");
   const response = await fetch(`${BASE_URL}/api/balance`, {
     method: 'GET',
     headers: {
@@ -78,6 +80,7 @@ export const getCoinBalance = async () => {
 
 //특정 코인 잔액 조회
 export const getCoinBalanceByCurrency = async (currency: string) => {
+  const token = sessionStorage.getItem("accessToken");
   const response = await fetch(`${BASE_URL}/api/balance/${currency}`, {
     method: 'GET',
     headers: {
@@ -95,6 +98,7 @@ export const getCoinBalanceByCurrency = async (currency: string) => {
 
 //코인 입금 요청
 export const requestDeposit = async (currency: string, txid: string) => {
+  const token = sessionStorage.getItem("accessToken");
 
   const response = await fetch(`${BASE_URL}/api/deposit`, {
     method: 'POST',
@@ -115,6 +119,7 @@ export const requestDeposit = async (currency: string, txid: string) => {
 
 // 코인 출금 요청
 export const requestWithdraw = async (currency: string, amount: string) => {
+  const token = sessionStorage.getItem("accessToken");
   const res = await fetch(`${BASE_URL}/api/withdraw`, {
     method: 'POST',
     headers: {
@@ -134,6 +139,7 @@ export const requestWithdraw = async (currency: string, amount: string) => {
 
 //코인 내역조회
 export const getCoinHistory = async ({ pageParam = 0, queryKey }: { pageParam?: number; queryKey: any }) => {
+  const token = sessionStorage.getItem("accessToken");
   const symbol = queryKey[1];
   const res = await fetch(`${BASE_URL}/api/history?currency=${symbol}&page=${pageParam}&size=5`, {
     headers: {

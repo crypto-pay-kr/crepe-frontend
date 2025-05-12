@@ -25,7 +25,7 @@ export default function StoreEditInfoPage() {
   const navigate = useNavigate()
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [isModalOpen, setModalOpen] = useState(false);
-  const token = localStorage.getItem("accessToken");
+  const token = sessionStorage.getItem("accessToken");
 
   const handleStoreNameUpdate = async () => {
     if (!newStoreName.trim()) {
@@ -33,7 +33,7 @@ export default function StoreEditInfoPage() {
       return;
     }
     try {
-      const response = await updateStoreName(token!, newStoreName);
+      const response = await updateStoreName(newStoreName);
       alert(`가게명이 "${newStoreName}"(으)로 변경되었습니다.`);
     } catch (err) {
       console.error("가게명 변경 실패:", err);
@@ -47,7 +47,7 @@ export default function StoreEditInfoPage() {
       return;
     }
     try {
-      const response = await updateStoreAddress(token!, newAddress);
+      const response = await updateStoreAddress(newAddress);
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(errorText || "주소 변경에 실패했습니다.");
@@ -70,8 +70,8 @@ export default function StoreEditInfoPage() {
   useEffect(() => {
     const loadMenus = async () => {
       try {
-        const token = localStorage.getItem("accessToken")!;
-        const data = await fetchMyStoreAllDetails(token);
+        const token = sessionStorage.getItem("accessToken")!;
+        const data = await fetchMyStoreAllDetails();
         console.log("API 응답:", data);
         setMenuItems(data.menuList ?? []);
       } catch (err) {

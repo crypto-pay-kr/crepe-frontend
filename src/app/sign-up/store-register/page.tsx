@@ -35,7 +35,7 @@ const BusinessVerificationPage: React.FC = () => {
   };
 
   const handleVerify = async () => {
-    const storedData = localStorage.getItem("signUpData");
+    const storedData = sessionStorage.getItem("signUpData");
     if (!storedData) {
       alert("가게 및 회원정보가 없습니다.");
       return;
@@ -86,9 +86,6 @@ const BusinessVerificationPage: React.FC = () => {
       }
 
       // 회원가입 성공 시 저장된 정보 삭제
-      sessionStorage.removeItem("signUpData");
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
       sessionStorage.clear();
 
       alert("사업자 회원가입이 완료되었습니다.");

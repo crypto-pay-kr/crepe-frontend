@@ -14,7 +14,7 @@ export default function MyPage(): React.ReactElement {
   const navigate = useNavigate();
   const location = useLocation();
   const [username, setUsername] = useState("...");
-  const token = localStorage.getItem("accessToken");
+  const token = sessionStorage.getItem("accessToken");
 
   // 경로를 기반으로 사용자 타입 결정 (변경된 경로 구조 반영)
   const isSeller = location.pathname.includes('/store');
@@ -34,10 +34,10 @@ export default function MyPage(): React.ReactElement {
         if (!token) return;
 
         if (isSeller) {
-          const storeData = await fetchMyStoreAllDetails(token);
+          const storeData = await fetchMyStoreAllDetails();
           setUsername(storeData.storeName);
         } else {
-          const userData = await fetchMyUserInfo(token);
+          const userData = await fetchMyUserInfo();
           setUsername(userData.nickname);
         }
       } catch (err) {

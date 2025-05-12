@@ -38,13 +38,13 @@ export default function PaymentCurrencySetModal({
 
   // "변경하기" 버튼 클릭 시 API 호출
   const handleUpdate = async () => {
-    const token = localStorage.getItem("accessToken");
+    const token = sessionStorage.getItem("accessToken");
     if (!token) {
       alert("로그인이 필요합니다.");
       return;
     }
     try {
-      await patchStoreCoin(token, selectedCoins);
+      await patchStoreCoin(selectedCoins);
       alert("결제 수단 지원 설정이 업데이트되었습니다.");
       onClose();
     } catch (err) {

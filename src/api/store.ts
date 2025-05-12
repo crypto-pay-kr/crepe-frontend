@@ -1,9 +1,6 @@
 const API_BASE_URL = import.meta.env.VITE_API_SERVER_URL || "http://localhost:8080"
 
 
-const token = localStorage.getItem("accessToken");
-
-
 export async function signUpStore(formData: FormData) {
   const response = await fetch(`${API_BASE_URL}/api/store/signup`, {
     method: "POST",
@@ -29,7 +26,9 @@ export async function uploadBusinessLicense(file: File) {
 
 
 
-export async function fetchMyStoreAllDetails(token: string) {
+export async function fetchMyStoreAllDetails() {
+  const token = sessionStorage.getItem("accessToken");
+
   const response = await fetch(`${API_BASE_URL}/api/store/my`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -45,7 +44,8 @@ export async function fetchMyStoreAllDetails(token: string) {
 
 
 // 가맹점 정보 수정
-export async function updateStoreName(token: string, newStoreName: string) {
+export async function updateStoreName(newStoreName: string) {
+  const token = sessionStorage.getItem("accessToken");
   const response = await fetch(`${API_BASE_URL}/api/store/change/name`, {
     method: "PATCH",
     headers: {
@@ -59,7 +59,8 @@ export async function updateStoreName(token: string, newStoreName: string) {
 
 
 // 가맹점 주소 수정
-export async function updateStoreAddress(token: string, newAddress: string) {
+export async function updateStoreAddress(newAddress: string) {
+  const token = sessionStorage.getItem("accessToken");
   const response = await fetch(`${API_BASE_URL}/api/store/change/address`, {
     method: "PATCH",
     headers: {
@@ -72,7 +73,8 @@ export async function updateStoreAddress(token: string, newAddress: string) {
 }
 
 // 가맹점 메뉴 상세 조회
-export async function fetchStoreMenuDetail(token: string, menuId: string) {
+export async function fetchStoreMenuDetail(menuId: string) {
+  const token = sessionStorage.getItem("accessToken");
   const response = await fetch(`${API_BASE_URL}/api/store/menu/${menuId}`, {
     method: "GET",
     headers: { Authorization: `Bearer ${token}` },
@@ -86,6 +88,7 @@ export async function fetchStoreMenuDetail(token: string, menuId: string) {
 
 // 가맹점 메뉴 등록
 export async function storeMenuAdd(formData: FormData) {
+  const token = sessionStorage.getItem("accessToken");
   const response = await fetch(`${API_BASE_URL}/api/store/menu`, {
     method: "POST",
     headers: {
@@ -97,7 +100,8 @@ export async function storeMenuAdd(formData: FormData) {
 }
 
 // 가게 영업상태 변경
-export const changeStoreStatus = async (newStatus: "OPEN" | "CLOSED", token: string) => {
+export const changeStoreStatus = async (newStatus: "OPEN" | "CLOSED") => {
+  const token = sessionStorage.getItem("accessToken");
   const res = await fetch(`${API_BASE_URL}/api/store/change/status`, {
     method: "PATCH",
     headers: {
@@ -110,7 +114,8 @@ export const changeStoreStatus = async (newStatus: "OPEN" | "CLOSED", token: str
 };
 
 // 가게 좋아요
-export const likeStore = async (storeId: number, token: string) => {
+export const likeStore = async (storeId: number) => {
+  const token = sessionStorage.getItem("accessToken");
   return await fetch(`${API_BASE_URL}/api/like/${storeId}`, {
     method: "POST",
     headers: {
@@ -120,7 +125,8 @@ export const likeStore = async (storeId: number, token: string) => {
 };
 
 // 가게 좋아요 취소
-export const unlikeStore = async (storeId: number, token: string) => {
+export const unlikeStore = async (storeId: number) => {
+  const token = sessionStorage.getItem("accessToken");
   return await fetch(`${API_BASE_URL}/api/like/${storeId}`, {
     method: "PATCH",
     headers: {
@@ -128,12 +134,14 @@ export const unlikeStore = async (storeId: number, token: string) => {
     },
   });
 };
+
+
 // 가맹점 메뉴 수정
 export async function patchStoreMenu(
-  token: string,
   menuId: string,
   formData: FormData
 ) {
+  const token = sessionStorage.getItem("accessToken");
   const response = await fetch(`${API_BASE_URL}/api/store/menu/${menuId}`, {
     method: "PATCH",
     headers: {
@@ -150,7 +158,8 @@ export async function patchStoreMenu(
 
 
 // 가맹점 메뉴 삭제
-export async function deleteStoreMenu(token: string, menuId: string) {
+export async function deleteStoreMenu(menuId: string) {
+  const token = sessionStorage.getItem("accessToken");
   const response = await fetch(`${API_BASE_URL}/api/store/menu/${menuId}/status`, {
     method: "PATCH",
     headers: { Authorization: `Bearer ${token}` },
@@ -162,7 +171,8 @@ export async function deleteStoreMenu(token: string, menuId: string) {
 }
 
 // 가맹점 결제 수단 설정
-export async function patchStoreCoin(token: string, supportedCoins: string[]) {
+export async function patchStoreCoin(supportedCoins: string[]) {
+  const token = sessionStorage.getItem("accessToken");
   const response = await fetch(`${API_BASE_URL}/api/store/select/coin`, {
     method: "PATCH",
     headers: {
@@ -193,6 +203,7 @@ export async function patchStoreCoin(token: string, supportedCoins: string[]) {
 
 // 주문상태  목록 조회
 export async function fetchOrders() {
+  const token = sessionStorage.getItem("accessToken");
   const response = await fetch(`${API_BASE_URL}/api/store/orders`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -210,6 +221,7 @@ export async function fetchOrders() {
 
 // 주문 수락
 export async function acceptOrder(orderId: string, preparationTime: string) {
+  const token = sessionStorage.getItem("accessToken");
   const response = await fetch(`${API_BASE_URL}/api/store/orders/${orderId}/action`, {
     method: "POST",
     headers: {
@@ -229,6 +241,7 @@ export async function acceptOrder(orderId: string, preparationTime: string) {
 
 // 주문 거절
 export async function rejectOrder(orderId: string, refusalReason: string) {
+  const token = sessionStorage.getItem("accessToken");
   const response = await fetch(`${API_BASE_URL}/api/store/orders/${orderId}/action`, {
     method: "POST",
     headers: {
@@ -246,6 +259,7 @@ export async function rejectOrder(orderId: string, refusalReason: string) {
 
 // 준비 완료
 export async function completeOrder(orderId: string) {
+  const token = sessionStorage.getItem("accessToken");
   const response = await fetch(`${API_BASE_URL}api//store/orders/${orderId}/action`, {
     method: "POST",
     headers: {

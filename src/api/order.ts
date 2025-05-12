@@ -5,7 +5,7 @@ export async function createOrder(orderRequest: {
   orderDetails: { menuId: number; menuCount: number }[];
   currency: string;
 }): Promise<string> {
-  const token = localStorage.getItem("accessToken");
+  const token = sessionStorage.getItem("accessToken");
   const response = await fetch(`${API_BASE_URL}/api/orders/create`, {
     method: "POST",
     headers: {
@@ -23,7 +23,7 @@ export async function createOrder(orderRequest: {
 
 
 export async function getOrderDetails(orderId: string): Promise<any> {
-    const token = localStorage.getItem("accessToken");
+    const token = sessionStorage.getItem("accessToken");
     const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}`, {
       headers: {
         "Content-Type": "application/json",
@@ -38,7 +38,7 @@ export async function getOrderDetails(orderId: string): Promise<any> {
   }
 
   export async function getOrderHistory() {
-    const token = localStorage.getItem("accessToken");
+    const token = sessionStorage.getItem("accessToken");
     const response = await fetch(`${API_BASE_URL}/api/orders`, {
       headers: {
         "Content-Type": "application/json",

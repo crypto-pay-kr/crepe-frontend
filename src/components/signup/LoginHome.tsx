@@ -58,12 +58,11 @@ export default function LoginHome({ onSignup, buttonClassName }: LoginHomeProps)
       }
 
 
-      const { accessToken, refreshToken, role } = await res.json();
+      const { accessToken, refreshToken  } = await res.json();
 
       // 토큰을 localStorage 등에 저장
-      localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("refreshToken", refreshToken);
-      localStorage.setItem("role", role);
+      sessionStorage.setItem("accessToken", accessToken);
+      sessionStorage.setItem("refreshToken", refreshToken);
 
       navigate("/my/coin");
 

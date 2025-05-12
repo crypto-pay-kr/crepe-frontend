@@ -16,7 +16,7 @@ export default function StoreSettingsPage() {
         <>
             <Header title="내 가게 관리" isStore={true} />
             <div className="relative overflow-auto bg-white pb-36">
-                <div className="pb-24">
+                <div className="pb-24 p-4">
                   <ShopInfo />
                 </div>
             </div>
@@ -26,11 +26,6 @@ export default function StoreSettingsPage() {
                         <Button
                             text="가게정보 수정"
                             onClick={() => navigate("/store/my/edit")}
-                            className="w-1/2 rounded-[9px] font-medium bg-[#0C2B5F] text-white shadow-inner"
-                        />
-                        <Button
-                            text="정산요청"
-                            onClick={() => navigate("/settlement")}
                             className="w-1/2 rounded-[9px] font-medium bg-[#0C2B5F] text-white shadow-inner"
                         />
                     </div>

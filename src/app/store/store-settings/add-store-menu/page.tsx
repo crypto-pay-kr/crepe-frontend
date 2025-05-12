@@ -86,7 +86,7 @@ export default function MenuAddPage(): React.ReactElement {
     }
 
     try {
-      const token = localStorage.getItem("accessToken");
+      const token = sessionStorage.getItem("accessToken");
       if (!token) {
         alert("로그인 정보가 없습니다. 다시 로그인해주세요.");
         navigate("/login");
@@ -126,7 +126,7 @@ export default function MenuAddPage(): React.ReactElement {
   const handleDelete = async () => {
     if (window.confirm("정말로 이 메뉴를 삭제하시겠습니까?")) {
       try {
-        const token = localStorage.getItem("accessToken");
+        const token = sessionStorage.getItem("accessToken");
         if (!token) {
           alert("로그인 정보가 없습니다. 다시 로그인해주세요.");
           navigate("/login");
