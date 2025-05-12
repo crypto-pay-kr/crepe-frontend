@@ -5,15 +5,13 @@ import NicknameChangeForm from "@/components/edit-info/NicknameChangeForm";
 import PhoneChangeForm from "@/components/edit-info/PhoneChangeForm";
 import Modal from "@/components/common/Modal";
 import { changeNickname, changePassword, changePhone } from '@/api/user'
-const BASE_URL = import.meta.env.VITE_API_SERVER_URL;
-
 
 
 export default function EditInfo(): React.ReactElement {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalTitle, setModalTitle] = useState<string>("");
 
-  const token = localStorage.getItem("accessToken");
+  const token = sessionStorage.getItem("accessToken");
 
 
   const handlePasswordChangeSuccess = (): void => {
@@ -34,17 +32,17 @@ export default function EditInfo(): React.ReactElement {
 
   const handlePasswordChange = async (data: { oldPassword: string; newPassword: string }) => {
     if (!token) throw new Error("로그인이 필요합니다.");
-    await changePassword(token, data);
+    await changePassword(data);
   };
 
   const handleNicknameChange = async (data: { newNickname: string }) => {
     if (!token) throw new Error("로그인이 필요합니다.");
-    await changeNickname(token, data);
+    await changeNickname(data);
   };
 
   const handlePhoneChange = async (data: { phoneNumber: string }) => {
     if (!token) throw new Error("로그인이 필요합니다.");
-    await changePhone(token, data);
+    await changePhone(data);
   };
 
 

@@ -159,12 +159,9 @@ export default function AdditionalStoreInfoPage() {
       // 로컬/세션 정리 후 완료 페이지로 이동
       localStorage.removeItem("businessOcrResult");
       localStorage.removeItem("businessImageBase64");
-      sessionStorage.removeItem("signUpData");
-      // 회원가입 성공 시 저장된 정보 삭제
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      
+
       sessionStorage.clear();
+      
       alert("회원가입이 완료되었습니다.");
       navigate("/signup-complete");
     } catch (error) {

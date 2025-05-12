@@ -5,41 +5,48 @@ import Button from "@/components/common/Button";
 import BottomNav from "@/components/common/BottomNavigate";
 import ImageUploader from "@/components/common/ImageUploader";
 import Input from "@/components/common/Input";
-import { fetchStoreMenuDetail, patchStoreMenu, deleteStoreMenu } from "@/api/store";
+import {
+  fetchStoreMenuDetail,
+  patchStoreMenu,
+  deleteStoreMenu,
+} from "@/api/store";
 
 interface MenuItemData {
   id?: number;
   name: string;
   price: string;
-  image?: File | null;
+  imageFile?: File | null;
+  imageUrl?: string;
 }
 
 export default function MenuEditPage(): React.ReactElement {
   const navigate = useNavigate();
-  const { menuId, storeId } = useParams<{ menuId?: string; storeId?: string }>();
+  const { menuId } = useParams<{ menuId?: string }>();
 
   const [menuItem, setMenuItem] = useState<MenuItemData>({
     name: "",
     price: "",
-    image: null,
+    imageFile: null,
+    imageUrl: "",
   });
 
   // 메뉴 상세 조회
   const fetchMenuDetails = async () => {
     if (!menuId) return;
     try {
-      const token = localStorage.getItem("accessToken");
+      const token = sessionStorage.getItem("accessToken");
       if (!token) {
         alert("로그인이 필요합니다.");
         navigate("/login");
         return;
       }
-      const data = await fetchStoreMenuDetail(token, menuId);
+      const data = await fetchStoreMenuDetail(menuId);
       setMenuItem({
         id: data.menuId,
         name: data.menuName,
         price: data.menuPrice.toString(),
-        image: null,
+        imageUrl: data.menuImage || "",
+        imageFile: null,
       });
     } catch (err) {
       console.error("메뉴 조회 실패:", err);
@@ -61,7 +68,7 @@ export default function MenuEditPage(): React.ReactElement {
     setMenuItem({ ...menuItem, price: value });
   };
   const handleImageChange = (file: File) => {
-    setMenuItem({ ...menuItem, image: file });
+    setMenuItem({ ...menuItem, imageFile: file });
   };
 
   // 메뉴 수정
@@ -76,7 +83,7 @@ export default function MenuEditPage(): React.ReactElement {
     }
 
     try {
-      const token = localStorage.getItem("accessToken");
+      const token = sessionStorage.getItem("accessToken");
       if (!token) {
         alert("로그인이 필요합니다.");
         navigate("/login");
@@ -95,11 +102,18 @@ export default function MenuEditPage(): React.ReactElement {
           { type: "application/json" }
         )
       );
-      if (menuItem.image) {
-        formData.append("menuImage", menuItem.image);
+
+      // 새로 업로드된 파일이 없는 경우, 기존 imageUrl을 그대로 업로드(Blob 변환)
+      if (menuItem.imageFile) {
+        formData.append("menuImage", menuItem.imageFile);
+      } else if (menuItem.imageUrl) {
+        // 서버가 항상 "menuImage" 파트를 요구한다면 아래처럼 기존 URL을 파일로 만들어 전송
+        const res = await fetch(menuItem.imageUrl);
+        const blob = await res.blob();
+        formData.append("menuImage", blob, "existing_image.jpg");
       }
 
-      await patchStoreMenu(token, menuId, formData);
+      await patchStoreMenu(menuId, formData);
       alert("메뉴가 수정되었습니다.");
       navigate(-1);
     } catch (err) {
@@ -116,13 +130,13 @@ export default function MenuEditPage(): React.ReactElement {
     }
     if (!window.confirm("정말 이 메뉴를 삭제하시겠습니까?")) return;
     try {
-      const token = localStorage.getItem("accessToken");
+      const token = sessionStorage.getItem("accessToken");
       if (!token) {
         alert("로그인이 필요합니다.");
         navigate("/login");
         return;
       }
-      await deleteStoreMenu(token, menuId);
+      await deleteStoreMenu(menuId);
       alert("메뉴가 삭제되었습니다.");
       navigate(-1);
     } catch (err) {
@@ -157,7 +171,8 @@ export default function MenuEditPage(): React.ReactElement {
             label="음식 사진"
             previewLabel="선택된 이미지"
             onChange={handleImageChange}
-            value={menuItem.image || undefined}
+            // 새 파일이 있다면 File 객체, 없으면 undefined -> 내부적으로 기존 URL만 미리보기
+            value={menuItem.imageFile || undefined}
           />
         </div>
         <div className="space-y-3 mt-6">

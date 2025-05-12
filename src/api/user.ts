@@ -54,9 +54,10 @@ export async function loginUser({ email, password, captchaKey, captchaValue }: {
 
 // 비밀번호 변경
 export async function changePassword(
-  token: string,
   data: { oldPassword: string; newPassword: string }
 ): Promise<void> {
+  const token = sessionStorage.getItem("accessToken");
+
   const response = await fetch(`${API_BASE_URL}/api/change/password`, {
     method: "PATCH",
     headers: {
@@ -74,9 +75,9 @@ export async function changePassword(
 
 // 전화번호 변경
 export async function changePhone(
-  token: string,
   data: { phoneNumber: string }
 ): Promise<void> {
+  const token = sessionStorage.getItem("accessToken");
   const response = await fetch(`${API_BASE_URL}/api/change/phone`, {
     method: "PATCH",
     headers: {
@@ -94,9 +95,9 @@ export async function changePhone(
 
 // 닉네임 변경
 export async function changeNickname(
-  token: string,
   data: { newNickname: string }
 ): Promise<void> {
+  const token = sessionStorage.getItem("accessToken");
   const response = await fetch(`${API_BASE_URL}/api/change/nickname`, {
     method: "PATCH",
     headers: {
@@ -113,7 +114,9 @@ export async function changeNickname(
 }
 
 // 사용자 정보 조회
-export async function fetchMyUserInfo(token: string) {
+export async function fetchMyUserInfo() {
+  const token = sessionStorage.getItem("accessToken");
+
   const response = await fetch(`${API_BASE_URL}/api/user/my`, {
     method: "GET",
     headers: {

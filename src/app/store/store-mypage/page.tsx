@@ -13,7 +13,7 @@ export default function StoreEditInfo(): React.ReactElement {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalTitle, setModalTitle] = useState<string>("");
 
-  const token = localStorage.getItem("accessToken");
+  const token = sessionStorage.getItem("accessToken");
 
   const handlePhoneChangeSuccess = (): void => {
     setModalTitle("휴대폰 변경 완료");

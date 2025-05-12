@@ -22,10 +22,10 @@ function ShopInfo() {
   useEffect(() => {
     const fetchStoreInfo = async () => {
       try {
-        const token = localStorage.getItem("accessToken");
+        const token = sessionStorage.getItem("accessToken");
         if (!token) throw new Error("로그인이 필요합니다.");
 
-        const data = await fetchMyStoreAllDetails(token);
+        const data = await fetchMyStoreAllDetails();
         setShopInfo(data);
       } catch (err) {
         console.error(err);
@@ -41,13 +41,13 @@ function ShopInfo() {
 
   const toggleStoreStatus = async () => {
     if (!shopInfo) return;
-    const token = localStorage.getItem("accessToken");
+    const token = sessionStorage.getItem("accessToken");
     if (!token) return;
 
     const newStatus = shopInfo.storeStatus === "OPEN" ? "CLOSED" : "OPEN";
 
     try {
-      await changeStoreStatus(newStatus, token);
+      await changeStoreStatus(newStatus);
       setShopInfo({ ...shopInfo, storeStatus: newStatus });
     } catch (err) {
       console.error("상태 변경 실패:", err);
