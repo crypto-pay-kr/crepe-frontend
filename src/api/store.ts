@@ -260,7 +260,7 @@ export async function rejectOrder(orderId: string, refusalReason: string) {
 // 준비 완료
 export async function completeOrder(orderId: string) {
   const token = sessionStorage.getItem("accessToken");
-  const response = await fetch(`${API_BASE_URL}api//store/orders/${orderId}/action`, {
+  const response = await fetch(`${API_BASE_URL}/api/store/orders/${orderId}/action`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
