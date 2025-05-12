@@ -1,28 +1,28 @@
 import React, { useState } from "react";
-import { CoinStatus } from "@/types/store";
+import { CoinList } from "@/types/store";
 import { patchStoreCoin } from "@/api/store";
 
 interface PaymentCurrencySetModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  coins?: CoinStatus[]; // 예: [{ name: "XRP" }, { name: "USDT" }, { name: "SOL" }]
+  coins?: CoinList[]; // 예: [{ name: "XRP" }, { name: "USDT" }, { name: "SOL" }]
 }
 
 export default function PaymentCurrencySetModal({
-  isOpen,
-  onClose,
-  title,
-  coins = [],
-}: PaymentCurrencySetModalProps): React.ReactElement | null {
+                                                  isOpen,
+                                                  onClose,
+                                                  title,
+                                                  coins = [],
+                                                }: PaymentCurrencySetModalProps): React.ReactElement | null {
   if (!isOpen) return null;
 
   // CryptocurrencyTags에서 사용한 색상 매핑
   const cryptoColors: Record<string, string> = {
-    XRP: "bg-yellow-100 text-yellow-800",
-    USDT: "bg-green-100 text-green-800",
-    SOL: "bg-purple-100 text-purple-800",
-    default: "bg-gray-500 text-gray-800",
+    XRP: "bg-yellow-100 text-yellow-800 border-yellow-100",
+    USDT: "bg-green-100 text-green-800 border-green-100",
+    SOL: "bg-purple-100 text-purple-800 border-purple-100",
+    default: "bg-gray-500 text-gray-800 border-gray-100",
   };
 
   // 선택한 코인들을 상태로 관리
@@ -62,16 +62,15 @@ export default function PaymentCurrencySetModal({
           {coins.map((coin, index) => {
             const coinName = typeof coin === "string" ? coin : coin.name || "";
             const isSelected = selectedCoins.includes(coinName);
+
             return (
               <button
                 key={index}
                 onClick={() => coinName && toggleCoin(coinName)}
                 className={`px-4 py-2 rounded-full text-sm transition-colors border 
-                  ${
-                    isSelected
-                      ? cryptoColors[coinName] || cryptoColors.default
-                      : "border-gray-300 text-gray-700 hover:bg-gray-100"
-                  }`}
+                   ${cryptoColors[coinName] || cryptoColors.default}
+                   ${isSelected ? "font-semibold" : ""}
+                  `}
               >
                 {coinName}
               </button>
