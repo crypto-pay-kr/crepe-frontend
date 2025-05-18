@@ -17,12 +17,12 @@ interface RawCoinBalance {
   balance: number;
 }
 
-const COIN_INFO: Record<string, Omit<Coin, 'balance' | 'krw'>> = {
+export const COIN_INFO: Record<string, Omit<Coin, 'balance' | 'krw'>> = {
   XRP: {
     currency: "XRP",
     coinName: "리플",
-    icon: <X className="h-5 w-5 text-white" />,
-    bg: "bg-gradient-to-br from-blue-500 to-blue-700",
+    icon: <X className="h-5 w-5 text-gray-400" />,
+    bg: "bg-gray-200",
     change: "+2.5%",
   },
   USDT: {

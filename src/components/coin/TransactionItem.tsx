@@ -22,7 +22,7 @@ export default function TransactionItem({
 
   const formattedAmount = isNaN(parsed)
     ? amount
-    : `${parsed > 0 ? "+" : ""}${parsed.toFixed(6)} ${symbol}`;
+    : `${parsed > 0 ? "+" : ""}${parsed.toFixed(8)} ${symbol}`;
 
 
   const [balanceValue, balanceSymbol] = balance.split(" ");
@@ -30,7 +30,7 @@ export default function TransactionItem({
 
   const formattedBalance = isNaN(parsedBalance)
     ? balance
-    : `${parsedBalance.toFixed(6)} ${balanceSymbol}`;
+    : `${parsedBalance.toFixed(8)} ${balanceSymbol}`;
 
   return (
     <div className="space-y-2 border-b border-gray-300 pb-4">

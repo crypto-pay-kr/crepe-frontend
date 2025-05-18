@@ -249,7 +249,7 @@ export default function CoinDetailPage() {
             </div>
             <div className="text-right">
               <p className="text-lg sm:text-xl md:text-2xl font-bold">
-                {balance.toFixed(6)} {symbol}
+                {balance.toFixed(8)} {symbol}
               </p>
               <p className="text-sm sm:text-base text-gray-500">
                 = {(balance * (prices[`KRW-${symbol}`] ?? 0)).toLocaleString()} KRW
@@ -467,11 +467,16 @@ export default function CoinDetailPage() {
                               ? '결제 완료'
                               : item.status === 'PENDING'
                                 ? '정산 대기중'
-                                : '결제 취소'
-                            : '알 수 없음'
+                                : item.status === 'FAILED'
+                                  ? '결제 취소'
+                                  : '환불 완료'
+                            : item.type === 'REFUND'
+                              ? '환불 완료'
+                              : '알 수 없음'
                     }
                     balance={`${item.afterBalance ?? '-'} ${symbol}`}
-                    amount={item.amount.toFixed(6) + ' ' + symbol}
+                    amount={item.amount.toFixed(8)
+                      + ' ' + symbol}
                     krw={`${krw} KRW`}
                     isDeposit={item.type === 'DEPOSIT'}
                     showAfterBalance={showAfterBalance}

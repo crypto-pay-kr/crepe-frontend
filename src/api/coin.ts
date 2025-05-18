@@ -141,7 +141,7 @@ export const requestWithdraw = async (currency: string, amount: string) => {
 export const getCoinHistory = async ({ pageParam = 0, queryKey }: { pageParam?: number; queryKey: any }) => {
   const token = sessionStorage.getItem("accessToken");
   const symbol = queryKey[1];
-  const res = await fetch(`${BASE_URL}/api/history?currency=${symbol}&page=${pageParam}&size=5`, {
+  const res = await fetch(`${BASE_URL}/api/history/coin?currency=${symbol}&page=${pageParam}&size=5`, {
     headers: {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
