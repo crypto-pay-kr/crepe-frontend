@@ -4,21 +4,19 @@ import BottomNav from "@/components/common/BottomNavigate";
 import React, { useEffect, useMemo, useState } from 'react'
 import { BankLogo } from '@/components/common/BankLogo';
 import Button from '@/components/common/Button';
-import { fetchCoinPrices } from '@/api/coin';
+import { fetchCoinPrices, getCoinBalanceByCurrency } from '@/api/coin'
 import { ArrowUpDown } from 'lucide-react'
 import { COIN_INFO } from '@/app/coin/home/CoinHome'
-import { getTokenInfo, requestExchange } from '@/api/token'
+import { fetchTokenBalance, getTokenInfo, requestExchange } from '@/api/token'
 import {
   calculateAvailableCapital,
   calculateTokenPrice,
-  calculateTokenAmount,
-  calculateCoinAmountFromToken,
-  calculateMaxTokenExchangeable
-} from "@/utils/exchangeCalculator";
+  calculateMaxExchangeCoin,
+  calculateMaxExchangeToken, calculateConversion,
+} from '@/utils/exchangeCalculator'
 export default function TokenExchangePage() {
   const navigate = useNavigate();
   const { bank } = useParams();
-
   const [coinPrice, setCoinPrice] = useState<Record<string, number>>({});
   const [tokenInfo, setTokenInfo] = useState<any | null>(null);
   const [selectedCurrency, setSelectedCurrency] = useState<string>("XRP");
@@ -26,11 +24,13 @@ export default function TokenExchangePage() {
   const [tokenAmount, setTokenAmount] = useState<number>(0);
   const [tokenCapital, setTokenCapital] =useState<number>(0);
   const [isCoinToToken, setIsCoinToToken] = useState(true);
+  const [myCoinBalance, setMyCoinBalance] = useState<number>(0);
+  const [myTokenBalance, setMyTokenBalance] = useState<number>(0);
+  const selectedPortfolio = tokenInfo?.portfolios.find(p => p.currency === selectedCurrency);
 
   // 시세 및 토큰 정보 불러오기 5초 마다
   useEffect(() => {
     if (!bank) return;
-
     const fetchAllData = async () => {
       const [info, prices] = await Promise.all([
         getTokenInfo(bank),
@@ -39,116 +39,75 @@ export default function TokenExchangePage() {
       setTokenInfo(info);
       setCoinPrice(prices);
 
-      // 🔥 최초 로딩일 때만 설정
       setSelectedCurrency(prev =>
         prev || (info.portfolios.length > 0 ? info.portfolios[0].currency : "")
       );
     };
-
     fetchAllData();
     const interval = setInterval(fetchAllData, 5000);
     return () => clearInterval(interval);
   }, [bank]);
+
 
   // 환전 수량 계산 (코인 < - > 토큰 )
   useEffect(() => {
     if (!tokenInfo || !selectedCurrency || !coinPrice) return;
 
     const totalCapital = calculateAvailableCapital(tokenInfo.portfolios, coinPrice);
-    setTokenCapital(Number(totalCapital.toFixed(8)));
+    setTokenCapital(Number(totalCapital.toFixed(2)));
 
-    const tokenPrice = calculateTokenPrice(totalCapital, tokenInfo.totalSupply);
-    const selectedRate = coinPrice[`KRW-${selectedCurrency}`];
+    const tokenPrice = calculateTokenPrice(totalCapital, tokenInfo.tokenBalance);
+    const rate = coinPrice[`KRW-${selectedCurrency}`];
+    if (!rate || !tokenPrice) return;
 
-    if (!selectedRate || !tokenPrice) return;
-
+    const result = calculateConversion(isCoinToToken, coinAmount, tokenAmount, rate, tokenPrice);
     if (isCoinToToken) {
-      if (!coinAmount) {
-        setTokenAmount(0);
-        return;
-      }
-      const result = calculateTokenAmount(coinAmount, selectedRate, tokenPrice);
-      setTokenAmount(Number(result.toFixed(8)));
+      setTokenAmount(Number(result.toFixed(2)));
     } else {
-      if (!tokenAmount) {
-        setCoinAmount(0);
-        return;
-      }
-      const krwValue = tokenAmount * tokenPrice;
-      const resultCoin = krwValue / selectedRate;
-      setCoinAmount(Number(resultCoin.toFixed(8)));
+      setCoinAmount(Number(result.toFixed(2)));
     }
   }, [tokenInfo, selectedCurrency, coinPrice, coinAmount, tokenAmount, isCoinToToken]);
 
+
+
   const tokenPrice = useMemo(() => {
-    return calculateTokenPrice(tokenCapital, tokenInfo?.totalSupply ?? 0);
-  }, [tokenCapital, tokenInfo?.totalSupply]);
+    return calculateTokenPrice(tokenCapital, tokenInfo?.tokenAmount ?? 0);
+  }, [tokenCapital, tokenInfo?.tokenAmount]);
 
-  const selectedRate = useMemo(() => {
-    return coinPrice[`KRW-${selectedCurrency}`] || 0;
-  }, [coinPrice, selectedCurrency]);
+  //최대로 교환 가능한 토큰 수량
+  const maxExchangeToken = useMemo(() =>
+      calculateMaxExchangeToken({ tokenInfo, selectedCurrency, tokenCapital, coinPrice }),
+    [tokenInfo, selectedCurrency, tokenCapital, coinPrice]
+  );
 
+  //최대로 교환가능한 코인 수량
+  const maxExchangeCoin = useMemo(() =>
+      calculateMaxExchangeCoin({ tokenInfo, selectedCurrency, tokenCapital, coinPrice }),
+    [tokenInfo, selectedCurrency, tokenCapital, coinPrice]
+  );
 
-  useEffect(() => {
-    if (!tokenInfo || !selectedRate || !tokenPrice) return;
+  //코인을 원화로 환산한 값
+  const coinToKRW = useMemo(() => {
+    if (!coinAmount || !selectedCurrency || !coinPrice) return 0;
+    const rate = coinPrice[`KRW-${selectedCurrency}`] || 0;
+    return (coinAmount * rate).toFixed(2);
+  }, [coinAmount, selectedCurrency, coinPrice]);
 
-    if (isCoinToToken) {
-      if (!coinAmount) {
-        setTokenAmount(0);
-        return;
-      }
-      const result = calculateTokenAmount(coinAmount, selectedRate, tokenPrice);
-      setTokenAmount(Number(result.toFixed(8)));
-    } else {
-      if (!tokenAmount) {
-        setCoinAmount(0);
-        return;
-      }
-      const krwValue = tokenAmount * tokenPrice;
-      const resultCoin = krwValue / selectedRate;
-      setCoinAmount(Number(resultCoin.toFixed(8)));
-    }
-  }, [coinAmount, tokenAmount, tokenInfo, selectedRate, tokenPrice, isCoinToToken]);
-
-
-  // 최대로 교환 가능한 토큰 수량 계산
-  const maxExchangeToken = useMemo(() => {
-    if (!tokenInfo || !selectedCurrency || !tokenCapital || !tokenInfo.totalSupply) return '-';
-
-    const tokenPrice = calculateTokenPrice(tokenCapital, tokenInfo.totalSupply);
-    const coinRate = coinPrice[`KRW-${selectedCurrency}`] || 0;
-    const portfolio = tokenInfo.portfolios.find(p => p.currency === selectedCurrency);
-    const available = (portfolio?.amount ?? 0) - (portfolio?.nonAvailableAmount ?? 0);
-
-    const maxToken = calculateMaxTokenExchangeable(available, coinRate, tokenPrice);
-    return maxToken.toFixed(8);
-  }, [tokenInfo, selectedCurrency, coinPrice, tokenCapital]);
-
-  // 최대로 교환 가능한 코인 수량 계산
-  const maxExchangeCoin = useMemo(() => {
-    if (
-      !tokenInfo || !selectedCurrency || !tokenInfo.totalSupply || !tokenCapital) return '-';
-
-    const tokenPrice = calculateTokenPrice(tokenCapital, tokenInfo.totalSupply);
-    const coinRate = coinPrice[`KRW-${selectedCurrency}`] || 0;
-
-    const availableToken = tokenInfo.tokenBalance ?? 0;
-    const coinAmount = calculateCoinAmountFromToken(availableToken, tokenPrice, coinRate);
-
-    return coinAmount.toFixed(8);
-  }, [tokenInfo, selectedCurrency, coinPrice, tokenCapital]);
+  //토큰을 원화로 환산한 값
+  const tokenToKRW = useMemo(() => {
+    if (!tokenAmount || !tokenPrice) return 0;
+    return (tokenAmount * tokenPrice).toFixed(2);
+  }, [tokenAmount, tokenPrice]);
 
 
   const handleExchangeClick = async () => {
-    if (!tokenInfo || !tokenPrice || !selectedRate) return;
-
-    // 포트폴리오에 있는 코인 시세만 추출
+    if (!tokenInfo)return console.error('Exchange error');
     const filteredCoinRates: Record<string, number> = {};
     tokenInfo.portfolios.forEach((p: any) => {
       const currency = p.currency;
       const rate = coinPrice[`KRW-${currency}`];
       if (rate) {
-        filteredCoinRates[currency] = Number(rate.toFixed(4));
+        filteredCoinRates[currency] = Number(rate.toFixed(2));
       }
     });
 
@@ -156,14 +115,13 @@ export default function TokenExchangePage() {
       await requestExchange(isCoinToToken, {
         fromCurrency: isCoinToToken ? selectedCurrency : tokenInfo.currency,
         toCurrency: isCoinToToken ? tokenInfo.currency : selectedCurrency,
-        coinRates: filteredCoinRates, // 여기에 정제된 시세만 전달
+        coinRates: filteredCoinRates,
         tokenAmount: tokenAmount ?? 0,
         coinAmount: coinAmount ?? 0
       });
-      alert("환전 요청 완료되었습니다.");
       navigate("/token/exchange/complete", {
         state: {
-          bank: tokenInfo.currency, // 예: "HTK"
+          bank: tokenInfo.currency,
           fromCurrency: selectedCurrency,
           toCurrency: tokenInfo.currency,
           fromAmount: coinAmount,
@@ -178,20 +136,43 @@ export default function TokenExchangePage() {
   };
 
 
+  useEffect(() => {
+    if (!bank) return;
+    //현재 사용자의 토큰 잔액 불러오기
+    fetchTokenBalance(bank)
+      .then(setMyTokenBalance)
+      .catch(err => {
+        console.error('토큰 잔액 조회 실패:', err);
+        setMyTokenBalance(0);
+      });
+
+    // 현재 사용자의 코인 잔액 불러오기
+    getCoinBalanceByCurrency(selectedCurrency)
+      .then((res) => {
+        setMyCoinBalance(res.balance); // balance 필드만 추출
+      })
+      .catch((err) => {
+        console.error('코인 잔액 조회 실패:', err);
+        setMyCoinBalance(0);
+      });
+  }, [bank, selectedCurrency]);
+
+
+
 
   return (
+
     <div className="flex h-full flex-col bg-gray-50">
       <Header title="토큰 환전" />
-
       <main className="flex-1 overflow-auto p-5">
         {/* 위 상단 입력 박스 */}
-        <div className="mb-6 rounded-2xl border-2 border-gray-200 bg-white p-9 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
+        <div className="mb-6 mt-6 min-h-[10px] rounded-2xl border-2 border-gray-200 bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-0.5">
               {tokenInfo && (
                 <>
                   {/* 아이콘 */}
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center ml-3 gap-3">
                     {isCoinToToken ? (
                       COIN_INFO[selectedCurrency] && (
                         <div
@@ -221,32 +202,48 @@ export default function TokenExchangePage() {
                       </select>
                     )
                   ) : (
-                    <p className="text-lg font-bold">{tokenInfo.currency}</p>
+                    <p className="ml-3 text-lg font-bold">
+                      {tokenInfo.currency}
+                    </p>
                   )}
                 </>
               )}
             </div>
 
-            <div className="flex items-center space-x-2">
-              <input
-                type="number"
-                className="min-w-[140px] appearance-none border-none bg-transparent text-right text-lg outline-none"
-                style={{
-                  MozAppearance: 'textfield',
-                  WebkitAppearance: 'none',
-                }}
-                value={isCoinToToken ? coinAmount : (tokenAmount ?? 0)}
-                onChange={e =>
-                  isCoinToToken
-                    ? setCoinAmount(Number(e.target.value))
-                    : setTokenAmount(Number(e.target.value))
-                }
-                placeholder="0"
-              />
+            <div className="mt-0 flex min-w-[140px] flex-col items-end space-y-1 mr-3">
+              <p className="text-xs text-gray-400">
+                보유:{' '}
+                {isCoinToToken
+                  ? `${myCoinBalance} ${selectedCurrency}`
+                  : `${myTokenBalance} ${bank}`}
+              </p>
+              {/* 수량 입력 + 단위 */}
+              <div className="flex items-baseline space-x-1">
+                <input
+                  type="number"
+                  step="any"
+                  min="0"
+                  className="appearance-none border-none bg-transparent text-right text-lg font-bold outline-none"
+                  value={isCoinToToken ? coinAmount : tokenAmount}
+                  onChange={e => {
+                    const value = Number(e.target.value)
+                    const max = isCoinToToken ? myCoinBalance : myTokenBalance
+                    const clamped = Math.min(value, max)
+                    isCoinToToken
+                      ? setCoinAmount(clamped)
+                      : setTokenAmount(clamped)
+                  }}
+                  placeholder="0"
+                />
+                <span className="text-lg font-bold">
+                  {isCoinToToken ? selectedCurrency : tokenInfo?.currency}
+                </span>
+              </div>
 
-              <span className="text-lg font-semibold">
-                {isCoinToToken ? selectedCurrency : tokenInfo?.currency}
-              </span>
+              {/* 환산값 (KRW) */}
+              <p className="text-xs text-gray-500">
+                {isCoinToToken ? `≈ ${coinToKRW} KRW` : `≈ ${tokenToKRW} KRW`}
+              </p>
             </div>
           </div>
         </div>
@@ -262,10 +259,10 @@ export default function TokenExchangePage() {
         </div>
 
         {/* 아래 결과 박스 */}
-        <div className="mb-6 rounded-2xl border-2 border-gray-200 bg-white p-9 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
+        <div className="mb-6 min-h-[110px] rounded-2xl border-2 border-gray-200 bg-white p-9 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
           <div className="flex items-center justify-between">
             {/* 좌측: 로고 + 이름 */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-0.5">
               {isCoinToToken
                 ? tokenInfo?.currency && <BankLogo bank={tokenInfo.currency} />
                 : COIN_INFO[selectedCurrency] && (
@@ -277,7 +274,7 @@ export default function TokenExchangePage() {
                   )}
               {/* 셀렉트 or 고정 텍스트 */}
               {isCoinToToken ? (
-                <p className="text-lg font-bold">{tokenInfo?.currency}</p>
+                <p className="ml-4 text-lg font-bold">{tokenInfo?.currency}</p>
               ) : (
                 tokenInfo?.portfolios?.length > 0 && (
                   <select
@@ -297,13 +294,39 @@ export default function TokenExchangePage() {
 
             {/* 우측: 환전 결과 */}
             <div className="text-blue-600 min-w-[100px] text-right text-xl font-bold">
-              {isCoinToToken
-                ? tokenAmount !== null
-                  ? `${tokenAmount} ${tokenInfo?.currency}`
-                  : '-'
-                : coinAmount !== null
-                  ? `${coinAmount} ${selectedCurrency}`
-                  : '-'}
+              {isCoinToToken ? (
+                tokenAmount !== null ? (
+                  <>
+                    {tokenAmount}
+                    <span className="ml-5">{tokenInfo?.currency}</span>
+                  </>
+                ) : (
+                  '-'
+                )
+              ) : coinAmount !== null ? (
+                <>
+                  {coinAmount}
+                  <span className="ml-5">{selectedCurrency}</span>
+                </>
+              ) : (
+                '-'
+              )}
+
+              {isCoinToToken && selectedPortfolio && (
+                (() => {
+                  const totalAmount = selectedPortfolio.amount ?? 0;
+                  const nonAvailable = selectedPortfolio.nonAvailableAmount ?? 0;
+                  const remainingPercent = totalAmount > 0 ? ((totalAmount - nonAvailable) / totalAmount) * 100 : 100;
+                  const isLowLiquidity = remainingPercent <= 30;
+
+
+                  {isLowLiquidity && (
+                    <div className="mt-2 text-xs text-red-500 font-semibold whitespace-nowrap">
+                       현재 {selectedCurrency} 잔여금액이 전체의 30% 이하입니다
+                    </div>
+                  )}
+                })()
+              )}
             </div>
           </div>
         </div>
@@ -323,7 +346,7 @@ export default function TokenExchangePage() {
         <div className="mb-3 flex items-end justify-between">
           <h2 className="text-xl font-bold">토큰 구성</h2>
           <p className="text-sm text-gray-500">
-            총 자본금 {tokenCapital?.toFixed(8).toLocaleString()} KRW
+            총 자본금 {tokenCapital?.toFixed(2).toLocaleString()} KRW
           </p>
         </div>
 
@@ -341,7 +364,7 @@ export default function TokenExchangePage() {
                   {p.currency} ({COIN_INFO[p.currency]?.coinName})
                 </span>
                 <span className="text-sm text-gray-600">
-                  교환됨 {swappedRatio.toFixed(1)}%
+                  교환됨 {swappedRatio.toFixed(2)}%
                 </span>
               </div>
               <div className="flex h-3 w-full overflow-hidden rounded-full bg-gray-200">

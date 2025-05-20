@@ -22,7 +22,7 @@ export default function TransactionItem({
 
   const formattedAmount = isNaN(parsed)
     ? amount
-    : `${parsed > 0 ? "+" : ""}${parsed.toFixed(8)} ${symbol}`;
+    : `${parsed > 0 ? "+" : ""}${parsed.toFixed(2)} ${symbol}`;
 
 
   const [balanceValue, balanceSymbol] = balance.split(" ");
@@ -30,7 +30,7 @@ export default function TransactionItem({
 
   const formattedBalance = isNaN(parsedBalance)
     ? balance
-    : `${parsedBalance.toFixed(8)} ${balanceSymbol}`;
+    : `${parsedBalance.toFixed(2)} ${balanceSymbol}`;
 
   return (
     <div className="space-y-2 border-b border-gray-300 pb-4">
@@ -39,7 +39,7 @@ export default function TransactionItem({
         <div>
           <p
             className={`text-xl font-bold ${
-              isDeposit ? "text-sky-700" : "text-red-500"
+              isDeposit ? "text-indigo-800" : "text-red-600"
             } mb-2`}
           >
             {type}
@@ -49,12 +49,10 @@ export default function TransactionItem({
           )}
         </div>
         <div className="text-right">
-          <p
-            className={`text-lg font-bold ${
-              isDeposit ? "text-sky-700" : "text-red-500"
-            } mb-2`}
-          >
-            <span>{formattedAmount}</span>
+          <p>
+            <span  className={`text-lg font-bold ${
+              isDeposit ? "text-indigo-800" : "text-red-500"
+            } mb-2`}>{formattedAmount}</span>
           </p>
           <p className="text-sm text-gray-600">= {krw} KRW</p>
         </div>
