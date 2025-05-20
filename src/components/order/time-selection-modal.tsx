@@ -5,19 +5,19 @@ import OrderModal from "./OrderModal"
 interface TimeSelectionModalProps {
   isOpen: boolean
   onClose: () => void
-  onAccept: (time: number) => void
+  onAccept: (time: string) => void
 }
 
 export function TimeSelectionModal({ isOpen, onClose, onAccept }: TimeSelectionModalProps) {
-  const [selectedTime, setSelectedTime] = useState<number | null>(null)
-  const timeOptions = [10, 20, 30, 40, 50, 60]
+  const [selectedTime, setSelectedTime] = useState<string | null>(null)
+  const timeOptions = ["10분", "20분", "30분", "40분", "50분", "60분"];
 
   const handleAccept = () => {
     if (selectedTime !== null) {
       onAccept(selectedTime)
       onClose()
     }
-  }
+  };
 
   return (
     <OrderModal isOpen={isOpen} onClose={onClose}>
@@ -28,29 +28,18 @@ export function TimeSelectionModal({ isOpen, onClose, onAccept }: TimeSelectionM
             <div
               key={time}
               onClick={() => setSelectedTime(time)}
-              className={`p-3 rounded-md cursor-pointer ${
-                selectedTime === time ? "bg-blue-50 border border-blue-500" : "hover:bg-gray-50"
-              }`}
+              className={`p-3 rounded-md cursor-pointer ${selectedTime === time ? "bg-blue-50 border border-blue-500" : "hover:bg-gray-50"
+                }`}
             >
-              <div className="flex items-center">
-                <div
-                  className={`w-5 h-5 rounded-full border ${
-                    selectedTime === time ? "border-blue-500 bg-blue-500" : "border-gray-300"
-                  } mr-3 flex items-center justify-center`}
-                >
-                  {selectedTime === time && <div className="w-2 h-2 rounded-full bg-white"></div>}
-                </div>
-                <span>{time}분</span>
-              </div>
+              {time}
             </div>
           ))}
         </div>
         <button
           onClick={handleAccept}
           disabled={selectedTime === null}
-          className={`w-full mt-6 py-3 rounded-md text-white font-medium ${
-            selectedTime === null ? "bg-blue-300" : "bg-[#0a2e65]"
-          }`}
+          className={`w-full mt-6 py-3 rounded-md text-white font-medium ${selectedTime === null ? "bg-blue-300" : "bg-[#0a2e65]"
+            }`}
         >
           수락
         </button>

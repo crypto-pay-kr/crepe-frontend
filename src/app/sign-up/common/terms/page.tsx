@@ -4,11 +4,12 @@ import { useNavigate, useLocation } from "react-router-dom"
 export default function TermsAgreementPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const params = new URLSearchParams(location.search)
-  const isStore = params.get("store") === "true"
+  
+  const isStore = location.pathname.includes("/store/")
+  
   const handleNext = () => {
     if (isStore) {
-      navigate("/email?store=true")
+      navigate("/store/email")
     } else {
       navigate("/email")
     }

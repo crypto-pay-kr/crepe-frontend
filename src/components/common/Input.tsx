@@ -1,12 +1,10 @@
-"use client"
-
 import CheckCircle from "./CheckCircle"
 
 interface InputProps {
   label: string
   type?: string
   value: string
-  onChange: (value: string) => void
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string
   isValid?: boolean
   showValidation?: boolean
@@ -32,7 +30,7 @@ export default function Input({
         <input
           type={type === "password" && showPassword ? "text" : type}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={onChange}
           placeholder={placeholder}
           className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-blue-500"
         />

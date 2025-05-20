@@ -1,20 +1,47 @@
-"use client"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Header from "../common/Header"
 import Button from "../common/Button"
 
 interface PhoneNumberProps {
-  onNext: () => void,
-  isStore?: boolean
+  onNext: () => void;
+  isStore: boolean;
+  onPhoneNumberChange: (phone: string) => void; // 전화번호 변경 핸들러
 }
 
-export default function PhoneNumber({ onNext, isStore }: PhoneNumberProps) {
-  const [phoneNumber, setPhoneNumber] = useState("01012345678")
-  const isButtonDisabled = !phoneNumber
+export default function PhoneNumber({
+  onNext,
+  isStore,
+  onPhoneNumberChange,
+}: PhoneNumberProps) {
+  const [phoneNumber, setPhoneNumber] = useState("")
+  const [formattedNumber, setFormattedNumber] = useState("")
+  const isButtonDisabled = !phoneNumber || phoneNumber.length < 10
+
+  useEffect(() => {
+    if (phoneNumber) {
+      let formatted = phoneNumber.replace(/[^0-9]/g, '')
+      
+      if (formatted.length > 3 && formatted.length <= 7) {
+        formatted = `${formatted.slice(0, 3)}-${formatted.slice(3)}`
+      } else if (formatted.length > 7) {
+        formatted = `${formatted.slice(0, 3)}-${formatted.slice(3, 7)}-${formatted.slice(7, 11)}`
+      }
+      
+      setFormattedNumber(formatted)
+    } else {
+      setFormattedNumber("")
+    }
+  }, [phoneNumber])
+
+  // 전화번호 입력 처리
+  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^0-9-]/g, ""); // 숫자와 '-'만 허용
+    setPhoneNumber(value.replace(/-/g, "")); // '-' 제거 후 상태 업데이트
+    onPhoneNumberChange(value.replace(/-/g, "")); // 부모 컴포넌트로 전달
+  };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-white">
       <Header title="회원가입" progress={2} isStore={isStore}/>
       <div className="flex-1 flex flex-col p-5">
         <div className="mb-8">
@@ -26,15 +53,21 @@ export default function PhoneNumber({ onNext, isStore }: PhoneNumberProps) {
             <div className="text-sm text-gray-500 mb-1">Phone Number</div>
             <input
               type="tel"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              className="w-full focus:outline-none"
+              value={formattedNumber}
+              onChange={handlePhoneNumberChange}
+              placeholder="010-0000-0000"
+              className="w-full focus:outline-none text-gray-800 text-lg"
             />
           </div>
         </div>
       </div>
       <div className="p-5">
-        <Button text="다음" onClick={onNext} color={isButtonDisabled ? "gray" : "blue"} />
+        <Button 
+          text="다음" 
+          onClick={onNext} 
+          color={isButtonDisabled ? "gray" : "primary"}
+          disabled={isButtonDisabled}
+        />
       </div>
     </div>
   )

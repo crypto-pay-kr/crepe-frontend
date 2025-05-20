@@ -35,10 +35,6 @@ export default function ProgressBar({
     return () => clearTimeout(timer);
   }, [progress, previousPercentage, targetPercentage]);
   
-  console.log('Current progress:', progress, 
-              'Previous progress:', progress > 1 ? progress - 1 : 0,
-              'Previous percentage:', previousPercentage,
-              'Target percentage:', targetPercentage);
   
   // 키프레임 스타일을 생성하는 함수
   const getKeyframeStyle = (): string => {
