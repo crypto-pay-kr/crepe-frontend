@@ -28,9 +28,6 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Build with Yarn
-      run: npm run build
-
     - name: Docker Login
       uses: docker/login-action@v2
       with:
