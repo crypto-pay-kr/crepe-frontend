@@ -1,38 +1,143 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { dummyTokenData } from "@/constants/TokenData";
-import { dummyTokenTransactions } from "@/constants/TokenTransactionData";
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import Header from "@/components/common/Header";
 import BottomNav from "@/components/common/BottomNavigate";
-import TransactionItem from "@/components/coin/TransactionItem";
-import React, { useState } from 'react'
-import { BankLogo } from '@/components/common/BankLogo'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import Button from '@/components/common/Button'
+import { BankLogo, BankLogoProps } from '@/components/common/BankLogo'
+import { GetMySubscribeTransactionList, GetMyTokenList } from '@/api/token'
+import { SubscribeTransaction } from '@/types/BankTokenAccount';
+import SubscribeTransactionList from '@/components/token/transaction/SubscribeTransactionList'
+import { useBankStore } from '@/stores/BankStore'
 
 export default function TokenProductListPage() {
-  const { tokenCode } = useParams();
+  const { subscribeId } = useParams<{ subscribeId: string }>();
+  const { bankTokens, fetchBankTokens } = useBankStore();
   const navigate = useNavigate();
-  const [selectedPeriod, setSelectedPeriod] = useState('day')
+  const [error, setError] = useState<string | null>(null);
+  const [transactions, setTransactions] = useState<SubscribeTransaction[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(0);
+  const location = useLocation();
 
-  const group = dummyTokenData.find(g => g.tokens.some(t => t.code === tokenCode));
-  const token = group?.tokens.find(t => t.code === tokenCode);
-  const transactions = dummyTokenTransactions.find(t => t.code === tokenCode)?.history ?? [];
+  const [hasNext, setHasNext] = useState<boolean>(true);
+  const observer = useRef<IntersectionObserver | null>(null);
+  const loaderRef = useRef<HTMLDivElement | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [hasFetchedOnce, setHasFetchedOnce] =  useState(false);
+  const [productState, setProductState] = useState<any>(null);
+  const [tokenInfoState, setTokenInfoState] = useState<any>(null);
 
-  if (!token || !group) return <div className="p-4">해당 토큰 정보를 찾을 수 없습니다.</div>;
 
   const handleCancelClick = () => {
-    navigate(`/token/product/cancel/${tokenCode}`, {
-      state: { tokenCode },
+    navigate(`/token/product/cancel/${subscribeId}`, {
+      state: {
+        productState,
+        tokenInfoState
+      },
     });
   };
   const handleExchangeClick = () => {
-    navigate(`/token/product/deposit/${tokenCode}`, {
-      state: { tokenCode },
+    navigate(`/token/product/deposit/${subscribeId}`, {
+      state: {
+        productState,
+        tokenInfoState
+      },
     });
   };
+
+
+  // 가입 상품 거래내역 불러오기 (무한 스크롤 적용)
+  const fetchTransactions = useCallback(async () => {
+    if (!subscribeId || !hasNext || loading) return;
+    setLoading(true);
+    try {
+      const data = await GetMySubscribeTransactionList(subscribeId.toString(), page, 3);
+
+      const mapped: SubscribeTransaction[] = (data.content || []).map((transaction: any) => ({
+        eventType: transaction.eventType,
+        amount: transaction.amount,
+        date: transaction.date,
+      }));
+
+      setTransactions((prev) => [...prev, ...mapped]);
+      setHasNext(!data.last);
+      setPage((prev) => prev + 1);
+    } catch (err: any) {
+      setError(err.message || "오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  }, [subscribeId, page, hasNext, loading]);
+
+  // 상태 초기화
+  useEffect(() => {
+    if (!location.state) return;
+
+    setTransactions([]);
+    setPage(0);
+    setHasNext(true);
+
+    fetchBankTokens().then(() => {
+      // 최신 bankTokens에서 현재 subscribeId에 해당하는 product를 다시 찾아서 상태 업데이트
+      const latest = useBankStore.getState().bankTokens?.flatMap(token => {
+        return token.products.map(product => ({
+          product,
+          tokenInfo: {
+            currency: token.currency,
+            totalBalance: token.totalBalance,
+            bankTokenName: token.bankTokenName,
+          }
+        }))
+      }).find(item => Number(subscribeId) === item.product.subscribeId);
+
+
+      if (latest) {
+        console.log(latest.product)
+        setProductState(latest.product);
+        setTokenInfoState(latest.tokenInfo);
+      }
+      setIsInitialized(true);
+
+    });
+  }, [location.state, subscribeId]);
+
+  useEffect(() => {
+    if (isInitialized && !hasFetchedOnce) {
+      fetchTransactions();
+      setHasFetchedOnce(true);
+    }
+  }, [isInitialized, hasFetchedOnce, fetchTransactions]);
+
+
+  useEffect(() => {
+    if (loading) return;
+
+    const currentRef = loaderRef.current;
+    if (!currentRef) return;
+
+    if (observer.current) observer.current.disconnect();
+
+    observer.current = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && hasNext) {
+        fetchTransactions();
+      }
+    });
+
+    observer.current.observe(currentRef);
+    console.log("fetch called with page:", page);
+
+
+    return () => observer.current?.disconnect();
+  }, [fetchTransactions,page, hasNext, loading]);
+
+  if (!isInitialized) {
+    return <div className="p-4">로딩 중입니다...</div>;
+  }
+
   return (
     <div className="flex h-full flex-col bg-gray-50">
       <Header
-        title={`${token.name} 상세`}
+        title={`${productState.name} 상세`}
         onBackClick={() => navigate(-1)}
       />
 
@@ -42,101 +147,49 @@ export default function TokenProductListPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <div className="mr-3">
-                  <BankLogo bank={group.bank} />
+                  <BankLogo bank={tokenInfoState.currency as BankLogoProps["bank"]} />
                 </div>
                 <p className="text-2xl font-semibold">총 보유</p>
               </div>
               <div className="text-right">
                 <p className="text-2xl font-bold">
-                  {token.amount}
+                  {productState.amount} {tokenInfoState.currency}
                 </p>
                 <p className="text-base text-gray-500">
-                  = {token.evaluated} KRW
+                  = {productState.evaluated}
                 </p>
-                <p className="text-sm mt-1 text-red-500">수익률: <span className="font-medium text-red-500">{token.rate}</span></p>
+                <p className="text-lg mt-1 font-semibold text-indigo-800">연 <span className="text-lg font-semibold text-indigo-800">{productState.rate}</span></p>
               </div>
             </div>
           </div>
           <div className="-mt-2 mb-4 w-full">
-            <button className="w-full bg-[#0a2e64] text-white py-3 rounded-lg font-medium text-base shadow-sm"
+            <button className="w-full bg-[#0a2e64] text-white py-3 rounded-lg font-semibold text-base shadow-sm"
             onClick={handleExchangeClick}>
               토큰 예치
             </button>
           </div>
 
-        {/* 기간 선택 탭 - 계좌등록 버튼 아래로 이동 */}
-        <div className="mb-6">
-          <div className="flex rounded-xl bg-white p-1 shadow-sm">
-            {['day', 'week', 'month', 'year'].map(period => (
-              <button
-                key={period}
-                onClick={() => setSelectedPeriod(period)}
-                className={`flex-1 rounded-lg py-2 text-center text-sm font-medium transition ${
-                  selectedPeriod === period
-                    ? 'bg-[#0a2e64] text-white'
-                    : 'text-gray-500 hover:bg-gray-50'
-                }`}
-              >
-                {period === 'day' && '1일'}
-                {period === 'week' && '1주'}
-                {period === 'month' && '1개월'}
-                {period === 'year' && '1년'}
-              </button>
-            ))}
-          </div>
-        </div>
-
 
         {/* 거래 내역 헤더 */}
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-7 flex items-center justify-between">
           <h3 className="text-lg font-bold text-gray-800">거래 내역</h3>
-          <button className="flex items-center text-sm font-medium text-[#0a2e64]">
-            전체보기
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="ml-1"
-            >
-              <path
-                d="M6 12L10 8L6 4"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
         </div>
-
-        {/* 거래 내역 세부*/}
-          <div className="space-y-4 pb-10 text-xs">
-          {transactions.length > 0 ? (
-            transactions.map((tx, idx) => (
-              <TransactionItem
-                key={idx}
-                date={tx.date}
-                type={tx.status}
-                balance={`${tx.amount}`}
-                amount={(tx.amount > 0 ? "+" : "") + tx.amount + "XRP"}
-                krw={tx.krw.toLocaleString()}
-                isDeposit={tx.amount > 0}
-                showAfterBalance={true}
-              />
-            ))
-          ) : (
-            <p className="text-sm text-gray-500">거래 내역이 없습니다.</p>
-          )}
-        </div>
-      </main>
+          {/* 거래 내역 세부 */}
+          <SubscribeTransactionList
+            transactions={transactions}
+            loaderRef={loaderRef}
+            loading={loading}
+            hasNext={hasNext}
+            currency={tokenInfoState.currency}
+            totalBalance={tokenInfoState.totalBalance}
+          />
+        </main>
 
       <div className="p-5 bg-gray-50 shadow-lg border-t border-gray-50">
         <Button
-          text="해지 요청"
+          text="해지하기"
           onClick={handleCancelClick}
-          className="w-full rounded-lg py-3 font-semibold text-lg shadow-md"
+          className="w-full rounded-lg py-3 font-semibold text-base shadow-md"
         />
       </div>
       <BottomNav />

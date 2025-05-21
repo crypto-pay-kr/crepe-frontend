@@ -1,12 +1,18 @@
 export interface BankLogoProps {
-    bank: "HTK" | "shinhan" | "woori"
+
+    bank: "WTK" | "STK" | "HTK" | "KTK" | "NTK"
 }
 
 const bankData: Record<BankLogoProps["bank"], { label: string; image: string }> = {
+    WTK: { label: "우리은행", image: "/woori.png" },
+    STK: { label: "신한은행", image: "/shinhan.png" },
     HTK: { label: "하나은행", image: "/hana.png" },
-    shinhan: { label: "신한은행", image: "/shinhan.png" },
-    woori: { label: "우리은행", image: "/woori.png" },
+    KTK: { label: "국민은행", image: "/hana.png" },
+    NTK: { label: "농협은행", image: "/hana.png" },
+
 }
+
+
 
 export function BankLogo({ bank }: BankLogoProps) {
     const { label, image } = bankData[bank]
