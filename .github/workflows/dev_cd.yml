@@ -38,13 +38,13 @@ jobs:
       run: |
         docker build \
           -t ${{ secrets.DOCKER_USERNAME}}/${{ secrets.DOCKER_REPO }}:latest \
-          -t ${{ secrets.DOCKER_USERNAME}}/${{ secrets.DOCKER_REPO }}:${{ github.sha }} \
+          -t ${{ secrets.DOCKER_USERNAME}}/${{ secrets.DOCKER_REPO }}:${GITHUB_SHA::7} \
           .
 
     - name: Docker Image Push
       run: |
         docker push ${{ secrets.DOCKER_USERNAME}}/${{ secrets.DOCKER_REPO }}:latest
-        docker push ${{ secrets.DOCKER_USERNAME}}/${{ secrets.DOCKER_REPO }}:${{ github.sha }}
+        docker push ${{ secrets.DOCKER_USERNAME}}/${{ secrets.DOCKER_REPO }}:${GITHUB_SHA::7}
 
 
     - name: Deploy to Remote
