@@ -133,9 +133,9 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/settlement" element={<SettlementCoin />} />
 
         {/*토큰 상품 페이지*/}
-        <Route path="/token/product/detail/:tokenCode" element={<TokenProductListPage/>} />
-        <Route path="/token/product/deposit/:tokenCode" element={<TokenDepositPage/>} />
-        <Route path="/token/product/cancel/:tokenCode" element={<TokenCancelPage/>} />
+        <Route path="/token/product/detail/:subscribeId" element={<TokenProductListPage/>} />
+        <Route path="/token/product/deposit/:subscribeId" element={<TokenDepositPage/>} />
+        <Route path="/token/product/cancel/:subscribeId" element={<TokenCancelPage/>} />
 
         {/*토큰 상세 페이지*/}
         <Route path="/token/detail/:bank" element={<TokenGroupDetailPage/>} />
