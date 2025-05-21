@@ -10,7 +10,7 @@ export function CoinList({ coins, onCoinClick }: CoinListProps) {
   return (
     <div className="flex flex-col gap-6 px-6">
       {coins.map((coin) => (
-        <CoinItem key={coin.symbol} coin={coin} onClick={() => onCoinClick(coin.symbol)} />
+        <CoinItem key={coin.currency} coin={coin} onClick={() => onCoinClick(coin.currency)} />
       ))}
     </div>
   );

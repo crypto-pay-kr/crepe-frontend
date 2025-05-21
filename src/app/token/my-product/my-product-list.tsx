@@ -123,6 +123,7 @@ export default function TokenProductListPage() {
                 amount={(tx.amount > 0 ? "+" : "") + tx.amount + "XRP"}
                 krw={tx.krw.toLocaleString()}
                 isDeposit={tx.amount > 0}
+                showAfterBalance={true}
               />
             ))
           ) : (
