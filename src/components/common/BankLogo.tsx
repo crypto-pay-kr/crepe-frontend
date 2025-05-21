@@ -1,4 +1,5 @@
 export interface BankLogoProps {
+
     bank: "WTK" | "STK" | "HTK" | "KTK" | "NTK"
 }
 
@@ -8,6 +9,7 @@ const bankData: Record<BankLogoProps["bank"], { label: string; image: string }> 
     HTK: { label: "하나은행", image: "/hana.png" },
     KTK: { label: "국민은행", image: "/hana.png" },
     NTK: { label: "농협은행", image: "/hana.png" },
+
 }
 
 

@@ -33,7 +33,7 @@ export default function CoinDeposit() {
 
       <div className="flex-1 px-6 py-6 overflow-auto bg-gray-50">
         <div className="mb-16 max-w-md mx-auto">
-          <NetworkDisplay networkName={symbol} />
+          <NetworkDisplay networkName={symbol || "Unknown"} />
           
           <DepositAddress 
             address="TNgzwecDR23DDKFodjkfn20d" 

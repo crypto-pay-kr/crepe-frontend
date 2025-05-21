@@ -141,7 +141,7 @@ export default function SettlementCoin() {
             <div>
               <h3 className="text-sm font-medium text-gray-900 mb-1">정산 안내</h3>
               <p className="text-sm text-gray-600">
-                정산 요청 후 영업일 기준 1-2일 내에 처리됩니다. 정산 최소 금액은 10 {symbol}입니다.
+                정산 요청 후 영업일 기준 1-2일 내에 처리됩니다. 정산 최소 금액은 0.4 {symbol}입니다.
               </p>
             </div>
           </div>

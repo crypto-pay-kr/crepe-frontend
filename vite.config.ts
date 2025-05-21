@@ -9,6 +9,14 @@ export default defineConfig({
     proxy: {
       '/api': 'http://localhost:8080',
     },
+    host: '0.0.0.0',
+    port: 5173,
+    strictPort: true,
+    allowedHosts: [
+      'localhost',
+      '127.0.0.1',
+      'dev.rolling-crepe.co.kr'
+    ],
   },
   resolve: {
     alias: [
@@ -29,12 +37,10 @@ export default defineConfig({
         find: '@hooks',
         replacement: path.resolve(__dirname, 'src/hooks'),
       },
-
       {
         find: '@stores',
         replacement: path.resolve(__dirname, 'src/stores'),
       },
-
       {
         find: '@styles',
         replacement: path.resolve(__dirname, 'src/styles'),
@@ -49,5 +55,4 @@ export default defineConfig({
       },
     ],
   },
-
 })

@@ -40,18 +40,18 @@ export default function StoreEditInfo(): React.ReactElement {
   };
 
   const handlePasswordChange = async (data: { oldPassword: string; newPassword: string }) => {
-    if (!token) throw new Error("로그인이 필요합니다.");
-    await changePassword(token, data);
+
+    await changePassword(data);
   };
 
   const handleNicknameChange = async (data: { newNickname: string }) => {
-    if (!token) throw new Error("로그인이 필요합니다.");
-    await changeNickname(token, data);
+
+    await changeNickname(data);
   };
 
   const handlePhoneChange = async (data: { phoneNumber: string }) => {
-    if (!token) throw new Error("로그인이 필요합니다.");
-    await changePhone(token, data);
+
+    await changePhone(data);
   };
 
 
