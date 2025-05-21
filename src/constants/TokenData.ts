@@ -41,7 +41,7 @@ export const dummyTokenData: TokenGroup[] = [
   },
   {
     groupName: "신한-토큰",
-    bank: "shinhan",
+    bank: "STK",
     total: "1000 KRW",
     tokens: [
       {

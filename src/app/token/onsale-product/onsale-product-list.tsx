@@ -16,7 +16,7 @@ export default function OnSaleTokenProductListPage() {
   const items: BankProductItemProps[] = [
     {
       productId: 1,
-      bank: "woori",
+      bank: "WTK",
       name: "청년도약토큰",
       subtitle: "연 2.6% ~ 연5.0%",
       tags: ["29세이하", "월 최대 50만 토큰", "세제혜택"],
@@ -25,7 +25,7 @@ export default function OnSaleTokenProductListPage() {
     },
     {
       productId: 2,
-      bank: "shinhan",
+      bank: "STK",
       name: "서울시동작사랑상품권",
       tags: ["서울 동작구", "월 최대 50만 토큰", "세제혜택"],
       statusText: "마감 임박",
@@ -36,7 +36,7 @@ export default function OnSaleTokenProductListPage() {
     },
     {
       productId: 3,
-      bank: "woori",
+      bank: "WTK",
       name: "서울시관악사랑상품권",
       tags: ["서울 관악구", "월 최대 50만 토큰", "세제혜택"],
       statusText: "잔여금액 30% 이하 남음",

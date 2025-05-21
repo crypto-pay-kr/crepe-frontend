@@ -101,11 +101,25 @@ export const GetMySubscribeTransactionList = async (subscribeId: string, page:nu
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${token}`,
-=======
-// import { GetTransactionHistoryResponse, SliceResponse } from '@/app/token/my-product/detail/my-product-detail'
+    },
+  });
 
-const BASE_URL = import.meta.env.VITE_API_SERVER_URL;
+  if (!response.ok) {
+    let errorMessage = "알 수 없는 오류가 발생했습니다.";
 
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || errorMessage;
+    } catch (e) {
+      console.warn("상품 목록 조회 실패:", e);
+    }
+
+    throw new Error(errorMessage);
+  }
+
+
+  return await response.json();
+};
 
 export const getTokenInfo = async (currency: string) => {
   const token = sessionStorage.getItem("accessToken");
@@ -124,7 +138,6 @@ export const getTokenInfo = async (currency: string) => {
 
   return await res.json();
 };
-
 
 export const requestExchange = async (
   isCoinToToken: boolean,
@@ -161,7 +174,7 @@ export const fetchTokenExchangeHistory = async (
   currency: string,
   page: number = 0,
   size: number = 5
-)=> {
+) => {
   const token = sessionStorage.getItem("accessToken");
 
   const params = new URLSearchParams();
@@ -201,20 +214,11 @@ export async function fetchTokenBalance(currency: string): Promise<number> {
       const errorData = await response.json();
       errorMessage = errorData.message || errorMessage;
     } catch (e) {
-      console.warn("상품 목록 조회 실패:", e);
+      console.warn("잔액 조회 실패:", e);
     }
 
     throw new Error(errorMessage);
   }
 
-
-  return await response.json();
+  return await response.json(); // Promise<number>를 반환해야 하므로 응답값이 숫자인지 확인 필요
 };
-
-    throw new Error(`잔액 조회 실패: ${response.status}`);
-  }
-
-  const balance = await response.json();
-  return balance;
-}
-

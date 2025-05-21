@@ -28,7 +28,7 @@ export default function OnSaleTokenProductDetail() {
 
       <div className="flex-1 overflow-auto">
         <div className="p-4">
-          <BankLogo bank="woori" />
+          <BankLogo bank="HTK" />
           <BankProductInfo {...bankProductData} />
           <div className="flex gap-2 mt-2 mb-4">
             {productTags.map((tag, index) => (

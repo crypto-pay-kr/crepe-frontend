@@ -128,7 +128,7 @@ export default function TokenProductSignup() {
       <div className="flex-1 overflow-auto">
         {/* 상단 정보 영역 */}
         <div className="p-4">
-          <BankLogo bank="woori" />
+          <BankLogo bank="WTK" />
           <BankProductInfo {...bankProductData} />
           <div className="flex gap-2 mt-2 mb-4">
             {productTags.map((tag, index) => (

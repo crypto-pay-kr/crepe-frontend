@@ -6,7 +6,7 @@ import { LucideIcon, Clock, AlertCircle } from "lucide-react"
 
 export interface BankProductItemProps {
     productId: number;
-    bank: "woori" | "shinhan"
+    bank: "WTK" | "STK" | "HTK" | "KTK" | "NTK"
     name: string
     subtitle?: string
     tags: string[]
