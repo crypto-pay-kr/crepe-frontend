@@ -1,11 +1,11 @@
 export interface BankLogoProps {
-    bank: "woori" | "shinhan" | "hana"
+    bank: "HTK" | "shinhan" | "woori"
 }
 
 const bankData: Record<BankLogoProps["bank"], { label: string; image: string }> = {
-    woori: { label: "우리은행", image: "/woori.png" },
+    HTK: { label: "하나은행", image: "/hana.png" },
     shinhan: { label: "신한은행", image: "/shinhan.png" },
-    hana: { label: "하나은행", image: "/hana.png" },
+    woori: { label: "우리은행", image: "/woori.png" },
 }
 
 export function BankLogo({ bank }: BankLogoProps) {
@@ -15,7 +15,6 @@ export function BankLogo({ bank }: BankLogoProps) {
             <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center bg-gray-200">
                 <img src={image} alt={label} className="object-cover w-full h-full" />
             </div>
-            <div className="ml-2 font-bold text-lg">{label}</div>
         </div>
     )
 }

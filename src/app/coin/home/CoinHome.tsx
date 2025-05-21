@@ -3,11 +3,10 @@ import Header from '@/components/common/Header';
 import BottomNav from '@/components/common/BottomNavigate';
 import { useNavigate, useLocation } from "react-router-dom";
 import React, { useState, useEffect } from 'react';
-import { OrderSection } from '@/components/coin/OrderSection';
 import { Coin, Order } from '@/constants/coinData';
 import CoinAssets from '@/components/coin/CoinAssets';
 import TokenAssets from '@/components/token/my-product/TokenAssets';
-import { fetchCoinPrices, getCoinBalance } from '@/api/coin'
+import { fetchCoinPrices, fetchCoinRate, getCoinBalance } from '@/api/coin'
 
 
 // 수신 데이터 타입 정의
@@ -17,12 +16,12 @@ interface RawCoinBalance {
   balance: number;
 }
 
-const COIN_INFO: Record<string, Omit<Coin, 'balance' | 'krw'>> = {
+export const COIN_INFO: Record<string, Omit<Coin, 'balance' | 'krw'>> = {
   XRP: {
     currency: "XRP",
     coinName: "리플",
-    icon: <X className="h-5 w-5 text-white" />,
-    bg: "bg-gradient-to-br from-blue-500 to-blue-700",
+    icon: <X className="h-5 w-5 text-gray-400" />,
+    bg: "bg-gray-200",
     change: "+2.5%",
   },
   USDT: {
@@ -50,7 +49,7 @@ const COIN_INFO: Record<string, Omit<Coin, 'balance' | 'krw'>> = {
 export default function CoinHome() {
   const navigate = useNavigate();
   const location = useLocation();
-  const isUser = location.state?.isUser ?? true;
+  // const isUser = location.state?.isUser ?? true;
   const [coins, setCoins] = useState<Coin[]>([]);
   const [activeTab, setActiveTab] = useState<'coin' | 'token'>('coin');
   const [prices, setPrices] = useState<{ [key: string]: number }>({
@@ -58,15 +57,35 @@ export default function CoinHome() {
     "KRW-USDT": 0,
     "KRW-SOL": 0,
   });
+  const [changeRates, setChangeRates] = useState<{ [key: string]: { rate: number; direction: string } }>({});
+
 
   const handleCoinClick = (symbol: string) => {
-    navigate(`/coin-detail/${symbol}`, { state: { isUser } });
+    navigate(`/coin-detail/${symbol}`);
   };
 
   const handleExchangeClick = () => {
     navigate(`/token/onsale/products`, {
     });
   };
+
+  useEffect(() => {
+    const loadRates = async () => {
+      try {
+        const updatedRates = await fetchCoinRate();
+        setChangeRates(updatedRates);
+      } catch (err) {
+        console.error("등락률 조회 실패", err);
+      }
+    };
+
+    loadRates();
+    const interval = setInterval(loadRates, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+
+
 
   useEffect(() => {
     const loadPrices = async () => {
@@ -102,6 +121,12 @@ export default function CoinHome() {
           const amount = raw?.balance ?? 0;
           const krwRate = prices[`KRW-${symbol}`] ?? 0;
           const krw = amount * krwRate;
+          const rateInfo = changeRates[`KRW-${symbol}`];
+          const rate = rateInfo?.rate ?? 0;
+          const direction = rateInfo?.direction ?? 'EVEN';
+
+          const formattedRate = `${(rate * 100).toFixed(2)}%`;
+          const prefix = direction === 'RISE' ? '+' : direction === 'FALL' ? '-' : '';
 
           return {
             currency: symbol,
@@ -110,7 +135,8 @@ export default function CoinHome() {
             bg: info.bg,
             balance: `${amount} ${symbol}`,
             krw: `${Math.floor(krw).toLocaleString()} KRW`,
-            change: info.change,
+            change: `${prefix}${formattedRate}`,
+            changeDirection: direction, // optional: for styling
           };
         });
 
@@ -145,8 +171,6 @@ export default function CoinHome() {
             </div>
             <h2 className="mb-1 text-3xl font-bold text-white">{totalBalanceKRW.toLocaleString()} KRW</h2>
             <div className="flex items-center text-green-300">
-              <ShoppingCart className="h-6 w-6 stroke-white" />
-              <span className="text-sm">+2.4% 오늘</span>
             </div>
           </div>
           <div className="mt-5 w-full">
@@ -166,14 +190,12 @@ export default function CoinHome() {
           >
             가상 자산
           </button>
-          {isUser && (
             <button
               className={`flex-1 py-3 text-center text-sm font-medium ${activeTab === 'token' ? 'border-b-2 border-indigo-400 text-indigo-400' : 'text-gray-500'}`}
               onClick={() => setActiveTab('token')}
             >
               K-토큰
             </button>
-          )}
         </div>
 
         <div className="px-4">
@@ -184,7 +206,7 @@ export default function CoinHome() {
           )}
         </div>
 
-        {isUser && (
+
           <button
             onClick={() => navigate('/user/orders')}
             className="fixed bottom-24 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-500 text-white shadow-lg hover:bg-indigo-500"
@@ -192,7 +214,7 @@ export default function CoinHome() {
           >
             <ShoppingCart className="h-6 w-6 stroke-white" />
           </button>
-        )}
+
       </main>
       <BottomNav />
     </div>

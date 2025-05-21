@@ -4,15 +4,16 @@ interface AddressInputProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder: string;
   className?: string;
+
 }
 
 export default function AddressInput({
-  label,
-  value,
-  onChange,
-  placeholder,
-  className = "mb-6"
-}: AddressInputProps) {
+                                       label,
+                                       value,
+                                       placeholder,
+                                       onChange,
+                                       className = "mb-6"
+                                     }: AddressInputProps) {
   return (
     <div className={className}>
       <h3 className="text-base font-medium mb-2">{label}</h3>
