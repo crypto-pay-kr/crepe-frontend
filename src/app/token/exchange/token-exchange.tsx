@@ -14,6 +14,11 @@ import {
   calculateMaxExchangeCoin,
   calculateMaxExchangeToken, calculateConversion,
 } from '@/utils/exchangeCalculator'
+interface Portfolio {
+  currency: string;
+  amount: number;
+  nonAvailableAmount?: number;
+}
 export default function TokenExchangePage() {
   const navigate = useNavigate();
   const { bank } = useParams();
@@ -26,8 +31,9 @@ export default function TokenExchangePage() {
   const [isCoinToToken, setIsCoinToToken] = useState(true);
   const [myCoinBalance, setMyCoinBalance] = useState<number>(0);
   const [myTokenBalance, setMyTokenBalance] = useState<number>(0);
-  const selectedPortfolio = tokenInfo?.portfolios.find(p => p.currency === selectedCurrency);
-
+  const selectedPortfolio = tokenInfo?.portfolios.find(
+    (p: Portfolio) => p.currency === selectedCurrency
+  );
   // 시세 및 토큰 정보 불러오기 5초 마다
   useEffect(() => {
     if (!bank) return;

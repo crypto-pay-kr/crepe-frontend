@@ -31,7 +31,7 @@ export default function TransactionItem({
 
   const formattedAmount = isNaN(parsed)
     ? amount
-    : `${parsed > 0 ? "+" : ""}${parsed.toFixed(2)} ${symbol}`;
+    : `${parsed > 0 ? "+" : ""}${parsed.toFixed(2)} ${bankSymbol}`;
 
 
 

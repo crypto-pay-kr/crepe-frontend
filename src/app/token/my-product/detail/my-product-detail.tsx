@@ -11,6 +11,14 @@ import {
 } from '@/api/token'
 import { fetchCoinPrices } from '@/api/coin'
 
+interface Transaction {
+  id: number;
+  amount: number;
+  afterBalance: number;
+  transferredAt: string;
+  status: 'ACCEPTED' | 'PENDING' | 'FAILED'; // 필요한 status만 추가
+}
+
 export default function TokenGroupDetailPage() {
   const { bank } = useParams<{ bank: string }>();
   const navigate = useNavigate();
@@ -132,7 +140,7 @@ export default function TokenGroupDetailPage() {
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <BankLogo bank={bank} />
+              <BankLogo bank={bank as "WTK" | "STK" | "HTK" | "KTK" | "NTK"} />
               <p className="text-lg sm:text-xl md:text-2xl font-semibold ml-3">총 보유</p>
             </div>
             <div className="text-right">
@@ -192,9 +200,9 @@ export default function TokenGroupDetailPage() {
         {/* 거래 내역 리스트 */}
         <div className="space-y-4 sm:space-y-5 md:space-y-6 pb-16 sm:pb-10 text-sm sm:text-base md:text-lg lg:text-xl">
 
-          {data?.pages?.length > 0 ? (
+          {Array.isArray(data?.pages) && data.pages.length > 0 ? (
             data.pages.map((page, pageIndex) =>
-              page.content.map((tx, idx) => {
+              page.content.map((tx: Transaction, idx: number) => {
                 const tokenPrice = calculateTokenPrice(tokenCapital, tokenInfo?.totalSupply ?? 0);
                 const krw = Math.floor(tx.amount * tokenPrice).toLocaleString();
 
