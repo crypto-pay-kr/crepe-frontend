@@ -1,5 +1,5 @@
-// components/token/tokenData.ts
-import { BankLogoProps } from '@/components/common/BankLogo'
+import { BankLogoProps } from '@/components/common/BankLogo';
+
 
 export interface TokenItem {
   name: string;

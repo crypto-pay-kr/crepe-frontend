@@ -63,7 +63,7 @@ export default function TokenGroupDetailPage() {
         </div>
         <div className="-mt-2 mb-4 w-full">
           <button className="w-full bg-[#0a2e64] text-white py-3 rounded-lg font-medium text-base shadow-sm"
-                  onClick={handleExchangeClick}>
+            onClick={handleExchangeClick}>
             토큰 환전
           </button>
         </div>
@@ -75,11 +75,10 @@ export default function TokenGroupDetailPage() {
               <button
                 key={period}
                 onClick={() => setSelectedPeriod(period)}
-                className={`flex-1 rounded-lg py-2 text-center text-sm font-medium transition ${
-                  selectedPeriod === period
+                className={`flex-1 rounded-lg py-2 text-center text-sm font-medium transition ${selectedPeriod === period
                     ? 'bg-[#0a2e64] text-white'
                     : 'text-gray-500 hover:bg-gray-50'
-                }`}
+                  }`}
               >
                 {period === 'day' && '1일'}
                 {period === 'week' && '1주'}
@@ -127,6 +126,7 @@ export default function TokenGroupDetailPage() {
                 amount={(tx.amount > 0 ? "+" : "") + tx.amount + "XRP"}
                 krw={tx.krw.toLocaleString()}
                 isDeposit={tx.amount > 0}
+                showAfterBalance={true}
               />
             ))
           ) : (

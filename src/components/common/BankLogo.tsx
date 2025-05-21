@@ -1,4 +1,4 @@
-interface BankLogoProps {
+export interface BankLogoProps {
     bank: "woori" | "shinhan" | "hana"
 }
 
