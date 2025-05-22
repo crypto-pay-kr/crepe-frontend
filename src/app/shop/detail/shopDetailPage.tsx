@@ -64,6 +64,19 @@ function MallDetailPage() {
         setShowCartPreview(true);
 
         setCartItems((prev) => {
+
+            if (prev.length > 0 && prev[0].storeId !== storeId) {
+                const newCart = [
+                    {
+                        ...item,
+                        storeId: storeId,
+                        quantity: 1,
+                    },
+                ];
+                localStorage.setItem("cartItems", JSON.stringify(newCart));
+                return newCart;
+            }
+    
             // 이미 같은 storeId, 같은 item.id를 가진 아이템이 있는지 검사
             const existingItem = prev.find(
                 (cartItem) => cartItem.id === item.id && cartItem.storeId === storeId
