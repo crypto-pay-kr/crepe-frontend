@@ -1,5 +1,4 @@
 //BankTokenAccount 타입 관리
-
 export interface BankTokenAccount {
   bankTokenId: number;
   bankId: number;
@@ -20,6 +19,7 @@ export interface SubscribeResponse {
   appliedPreferentialRates: number | null;
   productType: string;
   maxMonthlyPayment: number;
+  preTaxInterest: number;
 }
 
 export interface BankToken {
@@ -36,6 +36,7 @@ export interface Product {
   status: string;
   rate: string;
   maxMonthlyPayment: number;
+  preTaxInterest: number;
 }
 
 
