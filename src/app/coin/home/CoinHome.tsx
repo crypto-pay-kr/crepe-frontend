@@ -2,7 +2,7 @@ import { X, Wallet, ShoppingCart } from "lucide-react";
 import Header from '@/components/common/Header';
 import BottomNav from '@/components/common/BottomNavigate';
 import { useNavigate, useLocation } from "react-router-dom";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react'
 import { Coin, Order } from '@/constants/coinData';
 import CoinAssets from '@/components/coin/CoinAssets';
 import TokenAssets from '@/components/token/my-product/TokenAssets';
@@ -48,9 +48,7 @@ export const COIN_INFO: Record<string, Omit<Coin, 'balance' | 'krw'>> = {
 
 export default function CoinHome() {
   const navigate = useNavigate();
-  const location = useLocation();
-  // const isUser = location.state?.isUser ?? true;
-  const [coins, setCoins] = useState<Coin[]>([]);
+  const currencies = ["XRP", "USDT", "SOL"];
   const [activeTab, setActiveTab] = useState<'coin' | 'token'>('coin');
   const [prices, setPrices] = useState<{ [key: string]: number }>({
     "KRW-XRP": 0,
@@ -58,6 +56,97 @@ export default function CoinHome() {
     "KRW-SOL": 0,
   });
   const [changeRates, setChangeRates] = useState<{ [key: string]: { rate: number; direction: string } }>({});
+  const [balance, setBalance] = useState<Record<string, number>>({});
+
+
+  // 가격
+  useEffect(() => {
+    const loadPrices = async () => {
+      try {
+        const prices = await fetchCoinPrices();
+        setPrices(prices);
+      } catch (e) {
+        console.error("시세 실패", e);
+      }
+    };
+    loadPrices();
+    const interval = setInterval(loadPrices, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+// 등락률
+  useEffect(() => {
+    const loadRates = async () => {
+      try {
+        const rates = await fetchCoinRate();
+        setChangeRates(rates);
+      } catch (e) {
+        console.error("등락률 실패", e);
+      }
+    };
+    loadRates();
+    const interval = setInterval(loadRates, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // 잔액
+  useEffect(() => {
+    const loadBalances = async () => {
+      try {
+        const data = await getCoinBalance();
+        console.log("잔액 응답", data);
+
+
+        const result: Record<string, number> = {};
+        data.forEach((item: { currency: string; balance: number }) => {
+          result[item.currency] = item.balance;
+        });
+
+        setBalance(result);
+
+        const interval = setInterval(setBalance, 5000);
+        return () => clearInterval(interval);
+      } catch (e) {
+        console.error("잔액 실패", e);
+      }
+    };
+
+    loadBalances();
+    const interval = setInterval(loadBalances, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+// 준비되지 않은 값은 "-" 형태로 처리해 로딩 중에도 UI가 먼저 뜰 수 있게 함.
+  const coins = useMemo(() => {
+    return currencies.map((symbol) => {
+      const info = COIN_INFO[symbol];
+      const amount = balance[symbol];
+      const krwRate = prices[`KRW-${symbol}`];
+      const rateInfo = changeRates[`KRW-${symbol}`];
+
+      const balanceText = amount !== undefined ? `${amount} ${symbol}` : `- ${symbol}`;
+      const krwText = amount !== undefined && krwRate !== undefined
+        ? `${Math.floor(amount * krwRate).toLocaleString()} KRW`
+        : `- KRW`;
+
+      const rate = rateInfo?.rate ?? 0;
+      const direction = rateInfo?.direction ?? 'EVEN';
+      const formattedRate = rateInfo
+        ? `${direction === 'RISE' ? '+' : direction === 'FALL' ? '-' : ''}${(rate * 100).toFixed(2)}%`
+        : '-';
+
+      return {
+        currency: symbol,
+        coinName: info.coinName,
+        icon: info.icon,
+        bg: info.bg,
+        balance: balanceText,
+        krw: krwText,
+        change: formattedRate,
+        changeDirection: direction,
+      };
+    });
+  }, [balance, prices, changeRates]);
 
 
   const handleCoinClick = (symbol: string) => {
@@ -69,89 +158,6 @@ export default function CoinHome() {
     });
   };
 
-  useEffect(() => {
-    const loadRates = async () => {
-      try {
-        const updatedRates = await fetchCoinRate();
-        setChangeRates(updatedRates);
-      } catch (err) {
-        console.error("등락률 조회 실패", err);
-      }
-    };
-
-    loadRates();
-    const interval = setInterval(loadRates, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-
-
-
-  useEffect(() => {
-    const loadPrices = async () => {
-      try {
-        const updatedPrices = await fetchCoinPrices();
-        setPrices(updatedPrices);
-      } catch (err) {
-        console.error("시세 조회 실패", err);
-      }
-    };
-
-    loadPrices();
-
-    const interval = setInterval(() => {
-      loadPrices();
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-
-  useEffect(() => {
-    const fetchBalance = async () => {
-      try {
-        const data: RawCoinBalance[] = await getCoinBalance();
-        const currencies = ["XRP", "USDT", "SOL"];
-        const coinMap = new Map(data.map((raw) => [raw.currency, raw]));
-
-        const mapped: Coin[] = currencies.map((symbol) => {
-          const raw = coinMap.get(symbol);
-          const info = COIN_INFO[symbol];
-
-          const amount = raw?.balance ?? 0;
-          const krwRate = prices[`KRW-${symbol}`] ?? 0;
-          const krw = amount * krwRate;
-          const rateInfo = changeRates[`KRW-${symbol}`];
-          const rate = rateInfo?.rate ?? 0;
-          const direction = rateInfo?.direction ?? 'EVEN';
-
-          const formattedRate = `${(rate * 100).toFixed(2)}%`;
-          const prefix = direction === 'RISE' ? '+' : direction === 'FALL' ? '-' : '';
-
-          return {
-            currency: symbol,
-            coinName: info.coinName,
-            icon: info.icon,
-            bg: info.bg,
-            balance: `${amount} ${symbol}`,
-            krw: `${Math.floor(krw).toLocaleString()} KRW`,
-            change: `${prefix}${formattedRate}`,
-            changeDirection: direction, // optional: for styling
-          };
-        });
-
-        setCoins(mapped);
-      } catch (err) {
-        console.error("잔액 조회 실패:", err);
-      }
-    };
-
-
-    const isReady = ["XRP", "USDT", "SOL"].every(
-      (symbol) => prices[`KRW-${symbol}`] !== 0
-    );
-    if (isReady) fetchBalance();
-  }, [prices]);
 
   const totalBalanceKRW = coins.reduce((sum, coin) => {
     const n = Number(coin.krw.replace(/[^0-9]/g, ''));
