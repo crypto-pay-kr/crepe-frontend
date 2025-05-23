@@ -103,9 +103,6 @@ export default function CoinHome() {
         });
 
         setBalance(result);
-
-        const interval = setInterval(setBalance, 5000);
-        return () => clearInterval(interval);
       } catch (e) {
         console.error("잔액 실패", e);
       }

@@ -140,7 +140,7 @@ export default function TokenGroupDetailPage() {
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <BankLogo bank={bank as "WTK" | "STK" | "HTK" | "KTK" | "NTK"} />
+              {/*<BankLogo bank={bank as "WTK" | "STK" | "HTK" | "KTK" | "NTK"} />*/}
               <p className="text-lg sm:text-xl md:text-2xl font-semibold ml-3">총 보유</p>
             </div>
             <div className="text-right">

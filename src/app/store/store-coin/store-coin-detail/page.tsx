@@ -57,7 +57,7 @@ export default function CoinDetailPage() {
   const location = useLocation()
   const isUser = location.state?.isUser ?? false
 
-  const [addressStatus, setAddressStatus] = useState<'ACTIVE' | 'REGISTERING' | 'NOT_REGISTERED' |'UNREGISTERED'|'UNREGISTERED_AND_REGISTERING'| null>(null);
+  const [addressStatus, setAddressStatus] = useState<'ACTIVE' | 'REGISTERING' | 'NOT_REGISTERED' |'UNREGISTERED'|'UNREGISTERED_AND_REGISTERING'|'REJECTED'| null>(null);
   const [showModal, setShowModal] = useState(false)
   const [addressInfo, setAddressInfo] = useState<{
     address: string;
@@ -285,6 +285,7 @@ export default function CoinDetailPage() {
               {addressStatus === 'UNREGISTERED_AND_REGISTERING' &&
                 '계좌 등록 해제 후 변경 중입니다...'}
               {addressStatus === 'NOT_REGISTERED' && '출금계좌 등록하기'}
+              {addressStatus==='REJECTED' && '거절 되었습니다 다시 등록하기'}
             </span>
           </div>
         </div>
