@@ -48,7 +48,8 @@ export default function SelectPaymentPage() {
         const fetchBalances = async () => {
             try {
                 const data = await getCoinBalance();
-                const balanceMap = data.reduce((acc: any, item: any) => {
+                const items=data.balance;
+                const balanceMap = items.reduce((acc: any, item: any) => {
                     acc[item.currency] = item.balance;
                     return acc;
                 }, {});
