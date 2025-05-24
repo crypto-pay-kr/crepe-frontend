@@ -6,6 +6,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import CoinAssets from '@/components/coin/CoinAssets';
 import TokenAssets, { BankProduct } from '@/components/token/my-product/TokenAssets'
 import { fetchCoinPrices, fetchCoinRate, getCoinBalance } from '@/api/coin'
+
 import { useTokenStore } from '@/constants/useToken'
 import { useCoinStore } from '@/constants/useCoin'
 
@@ -25,6 +26,7 @@ interface GetAllBalanceResponse {
     balance: number;
     product:BankProduct[];
   }[];
+
 }
 
 export default function CoinHome() {
@@ -37,10 +39,12 @@ export default function CoinHome() {
     "KRW-SOL": 0,
   });
   const [changeRates, setChangeRates] = useState<{ [key: string]: { rate: number; direction: string } }>({});
+
   const [coinBalance, setCoinBalance] = useState<GetAllBalanceResponse['balance']>([]);
   const [tokenBalance, setTokenBalance] = useState<GetAllBalanceResponse['bankTokenInfo']>([]);
 
   // 가격
+
   useEffect(() => {
     const loadPrices = async () => {
       try {
@@ -50,46 +54,50 @@ export default function CoinHome() {
         console.error("시세 실패", e);
       }
     };
+    
     loadPrices();
     const interval = setInterval(loadPrices, 5000);
     return () => clearInterval(interval);
   }, []);
 
-// 등락률
+  // 등락률 - useEffect 수정
   useEffect(() => {
     const loadRates = async () => {
       try {
         const rates = await fetchCoinRate();
         setChangeRates(rates);
+        // console.log("등락률 응답", changeRates);
       } catch (e) {
         console.error("등락률 실패", e);
       }
     };
+    
     loadRates();
-    const interval = setInterval(loadRates, 5000);
+    const interval = setInterval(loadRates, 2500);
     return () => clearInterval(interval);
   }, []);
 
-  // 잔액
+  // 잔액 - 초기 1회만 로딩
   useEffect(() => {
     const loadBalances = async () => {
       try {
+
         const data: GetAllBalanceResponse = await getCoinBalance();
         setCoinBalance(data.balance);
         setTokenBalance(data.bankTokenInfo);
         useTokenStore.getState().setTokens(data.bankTokenInfo);
         useCoinStore.getState().setCoins(data.balance);
+
       } catch (e) {
         console.error("잔액 불러오기 실패", e);
       }
     };
 
+    // 초기 로딩만 실행 (주기적 업데이트 없음)
     loadBalances();
-    const interval = setInterval(loadBalances, 5000);
-    return () => clearInterval(interval);
-  }, []);
+  }, []); // 빈 의존성 배열
 
-// 준비되지 않은 값은 "-" 형태로 처리해 로딩 중에도 UI가 먼저 뜰 수 있게 함.
+  // 준비되지 않은 값은 "-" 형태로 처리해 로딩 중에도 UI가 먼저 뜰 수 있게 함.
   const coins = useMemo(() => {
     return coinBalance.map((item) => {
       const amount = item.balance;
@@ -119,22 +127,18 @@ export default function CoinHome() {
     });
   }, [ coinBalance,prices, changeRates]);
 
-
   const handleCoinClick = (symbol: string) => {
     navigate(`/coin-detail/${symbol}`);
   };
 
   const handleExchangeClick = () => {
-    navigate(`/token/onsale/products`, {
-    });
+    navigate(`/token/onsale/products`);
   };
-
 
   const totalBalanceKRW = coins.reduce((sum, coin) => {
     const n = Number(coin.krw.replace(/[^0-9]/g, ''));
     return sum + (isNaN(n) ? 0 : n);
   }, 0);
-
 
   return (
     <div className="flex h-full flex-col bg-gray-50">
@@ -167,12 +171,12 @@ export default function CoinHome() {
           >
             가상 자산
           </button>
-            <button
-              className={`flex-1 py-3 text-center text-sm font-medium ${activeTab === 'token' ? 'border-b-2 border-indigo-400 text-indigo-400' : 'text-gray-500'}`}
-              onClick={() => setActiveTab('token')}
-            >
-              K-토큰
-            </button>
+          <button
+            className={`flex-1 py-3 text-center text-sm font-medium ${activeTab === 'token' ? 'border-b-2 border-indigo-400 text-indigo-400' : 'text-gray-500'}`}
+            onClick={() => setActiveTab('token')}
+          >
+            K-토큰
+          </button>
         </div>
 
         <div className="px-4">
@@ -183,14 +187,13 @@ export default function CoinHome() {
           )}
         </div>
 
-
-          <button
-            onClick={() => navigate('/user/orders')}
-            className="fixed bottom-24 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-500 text-white shadow-lg hover:bg-indigo-500"
-            aria-label="주문 내역으로 이동"
-          >
-            <ShoppingCart className="h-6 w-6 stroke-white" />
-          </button>
+        <button
+          onClick={() => navigate('/user/orders')}
+          className="fixed bottom-24 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-500 text-white shadow-lg hover:bg-indigo-500"
+          aria-label="주문 내역으로 이동"
+        >
+          <ShoppingCart className="h-6 w-6 stroke-white" />
+        </button>
 
       </main>
       <BottomNav />
