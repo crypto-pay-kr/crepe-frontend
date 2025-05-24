@@ -178,19 +178,19 @@ export default function TokenExchangePage() {
               {tokenInfo && (
                 <>
                   {/* 아이콘 */}
-                  <div className="flex items-center ml-3 gap-3">
-                    {isCoinToToken ? (
-                      COIN_INFO[selectedCurrency] && (
-                        <div
-                          className={`flex h-10 w-10 items-center justify-center rounded-full ${COIN_INFO[selectedCurrency].bg}`}
-                        >
-                          {COIN_INFO[selectedCurrency].icon}
-                        </div>
-                      )
-                    ) : (
-                      <BankLogo bank={tokenInfo.currency} />
-                    )}
-                  </div>
+                  {/*<div className="flex items-center ml-3 gap-3">*/}
+                  {/*  {isCoinToToken ? (*/}
+                  {/*    COIN_INFO[selectedCurrency] && (*/}
+                  {/*      <div*/}
+                  {/*        className={`flex h-10 w-10 items-center justify-center rounded-full ${COIN_INFO[selectedCurrency].bg}`}*/}
+                  {/*      >*/}
+                  {/*        {COIN_INFO[selectedCurrency].icon}*/}
+                  {/*      </div>*/}
+                  {/*    )*/}
+                  {/*  ) : (*/}
+                  {/*    <BankLogo bank={tokenInfo.currency} />*/}
+                  {/*  )}*/}
+                  {/*</div>*/}
 
                   {/* 셀렉트 or 고정 텍스트 */}
                   {isCoinToToken ? (
@@ -269,15 +269,15 @@ export default function TokenExchangePage() {
           <div className="flex items-center justify-between">
             {/* 좌측: 로고 + 이름 */}
             <div className="flex items-center gap-0.5">
-              {isCoinToToken
-                ? tokenInfo?.currency && <BankLogo bank={tokenInfo.currency} />
-                : COIN_INFO[selectedCurrency] && (
-                    <div
-                      className={`flex h-10 w-10 items-center justify-center rounded-full ${COIN_INFO[selectedCurrency].bg}`}
-                    >
-                      {COIN_INFO[selectedCurrency].icon}
-                    </div>
-                  )}
+              {/*{isCoinToToken*/}
+              {/*  ? tokenInfo?.currency && <BankLogo bank={tokenInfo.currency} />*/}
+              {/*  : COIN_INFO[selectedCurrency] && (*/}
+              {/*      <div*/}
+              {/*        className={`flex h-10 w-10 items-center justify-center rounded-full ${COIN_INFO[selectedCurrency].bg}`}*/}
+              {/*      >*/}
+              {/*        {COIN_INFO[selectedCurrency].icon}*/}
+              {/*      </div>*/}
+              {/*    )}*/}
               {/* 셀렉트 or 고정 텍스트 */}
               {isCoinToToken ? (
                 <p className="ml-4 text-lg font-bold">{tokenInfo?.currency}</p>

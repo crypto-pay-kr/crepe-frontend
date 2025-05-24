@@ -36,7 +36,8 @@ export default function TokenAssets() {
             <div
               className="flex items-center gap-3 cursor-pointer"
               onClick={() => navigate(`/token/detail/${token.currency}`)}
-            ><BankLogo bank={token.currency as BankLogoProps["bank"]} />
+            >
+              {/*<BankLogo bank={token.currency as BankLogoProps["bank"]} />*/}
               <div>
                 <p className="font-medium">{token.bankTokenName}</p>
                 <p className="text-xs text-gray-500">{token.currency}</p>
