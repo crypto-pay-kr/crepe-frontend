@@ -11,7 +11,7 @@ import {
   getCoinHistory, fetchCoinPrices,
 } from '@/api/coin'
 import { useInfiniteQuery } from '@tanstack/react-query'
-
+import { useCoinStore } from '@/constants/useCoin';
 export interface PaymentHistory {
   status: 'ACCEPTED' | 'PENDING' | 'FAILED';
   amount: number;
@@ -20,35 +20,7 @@ export interface PaymentHistory {
   type: string;
 
 }
-const coinMeta = {
-  XRP: {
-    name: "리플",
-    icon: <X className="w-5 h-5 md:w-6 md:h-6" />,
-    bg: "bg-gray-200",
-    balance: "0.3 XRP",
-    krw: "1000 KRW",
-  },
-  SOL: {
-    name: "솔라나",
-    icon: (
-      <div className="w-4 h-4 md:w-5 md:h-5 flex flex-col justify-between">
-        <div className="h-[2px] bg-white" />
-        <div className="h-[2px] bg-white" />
-        <div className="h-[2px] bg-white" />
-      </div>
-    ),
-    bg: "bg-[#9945FF]",
-    balance: "0.3 SOL",
-    krw: "1000 KRW",
-  },
-  USDT: {
-    name: "테더",
-    icon: <div className="text-white text-xs md:text-sm font-bold">T</div>,
-    bg: "bg-[#26A17B]",
-    balance: "0.3 USDT",
-    krw: "1000 KRW",
-  },
-}
+
 
 export default function CoinDetailPage() {
   const styleSheet = document.createElement("style");
@@ -64,17 +36,10 @@ export default function CoinDetailPage() {
     tag?: string;
     addressStatus?: string;
   } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [pageVisible, setPageVisible] = useState(false);
-
   const navigate = useNavigate()
-  const isSeller = location.pathname.includes('/store');
-  const coin = coinMeta[symbol as keyof typeof coinMeta]
   const [balance, setBalance] = useState<number>(0);
-
-
-  if (!coin) return <div className="p-4">잘못된 경로입니다.</div>
-
+  const coinList = useCoinStore(state => state.coins);
+  const coinMeta = coinList.find(c => c.currency === symbol);
   // 입금 주소가 유효한지 확인
   useEffect(() => {
     if (symbol) {
@@ -172,10 +137,9 @@ export default function CoinDetailPage() {
   return (
     <div className="relative flex h-full flex-col bg-gray-50">
       <Header
-        title={`${coin.name} 상세`}
+        title={`${coinMeta?.coinName ?? symbol} 상세`}
         onBackClick={() => {
           // Add fade-out transition before navigating
-          setPageVisible(false)
           setTimeout(() => navigate('/my/coin'), 200)
         }}
       />
@@ -188,9 +152,13 @@ export default function CoinDetailPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div
-                className={`h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 ${coin.bg} mr-2 flex items-center justify-center rounded-full sm:mr-3 md:mr-4`}
+                className={`mr-2 flex h-8 w-8 items-center justify-center rounded-full sm:mr-3 sm:h-9 sm:w-9 md:mr-4 md:h-10 md:w-10`}
               >
-                {coin.icon}
+                <img
+                  src={coinMeta?.coinImageUrl}
+                  alt={coinMeta?.coinName ?? symbol}
+                  className="mr-2 h-8 w-8 rounded-full sm:mr-3 sm:h-9 sm:w-9 md:mr-4 md:h-10 md:w-10"
+                />
               </div>
               <p className="text-lg font-semibold sm:text-xl md:text-2xl">
                 총 보유
@@ -216,7 +184,6 @@ export default function CoinDetailPage() {
               className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-[#0a2e64] py-1.5 text-base font-semibold text-white shadow sm:gap-2 sm:rounded-xl sm:py-2 sm:text-lg"
               onClick={() => {
                 // Add transition before navigation
-                setPageVisible(false)
                 setTimeout(() => {
                   navigate(`/coin/address/${symbol}`, {
                     state: { isUser, symbol },
@@ -242,7 +209,6 @@ export default function CoinDetailPage() {
               onClick={() => {
                 if (addressStatus === 'ACTIVE') {
                   // Add transition before navigation
-                  setPageVisible(false)
                   setTimeout(() => {
                     navigate('/settlement', { state: { isUser, symbol } })
                   }, 200)
@@ -271,8 +237,7 @@ export default function CoinDetailPage() {
                 addressStatus === 'UNREGISTERED_AND_REGISTERING'
               ) {
                 setShowModal(true)
-              }else {
-                setPageVisible(false)
+              } else {
                 navigate('/coin/address/add', { state: { symbol } })
               }
             }}
@@ -281,11 +246,12 @@ export default function CoinDetailPage() {
               {addressStatus === 'ACTIVE' &&
                 '계좌가 등록되어 있습니다. 변경하려면 눌러주세요.'}
               {addressStatus === 'REGISTERING' && '계좌가 등록중입니다.'}
-              {addressStatus === 'UNREGISTERED' && '계좌가 등록 해제 중입니다...'}
+              {addressStatus === 'UNREGISTERED' &&
+                '계좌가 등록 해제 중입니다...'}
               {addressStatus === 'UNREGISTERED_AND_REGISTERING' &&
                 '계좌 등록 해제 후 변경 중입니다...'}
               {addressStatus === 'NOT_REGISTERED' && '출금계좌 등록하기'}
-              {addressStatus==='REJECTED' && '거절 되었습니다 다시 등록하기'}
+              {addressStatus === 'REJECTED' && '거절 되었습니다 다시 등록하기'}
             </span>
           </div>
         </div>
@@ -293,7 +259,7 @@ export default function CoinDetailPage() {
         {showModal && addressInfo && (
           <CoinAddressModal
             symbol={symbol!}
-            coinName={coin.name}
+            coinName={coinMeta?.coinName || symbol || ''}
             address={addressInfo.address}
             tag={addressInfo.tag}
             onClose={() => setShowModal(false)}
@@ -301,9 +267,7 @@ export default function CoinDetailPage() {
         )}
 
         {/* 거래 내역 섹션 */}
-        <div
-          className="mb-3 flex items-center justify-between sm:mb-4"
-        >
+        <div className="mb-3 flex items-center justify-between sm:mb-4">
           <h3 className="text-base font-bold text-gray-800 sm:text-lg">
             거래 내역
           </h3>

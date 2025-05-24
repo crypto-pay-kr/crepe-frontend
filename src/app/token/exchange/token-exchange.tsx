@@ -6,7 +6,6 @@ import { BankLogo } from '@/components/common/BankLogo';
 import Button from '@/components/common/Button';
 import { fetchCoinPrices, getCoinBalanceByCurrency } from '@/api/coin'
 import { ArrowUpDown } from 'lucide-react'
-import { COIN_INFO } from '@/app/coin/home/CoinHome'
 import { fetchTokenBalance, getTokenInfo, requestExchange } from '@/api/token'
 import {
   calculateAvailableCapital,
@@ -14,6 +13,8 @@ import {
   calculateMaxExchangeCoin,
   calculateMaxExchangeToken, calculateConversion,
 } from '@/utils/exchangeCalculator'
+import { useTokenStore } from '@/constants/useToken';
+import { useCoinStore } from '@/constants/useCoin';
 interface Portfolio {
   currency: string;
   amount: number;
@@ -34,6 +35,10 @@ export default function TokenExchangePage() {
   const selectedPortfolio = tokenInfo?.portfolios.find(
     (p: Portfolio) => p.currency === selectedCurrency
   );
+  const coinList = useCoinStore(state => state.coins);
+  const tokenList = useTokenStore(state => state.tokens);
+  const coinMeta = coinList.find(c => c.currency === selectedCurrency);
+  const tokenMeta = tokenList.find(t => t.currency === bank);
   // 시세 및 토큰 정보 불러오기 5초 마다
   useEffect(() => {
     if (!bank) return;
@@ -167,7 +172,6 @@ export default function TokenExchangePage() {
 
 
   return (
-
     <div className="flex h-full flex-col bg-gray-50">
       <Header title="토큰 환전" />
       <main className="flex-1 overflow-auto p-5">
@@ -177,20 +181,23 @@ export default function TokenExchangePage() {
             <div className="flex items-center gap-0.5">
               {tokenInfo && (
                 <>
-                  {/* 아이콘 */}
-                  {/*<div className="flex items-center ml-3 gap-3">*/}
-                  {/*  {isCoinToToken ? (*/}
-                  {/*    COIN_INFO[selectedCurrency] && (*/}
-                  {/*      <div*/}
-                  {/*        className={`flex h-10 w-10 items-center justify-center rounded-full ${COIN_INFO[selectedCurrency].bg}`}*/}
-                  {/*      >*/}
-                  {/*        {COIN_INFO[selectedCurrency].icon}*/}
-                  {/*      </div>*/}
-                  {/*    )*/}
-                  {/*  ) : (*/}
-                  {/*    <BankLogo bank={tokenInfo.currency} />*/}
-                  {/*  )}*/}
-                  {/*</div>*/}
+                  <div className="ml-3 flex items-center gap-3">
+                    {isCoinToToken
+                      ? coinMeta?.coinImageUrl && (
+                          <img
+                            src={coinMeta.coinImageUrl}
+                            alt={coinMeta.coinName}
+                            className="h-10 w-10 rounded-full"
+                          />
+                        )
+                      : tokenMeta?.bankImageUrl && (
+                          <img
+                            src={tokenMeta.bankImageUrl}
+                            alt={tokenMeta.name}
+                            className="h-10 w-10 rounded-full"
+                          />
+                        )}
+                  </div>
 
                   {/* 셀렉트 or 고정 텍스트 */}
                   {isCoinToToken ? (
@@ -216,7 +223,7 @@ export default function TokenExchangePage() {
               )}
             </div>
 
-            <div className="mt-0 flex min-w-[140px] flex-col items-end space-y-1 mr-3">
+            <div className="mr-3 mt-0 flex min-w-[140px] flex-col items-end space-y-1">
               <p className="text-xs text-gray-400">
                 보유:{' '}
                 {isCoinToToken
@@ -269,15 +276,21 @@ export default function TokenExchangePage() {
           <div className="flex items-center justify-between">
             {/* 좌측: 로고 + 이름 */}
             <div className="flex items-center gap-0.5">
-              {/*{isCoinToToken*/}
-              {/*  ? tokenInfo?.currency && <BankLogo bank={tokenInfo.currency} />*/}
-              {/*  : COIN_INFO[selectedCurrency] && (*/}
-              {/*      <div*/}
-              {/*        className={`flex h-10 w-10 items-center justify-center rounded-full ${COIN_INFO[selectedCurrency].bg}`}*/}
-              {/*      >*/}
-              {/*        {COIN_INFO[selectedCurrency].icon}*/}
-              {/*      </div>*/}
-              {/*    )}*/}
+                {!isCoinToToken
+                  ? coinMeta?.coinImageUrl && (
+                      <img
+                        src={coinMeta.coinImageUrl}
+                        alt={coinMeta.coinName}
+                        className="h-10 w-10 rounded-full"
+                      />
+                    )
+                  : tokenMeta?.bankImageUrl && (
+                      <img
+                        src={tokenMeta.bankImageUrl}
+                        alt={tokenMeta.name}
+                        className="h-10 w-10 rounded-full"
+                      />
+                    )}
               {/* 셀렉트 or 고정 텍스트 */}
               {isCoinToToken ? (
                 <p className="ml-4 text-lg font-bold">{tokenInfo?.currency}</p>
@@ -318,21 +331,25 @@ export default function TokenExchangePage() {
                 '-'
               )}
 
-              {isCoinToToken && selectedPortfolio && (
+              {isCoinToToken &&
+                selectedPortfolio &&
                 (() => {
-                  const totalAmount = selectedPortfolio.amount ?? 0;
-                  const nonAvailable = selectedPortfolio.nonAvailableAmount ?? 0;
-                  const remainingPercent = totalAmount > 0 ? ((totalAmount - nonAvailable) / totalAmount) * 100 : 100;
-                  const isLowLiquidity = remainingPercent <= 30;
+                  const totalAmount = selectedPortfolio.amount ?? 0
+                  const nonAvailable = selectedPortfolio.nonAvailableAmount ?? 0
+                  const remainingPercent =
+                    totalAmount > 0
+                      ? ((totalAmount - nonAvailable) / totalAmount) * 100
+                      : 100
+                  const isLowLiquidity = remainingPercent <= 30
 
-
-                  {isLowLiquidity && (
-                    <div className="mt-2 text-xs text-red-500 font-semibold whitespace-nowrap">
-                       현재 {selectedCurrency} 잔여금액이 전체의 30% 이하입니다
-                    </div>
-                  )}
-                })()
-              )}
+                  {
+                    isLowLiquidity && (
+                      <div className="mt-2 whitespace-nowrap text-xs font-semibold text-red-500">
+                        현재 {selectedCurrency} 잔여금액이 전체의 30% 이하입니다
+                      </div>
+                    )
+                  }
+                })()}
             </div>
           </div>
         </div>
@@ -367,7 +384,7 @@ export default function TokenExchangePage() {
             <div key={p.currency} className="mb-4">
               <div className="mb-1 flex justify-between">
                 <span className="text-sm font-medium text-gray-700">
-                  {p.currency} ({COIN_INFO[p.currency]?.coinName})
+                  {p.currency}
                 </span>
                 <span className="text-sm text-gray-600">
                   교환됨 {swappedRatio.toFixed(2)}%
