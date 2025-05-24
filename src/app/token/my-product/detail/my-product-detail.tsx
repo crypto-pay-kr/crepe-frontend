@@ -3,12 +3,12 @@ import Header from '@/components/common/Header';
 import BottomNav from '@/components/common/BottomNavigate';
 import TransactionItem from '@/components/coin/TransactionItem';
 import { useRef, useEffect, useState, useMemo } from 'react';
-import { BankLogo } from '@/components/common/BankLogo';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import {
   fetchTokenBalance,
   fetchTokenExchangeHistory, getTokenInfo,
 } from '@/api/token'
+import { useTokenStore } from '@/constants/useToken';
 import { fetchCoinPrices } from '@/api/coin'
 
 interface Transaction {
@@ -29,7 +29,10 @@ export default function TokenGroupDetailPage() {
   const [coinPrice, setCoinPrice] = useState<Record<string, number>>({});
   const [tokenInfo, setTokenInfo] = useState<any | null>(null);
   const observerElemRef = useRef<HTMLDivElement | null>(null);
+  const tokenList = useTokenStore(state => state.tokens); // 스토어에서 가져옴
 
+// bank에 해당하는 토큰 정보 찾기
+  const tokenMeta = tokenList.find(t => t.currency === bank);
   // 1. 토큰 가격 계산 함수
   const calculateTokenPrice = (totalCapital: number, totalSupply: number): number => {
     if (totalSupply === 0) return 0;
@@ -123,60 +126,63 @@ export default function TokenGroupDetailPage() {
   if (!bank) return <div className="p-4">잘못된 경로입니다.</div>;
 
   return (
-    <div className="flex h-full flex-col bg-gray-50 relative">
+    <div className="relative flex h-full flex-col bg-gray-50">
       <Header
         title={`${bank} 상세`}
         onBackClick={() => {
-          setTimeout(() => navigate(-1), 200);
+          setTimeout(() => navigate(-1), 200)
         }}
       />
 
       <main
-        className={`flex-1 overflow-auto p-3 sm:p-4 md:p-5 transition-all duration-500 ease-in-out`}
+        className={`flex-1 overflow-auto p-3 transition-all duration-500 ease-in-out sm:p-4 md:p-5`}
       >
         {/* 총 보유 금액 카드 */}
-        <div
-          className="mb-4 sm:mb-5 md:mb-6 rounded-xl md:rounded-2xl border border-gray-200 md:border-2 bg-white p-4 sm:p-8 md:p-12 shadow-[0_2px_10px_rgba(0,0,0,0.04)] md:shadow-[0_4px_20px_rgba(0,0,0,0.06)] transition-all duration-500 ease-in-out"
-        >
+        <div className="mb-4 rounded-xl border border-gray-200 bg-white p-4 shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-all duration-500 ease-in-out sm:mb-5 sm:p-8 md:mb-6 md:rounded-2xl md:border-2 md:p-12 md:shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              {/*<BankLogo bank={bank as "WTK" | "STK" | "HTK" | "KTK" | "NTK"} />*/}
-              <p className="text-lg sm:text-xl md:text-2xl font-semibold ml-3">총 보유</p>
+              {tokenMeta?.bankImageUrl && (
+                <img
+                  src={tokenMeta.bankImageUrl}
+                  alt={tokenMeta.name}
+                  className="h-8 w-8 rounded-full"
+                />
+              )}
+              <p className="ml-3 text-lg font-semibold sm:text-xl md:text-2xl">
+                총 보유
+              </p>
             </div>
             <div className="text-right">
-              <p className="text-lg sm:text-xl md:text-2xl font-bold">
+              <p className="text-lg font-bold sm:text-xl md:text-2xl">
                 {balance.toFixed(2)} {bank}
               </p>
-              <p className="text-sm sm:text-base text-gray-500">
-                {(tokenPrice*balance).toFixed(2)} KRW
+              <p className="text-sm text-gray-500 sm:text-base">
+                {(tokenPrice * balance).toFixed(2)} KRW
               </p>
             </div>
           </div>
         </div>
 
         {/* 환전 버튼 */}
-        <div
-          className="mb-4 sm:mb-5 md:mb-6 w-full"
-        >
+        <div className="mb-4 w-full sm:mb-5 md:mb-6">
           <button
-            className="w-full flex items-center justify-center gap-2 bg-[#0a2e64] text-white py-3 rounded-xl font-semibold shadow transition-all hover:bg-[#081d40]"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a2e64] py-3 font-semibold text-white shadow transition-all hover:bg-[#081d40]"
             onClick={() => {
               setTimeout(() => {
-                navigate(`/token/exchange/${bank}`, { state: { bank, isUser } });
-              }, 200);
+                navigate(`/token/exchange/${bank}`, { state: { bank, isUser } })
+              }, 200)
             }}
           >
-
             <span className="text-base text-white">토큰 환전</span>
           </button>
         </div>
 
         {/* 거래 내역 헤더 */}
-        <div
-          className="mb-3 sm:mb-4 flex items-center justify-between"
-        >
-          <h3 className="text-base sm:text-lg font-bold text-gray-800">거래 내역</h3>
-          <button className="flex items-center text-xs sm:text-sm font-medium text-[#0a2e64]">
+        <div className="mb-3 flex items-center justify-between sm:mb-4">
+          <h3 className="text-base font-bold text-gray-800 sm:text-lg">
+            거래 내역
+          </h3>
+          <button className="flex items-center text-xs font-medium text-[#0a2e64] sm:text-sm">
             전체보기
             <svg
               width="14"
@@ -198,46 +204,58 @@ export default function TokenGroupDetailPage() {
         </div>
 
         {/* 거래 내역 리스트 */}
-        <div className="space-y-4 sm:space-y-5 md:space-y-6 pb-16 sm:pb-10 text-sm sm:text-base md:text-lg lg:text-xl">
+        <div className="space-y-4 pb-16 text-sm sm:space-y-5 sm:pb-10 sm:text-base md:space-y-6 md:text-lg lg:text-xl">
+          {Array.isArray(data?.pages) && data.pages.length > 0
+            ? data.pages.map((page, pageIndex) =>
+                page.content.map((tx: Transaction, idx: number) => {
+                  const tokenPrice = calculateTokenPrice(
+                    tokenCapital,
+                    tokenInfo?.totalSupply ?? 0
+                  )
+                  const krw = Math.floor(
+                    tx.amount * tokenPrice
+                  ).toLocaleString()
 
-          {Array.isArray(data?.pages) && data.pages.length > 0 ? (
-            data.pages.map((page, pageIndex) =>
-              page.content.map((tx: Transaction, idx: number) => {
-                const tokenPrice = calculateTokenPrice(tokenCapital, tokenInfo?.totalSupply ?? 0);
-                const krw = Math.floor(tx.amount * tokenPrice).toLocaleString();
+                  return (
+                    <div
+                      key={
+                        tx.id ||
+                        `${tx.transferredAt}-${tx.amount}-${pageIndex}-${idx}`
+                      }
+                      className="transition-all duration-300 ease-in-out"
+                    >
+                      <TransactionItem
+                        date={new Date(tx.transferredAt).toLocaleString()}
+                        type={
+                          tx.amount > 0 ? '환전 입금 완료' : '환전 출금 완료'
+                        }
+                        balance={`${tx.afterBalance?.toFixed(2) ?? '-'} ${bank}`}
+                        amount={`${tx.amount.toFixed(2)} ${bank}`}
+                        krw={`${krw} KRW`}
+                        isDeposit={tx.amount > 0}
+                        showAfterBalance={tx.status === 'ACCEPTED'}
+                      />
+                    </div>
+                  )
+                })
+              )
+            : !isLoading && (
+                <div className="flex items-center justify-center py-10 text-gray-500">
+                  <p>거래 내역이 없습니다</p>
+                </div>
+              )}
 
-                return (
-                  <div
-                    key={tx.id || `${tx.transferredAt}-${tx.amount}-${pageIndex}-${idx}`}
-                    className="transition-all duration-300 ease-in-out"
-                  >
-                    <TransactionItem
-                      date={new Date(tx.transferredAt).toLocaleString()}
-                      type={tx.amount > 0 ? '환전 입금 완료' : '환전 출금 완료'}
-                      balance={`${tx.afterBalance?.toFixed(2) ?? '-'} ${bank}`}
-                      amount={`${tx.amount.toFixed(2)} ${bank}`}
-                      krw={`${krw} KRW`}
-                      isDeposit={tx.amount > 0}
-                      showAfterBalance={tx.status === 'ACCEPTED'}
-                    />
-                  </div>
-                );
-              })
-            )
-          ) : (
-            !isLoading && (
-              <div className="flex justify-center items-center py-10 text-gray-500">
-                <p>거래 내역이 없습니다</p>
-              </div>
-            )
-          )}
-
-          <div ref={observerElemRef} className="h-10 flex items-center justify-center mt-4">
+          <div
+            ref={observerElemRef}
+            className="mt-4 flex h-10 items-center justify-center"
+          >
             {isFetchingNextPage && (
-              <div className="w-8 h-8 rounded-full border-2 border-t-[#0a2e64] border-gray-200 animate-spin" />
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-200 border-t-[#0a2e64]" />
             )}
             {!hasNextPage && data?.pages[0]?.content.length > 0 && (
-              <p className="text-gray-500 text-sm">더 이상 거래 내역이 없습니다</p>
+              <p className="text-sm text-gray-500">
+                더 이상 거래 내역이 없습니다
+              </p>
             )}
           </div>
         </div>
@@ -245,5 +263,5 @@ export default function TokenGroupDetailPage() {
 
       <BottomNav />
     </div>
-  );
+  )
 }
