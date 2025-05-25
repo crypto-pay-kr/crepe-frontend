@@ -16,11 +16,17 @@ export interface BankProductItemProps {
     onClick?: () => void
 }
 
-const tagColorMapping: { [key: string]: string } = {
-    "29세이하": "gray",
-    "월 최대 50만 토큰": "purple",
-    "세제혜택": "green",
-};
+const tagColors = ["gray", "purple", "green"] as const;
+type TagColor = typeof tagColors[number];
+
+function getColorForTag(tag: string): TagColor {
+  let hash = 0;
+  for (let i = 0; i < tag.length; i++) {
+    hash = tag.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % tagColors.length;
+  return tagColors[index];
+}
 
 
 export default function BankProductItem({
@@ -53,7 +59,7 @@ export default function BankProductItem({
                 )}
                 <div className="flex gap-2 mt-2 mb-4">
                     {tags.map((tag, index) => (
-                        <ProductTag key={index} text={tag} color={(tagColorMapping[tag] || "gray") as "gray" | "purple" | "green"} />
+                        <ProductTag key={index} text={tag}  color={getColorForTag(tag)} />
                     ))}
                 </div>
 

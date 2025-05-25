@@ -12,6 +12,7 @@ export interface GetOnsaleProductListResponse {
   minInterestRate: number;
   maxInterestRate: number;
   imageUrl: string;
+  tags: string[];
   guideFile: string;
   deadline: string;
 }

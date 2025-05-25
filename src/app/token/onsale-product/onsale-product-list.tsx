@@ -9,6 +9,7 @@ import BottomNav from "@/components/common/BottomNavigate"
 import { GetOnsaleProductListResponse } from '@/types/product'
 import { fetchOnSaleTokenProducts, fetchProductDetail } from '@/api/product'
 import { bankMeta } from '@/utils/bankMeta'
+import { ProductTag } from '@/components/token/onsale-product/ProductTag'
 
 export default function OnSaleTokenProductListPage() {
   const navigate = useNavigate()
@@ -26,17 +27,18 @@ export default function OnSaleTokenProductListPage() {
   }, []);
 
 
-  /*useEffect(() => {
-    const token = localStorage.getItem("accessToken")
-    if (!token || !productId) {
-      setError("인증 오류 또는 잘못된 접근입니다.")
-      return
-    }
+  const tagColors = ["gray", "purple", "green"] as const;
+  type TagColor = typeof tagColors[number];
 
-    fetchProductDetail(Number(productId), token)
-      .then(setProduct)
-      .catch(() => setError("상품 정보를 불러오는 데 실패했습니다."))
-  }, [productId])*/
+  function getColorForTag(tag: string): TagColor {
+    // 간단한 해시로 index 추출
+    let hash = 0;
+    for (let i = 0; i < tag.length; i++) {
+      hash = tag.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % tagColors.length;
+    return tagColors[index];
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -67,10 +69,7 @@ export default function OnSaleTokenProductListPage() {
               bank: bankInfo?.code ?? "WTK",
               name: p.productName,
               subtitle: `연 ${p.minInterestRate}% ~ 연 ${p.maxInterestRate}%`,
-              tags: [
-                `잔여 자본금: ${p.remainingBudget.toLocaleString()}원`,
-                `참여자 ${p.currentParticipants}/${p.totalParticipants}`
-              ],
+              tags: p.tags ?? [],
               statusText: p.status === "CLOSED" ? "모집 마감" : undefined,
               statusIcon: p.status === "CLOSED" ? Clock : undefined,
               statusIconColor: p.status === "CLOSED" ? "text-red-500" : undefined,

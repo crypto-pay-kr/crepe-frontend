@@ -25,7 +25,9 @@ export async function fetchOnSaleTokenProducts(): Promise<GetOnsaleProductListRe
 
 import { GetProductDetailResponse } from "@/types/product";
 
-export async function fetchProductDetail(productId: number, token: string): Promise<GetProductDetailResponse> {
+export async function fetchProductDetail(productId: number): Promise<GetProductDetailResponse> {
+  const token = sessionStorage.getItem("accessToken");
+  if (!token) throw new Error("인증 토큰이 없습니다.");
   const response = await fetch(`${API_BASE_URL}/api/product/${productId}`, {
     method: "GET",
     headers: {
