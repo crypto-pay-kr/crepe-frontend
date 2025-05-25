@@ -41,7 +41,7 @@ export default function TokenExchangePage() {
   const tokenMeta = tokenList.find(t => t.currency === bank);
   const tickerData = useTickerData();
 
-  // 시세 및 토큰 정보 불러오기 5초 마다
+  // 토큰 정보 불러오기
   useEffect(() => {
     if (!bank) return;
     const fetchAllData = async () => {
@@ -76,7 +76,7 @@ export default function TokenExchangePage() {
     } else {
       setCoinAmount(Number(result.toFixed(2)));
     }
-  }, [tokenInfo, selectedCurrency, coinAmount, tokenAmount, isCoinToToken]);
+  }, [tokenInfo, selectedCurrency, coinAmount, tokenAmount, isCoinToToken,tickerData]);
 
 
 
@@ -115,9 +115,11 @@ export default function TokenExchangePage() {
     const filteredCoinRates: Record<string, number> = {};
     tokenInfo.portfolios.forEach((p: any) => {
       const currency = p.currency;
-      const rate = tickerData[`KRW-${selectedCurrency}`]?.trade_price ?? 0;
-      if (rate) {
+      const rate = tickerData[`KRW-${currency}`]?.trade_price;
+      if (rate !== undefined && rate !== null) {
         filteredCoinRates[currency] = Number(rate.toFixed(2));
+      } else {
+        console.warn(` ${currency} 시세를 찾을 수 없습니다.`);
       }
     });
 
