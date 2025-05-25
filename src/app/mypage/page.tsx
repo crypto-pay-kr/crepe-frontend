@@ -49,8 +49,10 @@ export default function MyPage(): React.ReactElement {
   }, [token, isSeller]);
 
   const handleLogout = (): void => {
-    // Logout logic here
-    console.log("Logging out...");
+    sessionStorage.removeItem("accessToken");
+    sessionStorage.removeItem("refreshToken");
+    // 로그인 페이지로 이동
+    navigate("/login");
   };
 
   // 메뉴 항목 정의
