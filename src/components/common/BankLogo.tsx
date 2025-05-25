@@ -14,6 +14,7 @@ const bankData: Record<BankLogoProps["bank"], { label: string; image: string }> 
 
 
 
+
 export function BankLogo({ bank }: BankLogoProps) {
     const { label, image } = bankData[bank]
     return (

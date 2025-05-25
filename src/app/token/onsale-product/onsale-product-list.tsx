@@ -1,54 +1,42 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import Header from "@/components/common/Header"
 import { Clock, AlertCircle } from "lucide-react"
 import { BankProductItemProps } from "@/components/token/onsale-product/TokenProductItem"
 import BankProductList from "@/components/token/onsale-product/TokenProductList"
 import TokenCategoryTab from "@/components/common/TokenCategoryTab"
 import BottomNav from "@/components/common/BottomNavigate"
+import { GetOnsaleProductListResponse } from '@/types/product'
+import { fetchOnSaleTokenProducts, fetchProductDetail } from '@/api/product'
+import { bankMeta } from '@/utils/bankMeta'
 
 export default function OnSaleTokenProductListPage() {
   const navigate = useNavigate()
 
   const categories = ["전체", "예금", "적금", "입출금", "상품권"]
   const [selectedCat, setSelectedCat] = useState("전체")
+  const { productId } = useParams()
+  const [products, setProducts] = useState<GetOnsaleProductListResponse[]>([]);
+  const [error, setError] = useState<string | null>(null)
 
-  const items: BankProductItemProps[] = [
-    {
-      productId: 1,
-      bank: "WTK",
-      name: "청년도약토큰",
-      subtitle: "연 2.6% ~ 연5.0%",
-      tags: ["29세이하", "월 최대 50만 토큰", "세제혜택"],
-      onClick: () =>
-        navigate(`/token/onsale/products/1`, { state: { product: "woori" } }),
-    },
-    {
-      productId: 2,
-      bank: "STK",
-      name: "서울시동작사랑상품권",
-      tags: ["서울 동작구", "월 최대 50만 토큰", "세제혜택"],
-      statusText: "마감 임박",
-      statusIcon: Clock,
-      statusIconColor: "text-red-500",
-      onClick: () =>
-        navigate(`/token/onsale/products/2`, { state: { product: "shinhan" } }),
-    },
-    {
-      productId: 3,
-      bank: "WTK",
-      name: "서울시관악사랑상품권",
-      tags: ["서울 관악구", "월 최대 50만 토큰", "세제혜택"],
-      statusText: "잔여금액 30% 이하 남음",
-      statusIcon: AlertCircle,
-      statusIconColor: "text-red-500",
-      onClick: () =>
-        navigate(`/token/onsale/products/3`, { state: { product: "woori" } }),
-    },
-  ];
+  useEffect(() => {
+    fetchOnSaleTokenProducts()
+      .then(setProducts)
+      .catch(console.error);
+  }, []);
 
-  // TODO: 카테고리별 필터링 로직 추가
-  const filtered = items // 현재는 전체
+
+  /*useEffect(() => {
+    const token = localStorage.getItem("accessToken")
+    if (!token || !productId) {
+      setError("인증 오류 또는 잘못된 접근입니다.")
+      return
+    }
+
+    fetchProductDetail(Number(productId), token)
+      .then(setProduct)
+      .catch(() => setError("상품 정보를 불러오는 데 실패했습니다."))
+  }, [productId])*/
 
   return (
     <div className="flex flex-col h-full">
@@ -71,7 +59,25 @@ export default function OnSaleTokenProductListPage() {
           onSelect={setSelectedCat}
         />
 
-        <BankProductList items={filtered} />
+        <BankProductList
+          items={products.map((p) => {
+            const bankInfo = bankMeta[p.bankName];
+            return {
+              productId: p.id,
+              bank: bankInfo?.code ?? "WTK",
+              name: p.productName,
+              subtitle: `연 ${p.minInterestRate}% ~ 연 ${p.maxInterestRate}%`,
+              tags: [
+                `잔여 자본금: ${p.remainingBudget.toLocaleString()}원`,
+                `참여자 ${p.currentParticipants}/${p.totalParticipants}`
+              ],
+              statusText: p.status === "CLOSED" ? "모집 마감" : undefined,
+              statusIcon: p.status === "CLOSED" ? Clock : undefined,
+              statusIconColor: p.status === "CLOSED" ? "text-red-500" : undefined,
+              onClick: () => navigate(`/token/onsale/products/${p.id}`, { state: { product: p } }),
+            };
+          })}
+        />
       </div>
       <BottomNav />
     </div>
