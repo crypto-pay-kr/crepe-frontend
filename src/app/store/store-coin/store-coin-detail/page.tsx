@@ -311,7 +311,7 @@ export default function CoinDetailPage() {
                     balance={`${item.afterBalance ?? '-'} ${symbol}`}
                     amount={item.amount.toFixed(2) + ' ' + symbol}
                     krw={`${krw} KRW`}
-                    isDeposit={item.type === 'DEPOSIT'}
+                    isDeposit={item.type === 'DEPOSIT'|| item.type==="EXCHANGE" && item.amount < 0|| item.type==="PAY"&& item.amount<0}
                     showAfterBalance={showAfterBalance}
                   />
                 </div>
