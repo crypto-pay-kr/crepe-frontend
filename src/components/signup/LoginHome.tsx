@@ -7,10 +7,11 @@ import { RefreshCw } from 'lucide-react'
 
 interface LoginHomeProps {
   onSignup: () => void;
+  onStoreSignup: () => void;
   buttonClassName?: string;
 }
 
-export default function LoginHome({ onSignup, buttonClassName }: LoginHomeProps) {
+export default function LoginHome({ onSignup, onStoreSignup, buttonClassName }: LoginHomeProps) {
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
   const [captchaImageUrl, setCaptchaImageUrl] = useState('');
@@ -144,10 +145,12 @@ export default function LoginHome({ onSignup, buttonClassName }: LoginHomeProps)
 
           <div className="flex justify-center gap-4 mt-4 mb-4 text-sm text-gray-500">
             <button onClick={onSignup} className="hover:underline">
-              회원가입
+              유저 회원가입
             </button>
-            <button className="hover:underline">아이디 찾기</button>
-            <button className="hover:underline">비밀번호 찾기</button>
+            <button onClick={onStoreSignup} className="hover:underline">
+              가맹점 회원가입
+            </button>
+            <button onClick={() => navigate('/under-development')} className="hover:underline">아이디 비밀번호 찾기</button>
           </div>
         </div>
       </div>
