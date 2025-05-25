@@ -4,18 +4,16 @@ import BottomNav from "@/components/common/BottomNavigate";
 import Header from "@/components/common/Header";
 import Button from "@/components/common/Button";
 import PaymentOptionsList from "@/components/order/PaymentOptionList";
-import { getCoinBalance, fetchCoinPrices } from "@/api/coin";
+import { getCoinBalance} from "@/api/coin";
 import { createOrder } from "@/api/order";
+import { useTickerData } from '@/hooks/useTickerData'
 
 
 export default function SelectPaymentPage() {
     const navigate = useNavigate();
     const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
-    const [prices, setPrices] = useState<{ [key: string]: number }>({
-        "KRW-SOL": 0,
-        "KRW-XRP": 0,
-        "KRW-USDT": 0,
-    });
+
+    const tickerData = useTickerData();
     const [balances, setBalances] = useState<{ [key: string]: number }>({});
     const [totalPrice, setTotalPrice] = useState<number>(0);
 
@@ -27,21 +25,6 @@ export default function SelectPaymentPage() {
         }
     }, []);
 
-    // 2. 코인 시세 가져오기
-    useEffect(() => {
-        const fetchPrices = async () => {
-            try {
-                const updatedPrices = await fetchCoinPrices();
-                setPrices(updatedPrices);
-            } catch (err) {
-                console.error("Error fetching prices:", err);
-            }
-        };
-
-        fetchPrices();
-        const interval = setInterval(fetchPrices, 3000);
-        return () => clearInterval(interval);
-    }, []);
 
     // 3. 사용자 잔액 가져오기
     useEffect(() => {
@@ -67,35 +50,35 @@ export default function SelectPaymentPage() {
         {
             id: "XRP",
             label: "XRP",
-            amount: prices["KRW-XRP"]
-                ? `${(totalPrice / prices["KRW-XRP"]).toFixed(2)} XRP`
+            amount: tickerData["KRW-XRP"]?.trade_price
+                ? `${(totalPrice / tickerData["KRW-XRP"].trade_price).toFixed(2)} XRP`
                 : "Loading...",
             insufficientBalance:
-                !prices["KRW-XRP"] ||
+                !tickerData["KRW-XRP"]?.trade_price ||
                 (balances["XRP"] === undefined ||
-                    balances["XRP"] < totalPrice / prices["KRW-XRP"]),
+                    balances["XRP"] < totalPrice /tickerData["KRW-XRP"].trade_price),
         },
         {
             id: "SOL",
             label: "SOL",
-            amount: prices["KRW-SOL"]
-                ? `${(totalPrice / prices["KRW-SOL"]).toFixed(2)} SOL`
+            amount:tickerData["KRW-SOL"]?.trade_price
+                ? `${(totalPrice / tickerData["KRW-SOL"]?.trade_price).toFixed(2)} SOL`
                 : "Loading...",
             insufficientBalance:
-                !prices["KRW-SOL"] ||
+                !tickerData["KRW-SOL"]?.trade_price ||
                 (balances["SOL"] === undefined ||
-                    balances["SOL"] < totalPrice / prices["KRW-SOL"]),
+                    balances["SOL"] < totalPrice / tickerData["KRW-SOL"]?.trade_price),
         },
         {
             id: "USDT",
             label: "USDT",
-            amount: prices["KRW-USDT"]
-                ? `${(totalPrice / prices["KRW-USDT"]).toFixed(2)} USDT`
+            amount: tickerData["KRW-USDT"]?.trade_price
+                ? `${(totalPrice / tickerData["KRW-USDT"]?.trade_price).toFixed(2)} USDT`
                 : "Loading...",
             insufficientBalance:
-                !prices["KRW-USDT"] ||
+                !tickerData["KRW-USDT"]?.trade_price ||
                 (balances["USDT"] === undefined ||
-                    balances["USDT"] < totalPrice / prices["KRW-USDT"]),
+                    balances["USDT"] < totalPrice / tickerData["KRW-USDT"]?.trade_price),
         }
     ];
 
@@ -142,7 +125,7 @@ export default function SelectPaymentPage() {
             menuCount: item.quantity,
         }));
 
-        const selectedPrice = prices[`KRW-${selectedPayment}`];
+        const selectedPrice = tickerData[`KRW-${selectedPayment}`].trade_price;
         if (!selectedPrice) {
             alert("시세 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
             return;

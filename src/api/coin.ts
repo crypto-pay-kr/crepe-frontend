@@ -149,59 +149,9 @@ export const getCoinHistory = async ({ pageParam = 0, queryKey }: { pageParam?: 
   });
 
   if (!res.ok) throw new Error('입금 내역 조회 실패');
-  return res.json(); // Slice 형태의 응답 객체
+  return res.json();
 };
 
-
-
-// 코인 시세 가져오기
-export const fetchCoinPrices = async () => {
-  try {
-    const response = await fetch(`${COIN_PRICE_URL}`);
-    if (!response.ok) {
-      throw new Error(`시세 조회 실패: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    // 시세 데이터를 객체 형태로 변환
-    const updatedPrices = data.reduce((acc: any, item: any) => {
-      acc[item.market] = item.trade_price;
-
-      return acc;
-    }, {});
-
-    return updatedPrices; // 시세 데이터 반환
-  } catch (err) {
-    console.error("Error fetching coin prices:", err);
-    throw err; // 에러를 호출한 쪽으로 전달
-  }
-};
-
-
-//등락률 가져오기
-export const fetchCoinRate= async () => {
-  try {
-    const response = await fetch(`${COIN_PRICE_URL}`);
-    if (!response.ok) {
-      throw new Error(`시세 조회 실패: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    const updatedPrices = data.reduce((acc: any, item: any) => {
-      acc[item.market] = {
-        rate: item.change_rate,
-        direction: item.change, // RISE / FALL / EVEN
-      };
-      return acc;
-    }, {});
-    return updatedPrices;
-  } catch (err) {
-    console.error("Error fetching coin prices:", err);
-    throw err;
-  }
-};
 
 
 export async function unRegisterAccountAddress(currency: string): Promise<void> {

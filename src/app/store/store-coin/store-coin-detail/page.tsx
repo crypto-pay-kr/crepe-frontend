@@ -8,10 +8,11 @@ import CoinAddressModal from "@/components/coin/CoinAddressModal";
 import {
   isAccountAddressRegistered,
   getCoinBalanceByCurrency,
-  getCoinHistory, fetchCoinPrices,
+  getCoinHistory,
 } from '@/api/coin'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useCoinStore } from '@/constants/useCoin';
+import { useTickerData } from '@/hooks/useTickerData'
 export interface PaymentHistory {
   status: 'ACCEPTED' | 'PENDING' | 'FAILED';
   amount: number;
@@ -28,7 +29,7 @@ export default function CoinDetailPage() {
   const { symbol } = useParams()
   const location = useLocation()
   const isUser = location.state?.isUser ?? false
-
+  const tickerData = useTickerData();
   const [addressStatus, setAddressStatus] = useState<'ACTIVE' | 'REGISTERING' | 'NOT_REGISTERED' |'UNREGISTERED'|'UNREGISTERED_AND_REGISTERING'|'REJECTED'| null>(null);
   const [showModal, setShowModal] = useState(false)
   const [addressInfo, setAddressInfo] = useState<{
@@ -40,6 +41,8 @@ export default function CoinDetailPage() {
   const [balance, setBalance] = useState<number>(0);
   const coinList = useCoinStore(state => state.coins);
   const coinMeta = coinList.find(c => c.currency === symbol);
+  const livePrice = tickerData[`KRW-${symbol}`]?.trade_price ?? 0;
+
   // 입금 주소가 유효한지 확인
   useEffect(() => {
     if (symbol) {
@@ -57,33 +60,6 @@ export default function CoinDetailPage() {
     }
   }, [symbol]);
 
-
-  const [prices, setPrices] = useState<{ [key: string]: number }>({
-    "KRW-XRP": 0,
-    "KRW-USDT": 0,
-    "KRW-SOL": 0,
-  });
-
-
-  // 코인 시세 가져오기
-  useEffect(() => {
-    const loadPrices = async () => {
-      try {
-        const updatedPrices = await fetchCoinPrices();
-        setPrices(updatedPrices);
-      } catch (err) {
-        console.error("시세 조회 실패", err);
-      }
-    };
-
-    loadPrices();
-
-    const interval = setInterval(() => {
-      loadPrices();
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
 
 
   // 코인 잔액 조회
@@ -169,7 +145,7 @@ export default function CoinDetailPage() {
                 {balance.toFixed(2)} {symbol}
               </p>
               <p className="text-sm text-gray-500 sm:text-base">
-                = {(balance * (prices[`KRW-${symbol}`] ?? 0)).toLocaleString()}{' '}
+                = {(balance * livePrice).toLocaleString()} KRW
                 KRW
               </p>
             </div>
@@ -296,7 +272,7 @@ export default function CoinDetailPage() {
         <div className="space-y-4 pb-16 text-sm sm:space-y-5 sm:pb-10 sm:text-base md:space-y-6 md:text-lg lg:text-xl">
           {data?.pages.map((page, pageIndex) =>
             page.content.map((item: PaymentHistory, idx: number) => {
-              const rate = prices[`KRW-${symbol}`] ?? 0
+              const rate = tickerData[`KRW-${symbol}`]?.trade_price ?? 0
               const krw = Math.floor(item.amount * rate).toLocaleString()
               const showAfterBalance = item.status === 'ACCEPTED'
 

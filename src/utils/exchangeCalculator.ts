@@ -1,8 +1,6 @@
-// utils/exchangeCalculator.ts
+import { TickerData } from '@/hooks/useTickerData'
 
-/**
- *  교환 로직 가능 한 수량 계산
- */
+
 export const calculateConversion = (
   isCoinToToken: boolean,
   coinAmount: number,
@@ -12,33 +10,25 @@ export const calculateConversion = (
 ) => {
   if (isCoinToToken) {
     if (!coinAmount) return 0;
-    return coinAmount* rate / tokenPrice;
+    return (coinAmount * rate) / tokenPrice;
   } else {
     if (!tokenAmount) return 0;
-    return tokenAmount * tokenPrice / rate;
+    return (tokenAmount * tokenPrice) / rate;
   }
 };
 
-
-
-/**
- * 실시간 시세와 포트폴리오를 기반으로 자본금(총 원화 가치)을 계산
- */
+// 실시간 시세 기반 자본금 계산
 export function calculateAvailableCapital(
   portfolios: any[],
-  coinPrice: Record<string, number>
+  tickerData: Record<string, TickerData>
 ): number {
   return portfolios.reduce((sum, p) => {
-    const rate = coinPrice[`KRW-${p.currency}`] || 0;
+    const rate = tickerData[`KRW-${p.currency}`]?.trade_price ?? 0;
     const available = p.amount - (p.nonAvailableAmount || 0);
     return sum + available * rate;
   }, 0);
 }
 
-
-/**
- * 토큰 단가 = 총 자본금 / 현재 토큰양
- */
 export function calculateTokenPrice(
   totalCapital: number,
   totalSupply: number
@@ -47,28 +37,28 @@ export function calculateTokenPrice(
   return totalCapital / totalSupply;
 }
 
-
-
-
-/**
- * 코인으로 교환가능한 최대 갯수
- */
-export function calculateMaxExchangeCoin({ tokenInfo, selectedCurrency,tokenCapital, coinPrice, }: {
+// 최대 교환 가능한 코인 수량 계산
+export function calculateMaxExchangeCoin({
+                                           tokenInfo,
+                                           selectedCurrency,
+                                           tokenCapital,
+                                           tickerData,
+                                         }: {
   tokenInfo: any;
   selectedCurrency: string;
   tokenCapital: number;
-  coinPrice: Record<string, number>;
+  tickerData: Record<string, TickerData>;
 }): string {
   if (!tokenInfo || !selectedCurrency || !tokenCapital || !tokenInfo.totalSupply) return '-';
 
   const tokenPrice = tokenCapital / tokenInfo.totalSupply;
-  const coinRate = coinPrice[`KRW-${selectedCurrency}`] || 0;
+  const coinRate = tickerData[`KRW-${selectedCurrency}`]?.trade_price ?? 0;
 
   const portfolio = tokenInfo.portfolios.find((p: any) => p.currency === selectedCurrency);
   if (!portfolio) return '-';
 
-  const availableKRW = (portfolio.amount ?? 0) - (portfolio.nonAvailableAmount ?? 0);
-  const availableCapital = availableKRW * coinRate;
+  const available = (portfolio.amount ?? 0) - (portfolio.nonAvailableAmount ?? 0);
+  const availableCapital = available * coinRate;
 
   const maxToken = availableCapital / tokenPrice;
   const maxCoin = (maxToken * tokenPrice) / coinRate;
@@ -76,21 +66,22 @@ export function calculateMaxExchangeCoin({ tokenInfo, selectedCurrency,tokenCapi
   return maxCoin.toFixed(2);
 }
 
-
-/**
-* 토큰으로 교환 가능한 최대갯수
- */
-
- export function calculateMaxExchangeToken({ tokenInfo, selectedCurrency, tokenCapital, coinPrice, }: {
+// 최대 교환 가능한 토큰 수량 계산
+export function calculateMaxExchangeToken({
+                                            tokenInfo,
+                                            selectedCurrency,
+                                            tokenCapital,
+                                            tickerData,
+                                          }: {
   tokenInfo: any;
   selectedCurrency: string;
   tokenCapital: number;
-  coinPrice: Record<string, number>;
+  tickerData: Record<string, TickerData>;
 }): string {
   if (!tokenInfo || !selectedCurrency || !tokenCapital || !tokenInfo.tokenBalance) return '-';
 
   const tokenPrice = tokenCapital / tokenInfo.tokenBalance;
-  const coinRate = coinPrice[`KRW-${selectedCurrency}`] || 0;
+  const coinRate = tickerData[`KRW-${selectedCurrency}`]?.trade_price ?? 0;
 
   const portfolio = tokenInfo.portfolios.find((p: any) => p.currency === selectedCurrency);
   const available = (portfolio?.amount ?? 0) - (portfolio?.nonAvailableAmount ?? 0);

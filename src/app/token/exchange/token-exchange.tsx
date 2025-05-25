@@ -4,7 +4,7 @@ import BottomNav from "@/components/common/BottomNavigate";
 import React, { useEffect, useMemo, useState } from 'react'
 import { BankLogo } from '@/components/common/BankLogo';
 import Button from '@/components/common/Button';
-import { fetchCoinPrices, getCoinBalanceByCurrency } from '@/api/coin'
+import { getCoinBalanceByCurrency } from '@/api/coin'
 import { ArrowUpDown } from 'lucide-react'
 import { fetchTokenBalance, getTokenInfo, requestExchange } from '@/api/token'
 import {
@@ -15,6 +15,7 @@ import {
 } from '@/utils/exchangeCalculator'
 import { useTokenStore } from '@/constants/useToken';
 import { useCoinStore } from '@/constants/useCoin';
+import { useTickerData } from '@/hooks/useTickerData'
 interface Portfolio {
   currency: string;
   amount: number;
@@ -23,7 +24,6 @@ interface Portfolio {
 export default function TokenExchangePage() {
   const navigate = useNavigate();
   const { bank } = useParams();
-  const [coinPrice, setCoinPrice] = useState<Record<string, number>>({});
   const [tokenInfo, setTokenInfo] = useState<any | null>(null);
   const [selectedCurrency, setSelectedCurrency] = useState<string>("XRP");
   const [coinAmount, setCoinAmount] = useState<number>(0);
@@ -39,36 +39,35 @@ export default function TokenExchangePage() {
   const tokenList = useTokenStore(state => state.tokens);
   const coinMeta = coinList.find(c => c.currency === selectedCurrency);
   const tokenMeta = tokenList.find(t => t.currency === bank);
+  const tickerData = useTickerData();
+
   // 시세 및 토큰 정보 불러오기 5초 마다
   useEffect(() => {
     if (!bank) return;
     const fetchAllData = async () => {
-      const [info, prices] = await Promise.all([
+      const [info] = await Promise.all([
         getTokenInfo(bank),
-        fetchCoinPrices()
       ]);
       setTokenInfo(info);
-      setCoinPrice(prices);
+
 
       setSelectedCurrency(prev =>
         prev || (info.portfolios.length > 0 ? info.portfolios[0].currency : "")
       );
     };
     fetchAllData();
-    const interval = setInterval(fetchAllData, 5000);
-    return () => clearInterval(interval);
   }, [bank]);
 
 
   // 환전 수량 계산 (코인 < - > 토큰 )
   useEffect(() => {
-    if (!tokenInfo || !selectedCurrency || !coinPrice) return;
+    if (!tokenInfo || !selectedCurrency ) return;
 
-    const totalCapital = calculateAvailableCapital(tokenInfo.portfolios, coinPrice);
+    const totalCapital = calculateAvailableCapital(tokenInfo.portfolios, tickerData);
     setTokenCapital(Number(totalCapital.toFixed(2)));
 
     const tokenPrice = calculateTokenPrice(totalCapital, tokenInfo.tokenBalance);
-    const rate = coinPrice[`KRW-${selectedCurrency}`];
+    const rate = tickerData[`KRW-${selectedCurrency}`]?.trade_price ?? 0;
     if (!rate || !tokenPrice) return;
 
     const result = calculateConversion(isCoinToToken, coinAmount, tokenAmount, rate, tokenPrice);
@@ -77,7 +76,7 @@ export default function TokenExchangePage() {
     } else {
       setCoinAmount(Number(result.toFixed(2)));
     }
-  }, [tokenInfo, selectedCurrency, coinPrice, coinAmount, tokenAmount, isCoinToToken]);
+  }, [tokenInfo, selectedCurrency, coinAmount, tokenAmount, isCoinToToken]);
 
 
 
@@ -87,22 +86,22 @@ export default function TokenExchangePage() {
 
   //최대로 교환 가능한 토큰 수량
   const maxExchangeToken = useMemo(() =>
-      calculateMaxExchangeToken({ tokenInfo, selectedCurrency, tokenCapital, coinPrice }),
-    [tokenInfo, selectedCurrency, tokenCapital, coinPrice]
+      calculateMaxExchangeToken({ tokenInfo, selectedCurrency, tokenCapital, tickerData }),
+    [tokenInfo, selectedCurrency, tokenCapital, tickerData]
   );
 
   //최대로 교환가능한 코인 수량
   const maxExchangeCoin = useMemo(() =>
-      calculateMaxExchangeCoin({ tokenInfo, selectedCurrency, tokenCapital, coinPrice }),
-    [tokenInfo, selectedCurrency, tokenCapital, coinPrice]
+      calculateMaxExchangeCoin({ tokenInfo, selectedCurrency, tokenCapital, tickerData }),
+    [tokenInfo, selectedCurrency, tokenCapital, tickerData]
   );
 
   //코인을 원화로 환산한 값
   const coinToKRW = useMemo(() => {
-    if (!coinAmount || !selectedCurrency || !coinPrice) return 0;
-    const rate = coinPrice[`KRW-${selectedCurrency}`] || 0;
+    if (!coinAmount || !selectedCurrency || !tickerData) return 0;
+    const rate = tickerData[`KRW-${selectedCurrency}`]?.trade_price ?? 0;
     return (coinAmount * rate).toFixed(2);
-  }, [coinAmount, selectedCurrency, coinPrice]);
+  }, [coinAmount, selectedCurrency, tickerData]);
 
   //토큰을 원화로 환산한 값
   const tokenToKRW = useMemo(() => {
@@ -116,7 +115,7 @@ export default function TokenExchangePage() {
     const filteredCoinRates: Record<string, number> = {};
     tokenInfo.portfolios.forEach((p: any) => {
       const currency = p.currency;
-      const rate = coinPrice[`KRW-${currency}`];
+      const rate = tickerData[`KRW-${selectedCurrency}`]?.trade_price ?? 0;
       if (rate) {
         filteredCoinRates[currency] = Number(rate.toFixed(2));
       }
@@ -374,7 +373,6 @@ export default function TokenExchangePage() {
         </div>
 
         {tokenInfo?.portfolios.map((p: any) => {
-          const rate = coinPrice[`KRW-${p.currency}`] || 0
           const swappedRatio =
             p.nonAvailableAmount && p.amount > 0
               ? (p.nonAvailableAmount / p.amount) * 100
