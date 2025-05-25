@@ -46,6 +46,7 @@ import BusinessCertificateVerifyPage from "./app/sign-up/store-register/business
 import MenuAddPage from "./app/store/store-settings/add-store-menu/page";
 import MenuEditPage from "./app/store/store-settings/edit-store-menu/page";
 import IDVerificationStep4 from "./app/sign-up/common/idcard-verification/step04/page";
+import UnderDevelopment from "./app/develop/page";
 
 
 
@@ -147,6 +148,10 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/token/onsale/products/signup" element={<TokenProductSignup />} />
         <Route path="/token/onsale/products/signup-complete" element={<TokenProductSignupComplete/>} />
         <Route path="/token/onsale/products" element={<OnSaleTokenProductListPage />} />
+
+        {/* 개발중 페이지 */}
+        <Route path="/under-development" element={<UnderDevelopment />} />
+
 
       </Routes>
     </BrowserRouter>
