@@ -14,7 +14,7 @@ export default function UnderDevelopment({ buttonClassName }: UnderDevelopmentPr
   };
 
   const handleGoHome = () => {
-    navigate("/");
+    navigate("/welcome");
   };
 
   return (
