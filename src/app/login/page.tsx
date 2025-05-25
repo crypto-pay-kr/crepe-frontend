@@ -8,7 +8,7 @@ export default function LoginPage() {
   return (
     <LoginHome
       onSignup={() => navigate("/terms")}
-      onStoreSignup={() => navigate("/store/signup")}
+      onStoreSignup={() => navigate("/store/terms")}
     />
   );
 }
