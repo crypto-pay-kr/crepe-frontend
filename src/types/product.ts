@@ -1,3 +1,4 @@
+import { BankProductType } from "@/constants/subscribe-condition";
 
 export interface GetOnsaleProductListResponse {
   id: number;
@@ -31,8 +32,23 @@ export interface PreferentialConditionDto {
   description: string;
 }
 
-
-export type BankProductType = "SAVING" | "VOUCHER" | "INSTALLMENT";
+export interface GetOnsaleProductListResponse {
+  id: number;
+  type: string;
+  productName: string;
+  bankName: string;
+  totalBudget: number;
+  remainingBudget: number;
+  totalParticipants: number;
+  currentParticipants: number;
+  status: string;
+  minInterestRate: number;
+  maxInterestRate: number;
+  imageUrl: string;
+  tags: string[];
+  guideFile: string;
+  deadline: string;
+}
 
 export interface GetProductDetailResponse {
   id: number;

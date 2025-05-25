@@ -7,6 +7,7 @@ export interface ProductInfoProps {
   target: string;
   amount: string;
   condition: string;
+  incomeLevel: string; // 소득 조건 추가
   interestPayment: string;
   baseRate: string;
   preferentialRate: string;
@@ -19,6 +20,7 @@ export default function ProductDetailInfo({
   target,
   amount,
   condition,
+  incomeLevel, // 소득 조건 추가
   interestPayment,
   baseRate,
   preferentialRate,
@@ -47,6 +49,10 @@ export default function ProductDetailInfo({
         <div className="flex justify-between">
           <div className="text-gray-600">가입 조건</div>
           <div>{condition}</div>
+        </div>
+        <div className="flex justify-between">
+          <div className="text-gray-600">소득 조건</div> {/* 소득 조건 추가 */}
+          <div>{incomeLevel}</div>
         </div>
         <div className="flex justify-between">
           <div className="text-gray-600">이자 지급</div>
