@@ -5,10 +5,11 @@ import { useNavigate, useLocation } from "react-router-dom";
 import React, { useState, useEffect, useMemo } from 'react'
 import CoinAssets from '@/components/coin/CoinAssets';
 import TokenAssets, { BankProduct } from '@/components/token/my-product/TokenAssets'
-import { fetchCoinPrices, fetchCoinRate, getCoinBalance } from '@/api/coin'
+import { getCoinBalance } from '@/api/coin'
 
 import { useTokenStore } from '@/constants/useToken'
 import { useCoinStore } from '@/constants/useCoin'
+import { useTickerData } from '@/hooks/useTickerData'
 
 
 
@@ -33,49 +34,9 @@ export default function CoinHome() {
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState<'coin' | 'token'>('coin');
-  const [prices, setPrices] = useState<{ [key: string]: number }>({
-    "KRW-XRP": 0,
-    "KRW-USDT": 0,
-    "KRW-SOL": 0,
-  });
-  const [changeRates, setChangeRates] = useState<{ [key: string]: { rate: number; direction: string } }>({});
-
   const [coinBalance, setCoinBalance] = useState<GetAllBalanceResponse['balance']>([]);
   const [tokenBalance, setTokenBalance] = useState<GetAllBalanceResponse['bankTokenInfo']>([]);
-
-  // 가격
-
-  useEffect(() => {
-    const loadPrices = async () => {
-      try {
-        const prices = await fetchCoinPrices();
-        setPrices(prices);
-      } catch (e) {
-        console.error("시세 실패", e);
-      }
-    };
-    
-    loadPrices();
-    const interval = setInterval(loadPrices, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // 등락률 - useEffect 수정
-  useEffect(() => {
-    const loadRates = async () => {
-      try {
-        const rates = await fetchCoinRate();
-        setChangeRates(rates);
-        // console.log("등락률 응답", changeRates);
-      } catch (e) {
-        console.error("등락률 실패", e);
-      }
-    };
-    
-    loadRates();
-    const interval = setInterval(loadRates, 2500);
-    return () => clearInterval(interval);
-  }, []);
+  const tickerData = useTickerData();
 
   // 잔액 - 초기 1회만 로딩
   useEffect(() => {
@@ -93,27 +54,28 @@ export default function CoinHome() {
       }
     };
 
-    // 초기 로딩만 실행 (주기적 업데이트 없음)
+
     loadBalances();
-  }, []); // 빈 의존성 배열
+  }, []);
 
   // 준비되지 않은 값은 "-" 형태로 처리해 로딩 중에도 UI가 먼저 뜰 수 있게 함.
   const coins = useMemo(() => {
     return coinBalance.map((item) => {
       const amount = item.balance;
-      const krwRate = prices[`KRW-${item.currency}`];
-      const rateInfo = changeRates[`KRW-${item.currency}`];
+      const data = tickerData[`KRW-${item.currency}`];
 
-      const balanceText = amount !== undefined ? `${amount} ${item.currency}` : `- ${item.currency}`;
-      const krwText = amount !== undefined && krwRate !== undefined
+      const krwRate = data?.trade_price ?? 0;
+      const rate = data?.signed_change_rate ?? 0;
+      const direction = data?.change ?? 'EVEN';
+
+      const balanceText = `${amount} ${item.currency}`;
+      const krwText = amount && krwRate
         ? `${Math.floor(amount * krwRate).toLocaleString()} KRW`
         : `- KRW`;
 
-      const rate = rateInfo?.rate ?? 0;
-      const direction = rateInfo?.direction ?? 'EVEN';
-      const formattedRate = rateInfo
-        ? `${direction === 'RISE' ? '+' : direction === 'FALL' ? '-' : ''}${(rate * 100).toFixed(2)}%`
-        : '-';
+      const formattedRate =
+        direction === "EVEN" ? "-" :
+          `${direction === "RISE" ? "+" : "-"}${(Math.abs(rate) * 100).toFixed(2)}%`;
 
       return {
         currency: item.currency,
@@ -125,7 +87,7 @@ export default function CoinHome() {
         changeDirection: direction,
       };
     });
-  }, [ coinBalance,prices, changeRates]);
+  }, [coinBalance, tickerData]);
 
   const handleCoinClick = (symbol: string) => {
     navigate(`/coin-detail/${symbol}`);

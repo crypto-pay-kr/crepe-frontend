@@ -9,7 +9,7 @@ import {
   fetchTokenExchangeHistory, getTokenInfo,
 } from '@/api/token'
 import { useTokenStore } from '@/constants/useToken';
-import { fetchCoinPrices } from '@/api/coin'
+import { useTickerData } from '@/hooks/useTickerData'
 
 interface Transaction {
   id: number;
@@ -26,10 +26,10 @@ export default function TokenGroupDetailPage() {
   const isUser = location.state?.isUser ?? false;
   const [isLoading, setIsLoading] = useState(true);
   const [balance, setBalance] = useState(0);
-  const [coinPrice, setCoinPrice] = useState<Record<string, number>>({});
   const [tokenInfo, setTokenInfo] = useState<any | null>(null);
   const observerElemRef = useRef<HTMLDivElement | null>(null);
   const tokenList = useTokenStore(state => state.tokens); // 스토어에서 가져옴
+  const tickerData = useTickerData();
 
 // bank에 해당하는 토큰 정보 찾기
   const tokenMeta = tokenList.find(t => t.currency === bank);
@@ -38,24 +38,40 @@ export default function TokenGroupDetailPage() {
     if (totalSupply === 0) return 0;
     return totalCapital / totalSupply;
   };
-
   // 2. 상태값
   const [tokenCapital, setTokenCapital] = useState<number>(0);
   const [tokenPrice, setTokenPrice] = useState<number>(0);
 
   // 3. useEffect로 계산
+
   useEffect(() => {
-    if (!tokenInfo || !coinPrice) return;
+    if (!tokenInfo || !tickerData) return;
 
     const totalCapital = tokenInfo.portfolios.reduce((acc: number, p: any) => {
-      const price = coinPrice[`KRW-${p.currency}`] ?? 0;
+      const price = tickerData[`KRW-${p.currency}`]?.trade_price ?? 0;
       return acc + (p.amount ?? 0) * price;
     }, 0);
 
     setTokenCapital(totalCapital);
     const pricePerToken = calculateTokenPrice(totalCapital, tokenInfo.totalSupply ?? 0);
     setTokenPrice(pricePerToken);
-  }, [tokenInfo, coinPrice]);
+  }, [tokenInfo, tickerData]);
+
+  useEffect(() => {
+    if (!bank) return;
+
+    const fetchAllData = async () => {
+      const [info] = await Promise.all([
+        getTokenInfo(bank),
+
+      ]);
+      setTokenInfo(info);
+
+    };
+    fetchAllData();
+    const interval = setInterval(fetchAllData, 5000);
+    return () => clearInterval(interval);
+  }, [bank]);
 
 
   const {
@@ -103,22 +119,7 @@ export default function TokenGroupDetailPage() {
   }, [bank]);
 
 
-  // 시세 및 토큰 정보 불러오기 5초 마다
-  useEffect(() => {
-    if (!bank) return;
 
-    const fetchAllData = async () => {
-      const [info, prices] = await Promise.all([
-        getTokenInfo(bank),
-        fetchCoinPrices()
-      ]);
-      setTokenInfo(info);
-      setCoinPrice(prices);
-    };
-    fetchAllData();
-    const interval = setInterval(fetchAllData, 5000);
-    return () => clearInterval(interval);
-  }, [bank]);
 
 
 
