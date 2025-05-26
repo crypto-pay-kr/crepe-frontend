@@ -9,7 +9,8 @@ interface PhoneVerificationProps {
   errorMessage?: string; // 에러 메시지
 }
 
-export default function PhoneVerification({ isStore }: PhoneVerificationProps) {
+export default function PhoneVerification({
+  isStore }: PhoneVerificationProps) {
   const [verificationCode, setVerificationCode] = useState(["", "", "", "", "", ""]);
   const [errorMessage, setErrorMessage] = useState(""); // 에러 메시지 상태
   const navigate = useNavigate();
@@ -40,6 +41,7 @@ export default function PhoneVerification({ isStore }: PhoneVerificationProps) {
     }
   }, [verificationCode]);
 
+
   // 인증 요청 처리
   const handleVerify = async () => {
     const code = verificationCode.join("");
@@ -65,11 +67,12 @@ export default function PhoneVerification({ isStore }: PhoneVerificationProps) {
         signUpData.phoneNumber = phoneNumber;
         sessionStorage.setItem("signUpData", JSON.stringify(signUpData));
 
-        if (!isStore) {
-          navigate("/additional/info");
-        } else {
+        if (location.pathname.includes("/store")) {
           navigate("/store/register");
+        } else {
+          navigate("/additional/info");
         }
+
       } else {
         const errorData = await response.json();
         setErrorMessage(errorData.message || "인증에 실패했습니다.");

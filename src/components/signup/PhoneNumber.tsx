@@ -1,26 +1,24 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; 
 import Header from "../common/Header";
 import Button from "../common/Button";
-import { sendSMS } from "@/api/user";
 
 interface PhoneNumberProps {
   onNext: () => void;
   isStore: boolean;
   onPhoneNumberChange: (phone: string) => void;
+  phoneMessage: string; // 전화번호 검증 메시지
+  isSending: boolean; // SMS 요청 중 여부
 }
 
 export default function PhoneNumber({
   onNext,
   isStore,
   onPhoneNumberChange,
+  phoneMessage,
+  isSending,
 }: PhoneNumberProps) {
-  const navigate = useNavigate(); 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [formattedNumber, setFormattedNumber] = useState("");
-  const [phoneMessage, setPhoneMessage] = useState(""); // 전화번호 검증 메시지
-  const [phoneMessageColor, setPhoneMessageColor] = useState(""); 
-  const [isPhoneValid, setIsPhoneValid] = useState(false); // 전화번호 유효성 여부
 
   useEffect(() => {
     if (phoneNumber) {
@@ -43,41 +41,6 @@ export default function PhoneNumber({
     const value = e.target.value.replace(/[^0-9-]/g, ""); // 숫자와 '-'만 허용
     setPhoneNumber(value.replace(/-/g, "")); // '-' 제거 후 상태 업데이트
     onPhoneNumberChange(value.replace(/-/g, "")); // 부모 컴포넌트로 전달
-    setPhoneMessage(""); // 메시지 초기화
-    setIsPhoneValid(false); // 유효성 초기화
-  };
-
-// SMS 인증 요청
-  const handleSendSMS = async () => {
-    if (!phoneNumber || phoneNumber.length < 10) {
-      setPhoneMessage("유효한 전화번호를 입력해주세요.");
-      setPhoneMessageColor("text-red-500");
-      return;
-    }
-
-    try {
-      const response = await sendSMS(phoneNumber, "SIGN_UP");
-      if (response.ok) {
-        setPhoneMessage("인증번호가 전송되었습니다.");
-        setPhoneMessageColor("text-green-500");
-        setIsPhoneValid(true);
-
-        // 성공 시 자동으로 다음 단계로 이동
-        setTimeout(() => {
-          onNext();
-        }, 1000); // 1초 후 다음 단계로 이동
-      } else {
-        const errorData = await response.json();
-        setPhoneMessage(errorData.message || "SMS 전송 중 오류가 발생했습니다.");
-        setPhoneMessageColor("text-red-500");
-        setIsPhoneValid(false);
-      }
-    } catch (error) {
-      console.error("SMS 전송 중 오류 발생:", error);
-      setPhoneMessage("SMS 전송 중 오류가 발생했습니다.");
-      setPhoneMessageColor("text-red-500");
-      setIsPhoneValid(false);
-    }
   };
 
   return (
@@ -106,9 +69,10 @@ export default function PhoneNumber({
       </div>
       <div className="p-5">
         <Button
-          text="인증번호 요청"
-          onClick={handleSendSMS}
+          text={isSending ? "요청 중..." : "인증번호 요청"}
+          onClick={onNext}
           color="primary"
+          disabled={isSending} // 요청 중 버튼 비활성화
         />
       </div>
     </div>
