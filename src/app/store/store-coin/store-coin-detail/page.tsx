@@ -114,10 +114,7 @@ export default function CoinDetailPage() {
     <div className="relative flex h-full flex-col bg-gray-50">
       <Header
         title={`${coinMeta?.coinName ?? symbol} 상세`}
-        onBackClick={() => {
-          // Add fade-out transition before navigating
-          setTimeout(() => navigate('/my/coin'), 200)
-        }}
+        onBackClick={() => {navigate('/my/coin')}}
       />
 
       <main
