@@ -82,7 +82,7 @@ export default function MyPage(): React.ReactElement {
     baseMenuItems.push(
       {
         label: "결제 내역",
-        onClick: () => navigate(isSeller ? "/store/my/payment-history" : "/home/my/payment-history"),
+        onClick: () => navigate(isSeller ? "/store/my/payment-history" : "/my/payments"),
         icon: <CreditCard size={18} color="#f59e0b" />
       },
       {

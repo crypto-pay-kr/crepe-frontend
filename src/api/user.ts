@@ -146,3 +146,24 @@ export async function processIdentityCard(file: File) {
 }
 
 
+// 사용자 결제 내역 조회
+export async function fetchUserPayHistory() {
+  const token = sessionStorage.getItem("accessToken");
+
+  const response = await fetch(`${API_BASE_URL}/api/pay`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json"
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("사용자의 결제내역 정보를 불러오지 못했습니다.");
+  }
+
+  return await response.json();
+}
+
+
+
