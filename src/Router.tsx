@@ -47,6 +47,7 @@ import MenuAddPage from "./app/store/store-settings/add-store-menu/page";
 import MenuEditPage from "./app/store/store-settings/edit-store-menu/page";
 import IDVerificationStep4 from "./app/sign-up/common/idcard-verification/step04/page";
 import UnderDevelopment from "./app/develop/page";
+import ProtectedRoute from '@/routes/ProtectedRoute'
 
 
 
@@ -95,64 +96,65 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/store/register/info" element={<AdditionalStoreInfoPage />} />
 
 
-        {/* 가맹점 및 유저 정보 관리 및 수정 페이지 */}
-        <Route path="/user/my" element={<MyPage />} />
-        <Route path="/user/my/edit" element={<EditInfo />} />
-        <Route path="/store/my" element={<MyPage />} />
-        <Route path="/store/my/settlement-report" element={<SettlementReport />} />
-        <Route path="/store/my/edit" element={<StoreEditInfoPage />} />
+        <Route element={<ProtectedRoute />}>
+          {/* 가맹점 및 유저 정보 관리 및 수정 페이지 */}
+          <Route path="/user/my" element={<MyPage />} />
+          <Route path="/user/my/edit" element={<EditInfo />} />
+          <Route path="/store/my" element={<MyPage />} />
+          <Route path="/store/my/settlement-report" element={<SettlementReport />} />
+          <Route path="/store/my/edit" element={<StoreEditInfoPage />} />
 
 
-        {/* 가맹점 가게 및 주문 관리 페이지 */}
-        <Route path="/store/manage" element={<MyStoreManagePage />} />
-        <Route path="/store/menu/add" element={<MenuAddPage />} />
-        <Route path="/store/menu/edit/:menuId" element={<MenuEditPage/>} />
-        <Route path="/store" element={<OrderStatusPage />} />
+          {/* 가맹점 가게 및 주문 관리 페이지 */}
+          <Route path="/store/manage" element={<MyStoreManagePage />} />
+          <Route path="/store/menu/add" element={<MenuAddPage />} />
+          <Route path="/store/menu/edit/:menuId" element={<MenuEditPage/>} />
+          <Route path="/store" element={<OrderStatusPage />} />
 
 
-        {/* 유저 쇼핑몰 이용 및 주문 페이지 */}
-        <Route path="/mall" element={<ShoppingMall />} />
-        <Route path="/mall/store/:id" element={<MallDetailPage />} />
-        <Route path="/mall/store/cart" element={<CartPage />} />
-        <Route path="/mall/store/order" element={<SelectPaymentPage />} />
-        <Route path="/mall/store/order-pending" element={<LoadingPage />} />
-        <Route path="/mall/store/pay-complete/:orderId" element={<PayCompletePage />} />
-        <Route path="/my/orders" element={<MyOrderHistoryPage/>} />
+          {/* 유저 쇼핑몰 이용 및 주문 페이지 */}
+          <Route path="/mall" element={<ShoppingMall />} />
+          <Route path="/mall/store/:id" element={<MallDetailPage />} />
+          <Route path="/mall/store/cart" element={<CartPage />} />
+          <Route path="/mall/store/order" element={<SelectPaymentPage />} />
+          <Route path="/mall/store/order-pending" element={<LoadingPage />} />
+          <Route path="/mall/store/pay-complete/:orderId" element={<PayCompletePage />} />
+          <Route path="/my/orders" element={<MyOrderHistoryPage/>} />
 
 
-        {/*유저 코인 내역*/}
-        <Route path="/my/coin" element={<CoinHome />} />
-        {/*코인 상세내역 보여주는 페이지*/}
-        <Route path="/coin-detail/:symbol" element={<CoinDetailPage />} />
-        {/*입금주소 보여주는 페이지*/}
-        <Route path="/coin/address/:symbol" element={<CoinDeposit />} />
-        {/*거래ID 입력 페이지*/}
-        <Route path="/coin/transaction/:symbol" element={<CoinTransaction />} />
-        {/*입금 계좌 등록 페이지*/}
-        <Route path="/coin/address/add" element={<AddCoinAddress />} />
-        {/*가맹점 코인 정산 페이지*/}
-        <Route path="/settlement" element={<SettlementCoin />} />
+          {/*유저 코인 내역*/}
+          <Route path="/my/coin" element={<CoinHome />} />
+          {/*코인 상세내역 보여주는 페이지*/}
+          <Route path="/coin-detail/:symbol" element={<CoinDetailPage />} />
+          {/*입금주소 보여주는 페이지*/}
+          <Route path="/coin/address/:symbol" element={<CoinDeposit />} />
+          {/*거래ID 입력 페이지*/}
+          <Route path="/coin/transaction/:symbol" element={<CoinTransaction />} />
+          {/*입금 계좌 등록 페이지*/}
+          <Route path="/coin/address/add" element={<AddCoinAddress />} />
+          {/*가맹점 코인 정산 페이지*/}
+          <Route path="/settlement" element={<SettlementCoin />} />
 
-        {/*토큰 상품 페이지*/}
-        <Route path="/token/product/detail/:subscribeId" element={<TokenProductListPage/>} />
-        <Route path="/token/product/deposit/:subscribeId" element={<TokenDepositPage/>} />
-        <Route path="/token/product/cancel/:subscribeId" element={<TokenCancelPage/>} />
+          {/*토큰 상품 페이지*/}
+          <Route path="/token/product/detail/:subscribeId" element={<TokenProductListPage/>}/>
+          <Route path="/token/product/deposit/:subscribeId" element={<TokenDepositPage/>} />
+          <Route path="/token/product/cancel/:subscribeId" element={<TokenCancelPage/>} />
 
-        {/*토큰 상세 페이지*/}
-        <Route path="/token/detail/:bank" element={<TokenGroupDetailPage/>} />
-        <Route path="/token/exchange/:bank" element={<TokenExchangePage/>} />
-        <Route path="/token/exchange/complete" element={<TokenExchangeCompletePage/>} />
+          {/*토큰 상세 페이지*/}
+          <Route path="/token/detail/:bank" element={<TokenGroupDetailPage/>} />
+          <Route path="/token/exchange/:bank" element={<TokenExchangePage/>} />
+          <Route path="/token/exchange/complete" element={<TokenExchangeCompletePage/>} />
 
-        {/*Token Product 관련 페이지 */}
-        <Route path="/token/onsale/products/:productId" element={<OnSaleTokenProductDetail />} />
-        <Route path="/token/onsale/products/signup" element={<TokenProductSignup />} />
-        <Route path="/token/onsale/products/signup-complete" element={<TokenProductSignupComplete/>} />
-        <Route path="/token/onsale/products" element={<OnSaleTokenProductListPage />} />
+          {/*Token Product 관련 페이지 */}
+          <Route path="/token/onsale/products/:productId" element={<OnSaleTokenProductDetail />} />
+          <Route path="/token/onsale/products/signup" element={<TokenProductSignup />} />
+          <Route path="/token/onsale/products/signup-complete" element={<TokenProductSignupComplete/>} />
+          <Route path="/token/onsale/products" element={<OnSaleTokenProductListPage />} />
 
-        {/* 개발중 페이지 */}
-        <Route path="/under-development" element={<UnderDevelopment />} />
+          {/* 개발중 페이지 */}
+          <Route path="/under-development" element={<UnderDevelopment />} />
 
-
+        </Route>
       </Routes>
     </BrowserRouter>
   )
