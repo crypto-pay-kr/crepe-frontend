@@ -25,6 +25,46 @@ export async function verifySMS(code: string, phone: string, smsType: string) {
   return response;
 }
 
+// 이메일 중복 확인
+export async function checkEmailDuplicate(email: string): Promise<string | null> {
+  const response = await fetch(`${API_BASE_URL}/api/check/email-duplicate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+
+  if (response.status === 200) {
+    return null; 
+  } else if (response.status === 403) {
+    const errorData = await response.json();
+    return errorData.message; 
+  } else {
+    // 기타 오류 처리
+    const errorText = await response.text();
+    throw new Error(errorText || "이메일 중복 확인 중 오류가 발생했습니다.");
+  }
+}
+
+// 닉네임 중복 확인
+export async function checkNicknameDuplicate(nickname: string): Promise<boolean> {
+  const response = await fetch(`${API_BASE_URL}/api/check/nickname-duplicate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nickname }),
+  });
+
+  if (response.status === 200) {
+    return false;
+  } else if (response.status === 403) {
+    const errorData = await response.json();
+    return errorData.message; 
+  } else {
+    const errorText = await response.text();
+    throw new Error(errorText || "닉네임 중복 확인 중 오류가 발생했습니다.");
+  }
+}
+
+
 //  회원가입
 export async function signUpUser(requestBody: any) {
   const response = await fetch(`${API_BASE_URL}/api/user/signup`, {
