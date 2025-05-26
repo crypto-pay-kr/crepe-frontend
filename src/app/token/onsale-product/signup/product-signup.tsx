@@ -7,8 +7,9 @@ import BankProductInfo from "@/components/token/onsale-product/TokenProductInfo"
 import Button from "@/components/common/Button";
 import ProductSignUpAgreementSection from "@/components/token/signup/ProductSignUpAgreementSection";
 import ProductProtectionInfo from "@/components/token/signup/ProductProtectionInfo";
-import { GetProductDetailResponse } from "@/types/product";
 import { ProductLogo } from "@/components/common/ProductLogo";
+import Input from "@/components/common/Input";
+import { subscribeProduct } from "@/api/subscribe"; 
 
 // PDF.js 워커 설정
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -17,7 +18,7 @@ export default function TokenProductSignup() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // onsale-product-detail에서 넘어온 state (필요 데이터)
+  // 상품 정보 및 step을 state에서 추출
   const {
     productId,
     productName,
@@ -26,10 +27,11 @@ export default function TokenProductSignup() {
     imageUrl,
     guideFile,
     interestRange,
+    step: stepFromState,
   } = location.state || {};
 
-  // 가입 스텝
-  const [step, setStep] = useState(1);
+  // step 상태 관리
+  const [step, setStep] = useState(() => stepFromState || 1);
 
   // PDF 페이지 수, 현재 페이지
   const [numPages, setNumPages] = useState(0);
@@ -38,6 +40,13 @@ export default function TokenProductSignup() {
   // pdf 컨테이너 ref, pdf 컨테이너 너비
   const pdfWrapperRef = useRef<HTMLDivElement>(null);
   const [pageWidth, setPageWidth] = useState(0);
+
+  const [subscribePurpose, setSubscribePurpose] = useState(""); 
+
+  // step이 state로 넘어오면 반영
+  useEffect(() => {
+    if (location.state?.step) setStep(location.state.step);
+  }, [location.state?.step]);
 
   useEffect(() => {
     // PDF 컨테이너 너비 업데이트
@@ -90,14 +99,54 @@ export default function TokenProductSignup() {
 
   // 다음 스텝 이동
   const handleNextStep = () => {
-    if (step === 1 && (!allRequiredAgreed || !protectionConfirmed)) return;
-    if (step < 3) {
+    if (step === 1) {
+      // 상품 정보와 step을 함께 넘김
+      navigate("/id/verification", {
+        state: {
+          from: location.pathname,
+          signupState: {
+            productId,
+            productName,
+            bankName,
+            tags,
+            imageUrl,
+            guideFile,
+            interestRange,
+          },
+        },
+      });
+      return;
+    }
+    if (step < 4) {
       setStep(step + 1);
-    } else {
-      // 가입 완료 화면 등으로 이동
-      navigate("/token/onsale/products/signup-complete");
+    } 
+  };
+
+  const handleSubscribe = async () => {
+    try {
+      // 구독 요청 데이터 생성
+      const request = {
+        // productId, // 상품 ID
+        // initialDepositAmount, // 초기 납입액
+        // selectedFreeDepositRate, // 선택한 우대금리
+        // voucherQuantity, // 상품권 수량
+        subscribePurpose, // 가입 목적
+      };
+
+      // 구독 API 호출
+      const response = await subscribeProduct(request);
+
+      // 성공 시 가입 완료 화면으로 이동
+      alert("상품 가입이 완료되었습니다!");
+      navigate("/token/onsale/products/signup-complete", {
+        state: { subscribeResponse: response }, // 응답 데이터를 다음 화면으로 전달
+      });
+    } catch (error) {
+      console.error("상품 가입 실패:", error);
+      alert("상품 가입 중 오류가 발생했습니다.");
     }
   };
+
 
   // 전체 동의 토글
   const toggleAll = () => {
@@ -125,13 +174,6 @@ export default function TokenProductSignup() {
     setConsents({ ...updated, all: newAll });
   };
 
-  // 태그 색상 매핑 예시
-  const tagColorMapping = {
-    "29세이하": "gray",
-    "월 최대 50만 토큰": "purple",
-    "세제혜택": "green",
-  } as const;
-
   // PDF 파일 경로 (guideFile이 없으면 기본값 사용 가능)
   const pdfFile = guideFile || "/product-info.pdf";
 
@@ -151,7 +193,6 @@ export default function TokenProductSignup() {
             interestRange={interestRange || "연 0%"}
           />
 
-          {/* 태그 목록 */}
           {/* 태그 목록 */}
           <div className="flex gap-2 mt-2 mb-4">
             {(tags || []).map((tag: string, index: number) => (
@@ -242,6 +283,24 @@ export default function TokenProductSignup() {
               </div>
             </div>
           )}
+
+          {step === 4 && (
+            <div>
+              <div className="mt-6 mb-4">
+                <h2 className="text-xl font-bold">가입 전 필수 정보를 입력해주세요.</h2>
+              </div>
+
+              <div className="flex-1 space-y-6 px-1">
+                <Input
+                  label="가입목적"
+                  value={subscribePurpose}
+                  onChange={(e) => setSubscribePurpose(e.target.value)}
+                  placeholder="가입목적을 작성해주세요"
+                />
+              </div>  
+            </div>
+          )}
+
         </div>
       </div>
 
@@ -252,11 +311,10 @@ export default function TokenProductSignup() {
           <button
             onClick={handleNextStep}
             disabled={!allRequiredAgreed || !protectionConfirmed}
-            className={`w-full py-3 rounded-md ${
-              allRequiredAgreed && protectionConfirmed
-                ? "bg-[#0a2d6b] text-white"
-                : "bg-gray-200 text-gray-400"
-            }`}
+            className={`w-full py-3 rounded-md ${allRequiredAgreed && protectionConfirmed
+              ? "bg-[#0a2d6b] text-white"
+              : "bg-gray-200 text-gray-400"
+              }`}
           >
             다음
           </button>
@@ -272,10 +330,16 @@ export default function TokenProductSignup() {
           />
         )}
 
-        {/* 3단계: 최종 확인 */}
+        {/* 3단계: 상품설명서 최종 확인 */}
         {step === 3 && (
           <Button text="확인했습니다" onClick={handleNextStep} fullWidth />
         )}
+
+        {/* 4단계: 가입 목적 작성 */}
+        {step === 4 && (
+          <Button text="제출하기" onClick={handleSubscribe} fullWidth />
+        )}
+
       </div>
     </div>
   );

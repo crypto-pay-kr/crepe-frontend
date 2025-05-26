@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Header from "@/components/common/Header";
 import Button from "@/components/common/Button";
 import CameraComponent from "@/components/common/CameraComponent";
@@ -8,10 +8,13 @@ import { Check } from "lucide-react";
 
 export default function IDVerificationStep2() {
   const navigate = useNavigate();
+  const location = useLocation();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+
+  const signupState = location.state?.signupState || {};
 
   // 파일 업로드 버튼 클릭
   const handleFileUpload = () => {
@@ -51,7 +54,15 @@ export default function IDVerificationStep2() {
         }
         const ocrResponse = await processIdentityCard(fileToSend);
         // Step03로 이동하며 OCR 데이터를 state로 전달
-        navigate("/id/verification/step3", { state: ocrResponse });
+        navigate("/id/verification/step3", {
+          state: {
+            from: location.pathname,
+            signupState: {
+              ...signupState,
+              ocrData: ocrResponse,
+            },
+          },
+        });
       } catch (err) {
         console.error(err);
         alert("OCR 처리 중 오류가 발생했습니다.");
