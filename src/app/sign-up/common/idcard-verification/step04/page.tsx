@@ -69,7 +69,6 @@ export default function IDVerificationStep4() {
                 alert("인증번호를 입력해주세요.");
                 return;
             }
-            // user.ts의 verifySMS 호출
             const res = await verifySMS(verificationCode, phoneNumber, "SUBSCRIBE_PRODUCT");
             if (!res.ok) {
                 alert("인증번호가 일치하지 않습니다.");
@@ -85,9 +84,11 @@ export default function IDVerificationStep4() {
 
     const handleComplete = () => {
         const signupState = location.state?.signupState || {};
-        navigate("/token/onsale/products/signup", {
-            state: { ...signupState, step: 2 },
-        });
+        const { productId } = signupState;     
+        navigate(
+            `/token/onsale/products/${productId}/signup`, 
+            { state: { ...signupState, step: 2 } }
+        );
     };
 
     return (

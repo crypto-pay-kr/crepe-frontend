@@ -7,7 +7,6 @@ import ProductDetailInfo from "@/components/token/onsale-product/ProductDetailIn
 import ProductAdditionalInfo from "@/components/token/onsale-product/ProductAdditionalInfo";
 import { fetchProductDetail } from "@/api/product";
 import { GetOnsaleProductListResponse, GetProductDetailResponse } from "@/types/product";
-import { bankMeta } from "@/utils/bankMeta";
 import { getTagColor } from "@/utils/tagUtils";
 import { mapProductTypeToFrontend } from "@/utils/productTypeUtils";
 import { AGE_OPTIONS, INCOME_OPTIONS, OCCUPATION_OPTIONS } from "@/constants/subscribe-condition";
@@ -59,9 +58,6 @@ export default function OnSaleTokenProductDetail() {
     INCOME_OPTIONS
   );
 
-  // 은행 메타정보(로고 등)
-  const bankInfo = bankMeta[mergedProduct.bankName ?? "WTK"];
-
   // 이자 범위 문자열 생성
   const interestRange = mergedProduct.minInterestRate && mergedProduct.maxInterestRate
     ? `연 ${mergedProduct.minInterestRate}% ~ 연 ${mergedProduct.maxInterestRate}%`
@@ -69,13 +65,14 @@ export default function OnSaleTokenProductDetail() {
 
   // 가입 버튼 클릭 시, signup 페이지로 필요한 데이터 전달
   const handleSignupClick = () => {
-    navigate("/token/onsale/products/signup", {
+    navigate(`/token/onsale/products/${productId}/signup`, {
       state: {
         // signup에서 사용할 데이터
-        productId: mergedProduct.id,
+        productId: productId,
         productName: mergedProduct.productName,
         bankName: mergedProduct.bankName,
         tags: mergedProduct.tags,
+        productType: mergedProduct.type,
         imageUrl: mergedProduct.imageUrl,
         guideFile: mergedProduct.guideFile, // PDF 파일 경로 (필수)
         interestRange,

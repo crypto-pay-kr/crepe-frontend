@@ -44,7 +44,6 @@ export default function IDVerificationStep2() {
         if (uploadedFile) {
           fileToSend = uploadedFile;
         } else if (capturedImage) {
-          // capturedImage (dataURL) → Blob → File 변환
           const res = await fetch(capturedImage);
           const blob = await res.blob();
           fileToSend = new File([blob], "captured.png", { type: "image/png" });
@@ -63,9 +62,9 @@ export default function IDVerificationStep2() {
             },
           },
         });
-      } catch (err) {
-        console.error(err);
-        alert("OCR 처리 중 오류가 발생했습니다.");
+      } catch (error : any)  {
+        console.error("OCR 처리 중 오류 발생:", error.message);
+        alert(error.message);
       }
     } else {
       alert("신분증 이미지가 필요합니다.");

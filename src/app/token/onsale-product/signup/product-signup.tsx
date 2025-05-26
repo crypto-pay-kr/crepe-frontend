@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
 import { Document, Page, pdfjs } from "react-pdf";
 import Header from "@/components/common/Header";
 import { getTagColor } from "@/utils/tagUtils";
@@ -9,7 +10,11 @@ import ProductSignUpAgreementSection from "@/components/token/signup/ProductSign
 import ProductProtectionInfo from "@/components/token/signup/ProductProtectionInfo";
 import { ProductLogo } from "@/components/common/ProductLogo";
 import Input from "@/components/common/Input";
-import { subscribeProduct } from "@/api/subscribe"; 
+import { subscribeProduct, SubscribeProductRequest } from "@/api/subscribe";
+import { addOccupation, checkActorIncome, checkEligibility, fetchMyUserInfo } from "@/api/user";
+import { fetchMyStoreAllDetails } from "@/api/store";
+import { isSellerToken } from "@/utils/authUtils";
+import { FreeDepositCountPreferentialRate } from "@/types/FreeDepositCountPreferentialRate ";
 
 // PDF.js 워커 설정
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -17,21 +22,12 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
 export default function TokenProductSignup() {
   const navigate = useNavigate();
   const location = useLocation();
+  const params = useParams<{ productId: string }>();
+  const productId = Number(params.productId);
 
-  // 상품 정보 및 step을 state에서 추출
-  const {
-    productId,
-    productName,
-    bankName,
-    tags,
-    imageUrl,
-    guideFile,
-    interestRange,
-    step: stepFromState,
-  } = location.state || {};
-
-  // step 상태 관리
-  const [step, setStep] = useState(() => stepFromState || 1);
+  const [username, setUsername] = useState("");
+  const token = sessionStorage.getItem("accessToken");
+  const isSeller = isSellerToken(token);
 
   // PDF 페이지 수, 현재 페이지
   const [numPages, setNumPages] = useState(0);
@@ -41,7 +37,54 @@ export default function TokenProductSignup() {
   const pdfWrapperRef = useRef<HTMLDivElement>(null);
   const [pageWidth, setPageWidth] = useState(0);
 
-  const [subscribePurpose, setSubscribePurpose] = useState(""); 
+  const [subscribePurpose, setSubscribePurpose] = useState("");
+
+  const [occupation, setOccupation] = useState("");
+  const [isLoadingIncome, setIsLoadingIncome] = useState(false);
+  const [isOccupationRegistered, setIsOccupationRegistered] = useState(false);
+  const [annualIncome, setAnnualIncome] = useState<number | null>(null);
+  const [totalAsset, setTotalAsset] = useState<number | null>(null);
+  const [isIncomeVisible, setIsIncomeVisible] = useState(false);
+  const [isCheckingEligibility, setIsCheckingEligibility] = useState(false);
+
+  const [initialDepositAmount, setInitialDepositAmount] = useState("");
+  const [selectedFreeDepositRate, setSelectedFreeDepositRate] = useState<FreeDepositCountPreferentialRate>("NONE");
+  const [voucherQuantity, setVoucherQuantity] = useState("");
+
+
+  const signupState = location.state?.signupState || location.state || {};
+  const {
+    productName,
+    bankName,
+    tags,
+    productType,
+    imageUrl,
+    guideFile,
+    interestRange,
+    step: stepFromState,
+  } = signupState;
+
+  // step 상태 관리
+  const [step, setStep] = useState(() => stepFromState || 1);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        if (isSeller) {
+          const storeData = await fetchMyStoreAllDetails();
+          setUsername(storeData.storeName);
+        } else {
+          const userData = await fetchMyUserInfo();
+          setUsername(userData.name);
+        }
+      } catch (err) {
+        console.error("사용자 정보 조회 실패:", err);
+      }
+    };
+
+    fetchUserData();
+  }, [isSeller]);
+
 
   // step이 state로 넘어오면 반영
   useEffect(() => {
@@ -109,6 +152,7 @@ export default function TokenProductSignup() {
             productName,
             bankName,
             tags,
+            productType,
             imageUrl,
             guideFile,
             interestRange,
@@ -117,33 +161,75 @@ export default function TokenProductSignup() {
       });
       return;
     }
-    if (step < 4) {
+    if (step < 5) {
       setStep(step + 1);
-    } 
+    }
   };
 
+  // 소득 조회
+  const handleVerifyIncome = async () => {
+    try {
+      setIsLoadingIncome(true); // 로딩 상태 활성화
+      const res = await checkActorIncome(); // 소득 조회 API 호출
+      setAnnualIncome(res.annualIncome); // 연소득 설정
+      setTotalAsset(res.totalAsset); // 총자산 설정
+      setIsIncomeVisible(true); // 소득 데이터 표시 활성화
+    } catch (error: any) {
+      console.error("소득 조회 오류:", error.message);
+      alert(error.message);
+    } finally {
+      setIsLoadingIncome(false); // 로딩 상태 비활성화
+    }
+  };
+
+  // 4단계 자격 확인 처리
+  const handleCheckEligibility = async () => {
+    if (!productId) {
+      alert("상품 정보가 없습니다.");
+      return;
+    }
+    try {
+      setIsCheckingEligibility(true);
+      const eligible = await checkEligibility(productId);
+      if (eligible) {
+        alert("상품 가입 자격이 확인되었습니다.");
+        setStep(5);
+      } else {
+        alert("상품 가입 자격이 없습니다.");
+        navigate(`/token/onsale/products/${productId}`); 
+      }
+    } catch (error: any) {
+      console.error("자격 확인 오류:", error.message);
+      alert(error.message);
+    } finally {
+      setIsCheckingEligibility(false);
+    }
+  };
   const handleSubscribe = async () => {
     try {
-      // 구독 요청 데이터 생성
-      const request = {
-        // productId, // 상품 ID
-        // initialDepositAmount, // 초기 납입액
-        // selectedFreeDepositRate, // 선택한 우대금리
-        // voucherQuantity, // 상품권 수량
-        subscribePurpose, // 가입 목적
-      };
+      // 상품 유형에 따라 request 객체에 필드 채우기
+      const req: SubscribeProductRequest = { productId, purpose: subscribePurpose };
+
+      if (productType === "VOUCHER") {
+        req.voucherQuantity = voucherQuantity ? parseInt(voucherQuantity, 10) : 0;
+      } else {
+        // INSTALLMENT or SAVING
+        req.initialDepositAmount = initialDepositAmount ? parseFloat(initialDepositAmount) : 0;
+        req.selectedFreeDepositRate = selectedFreeDepositRate;
+      }
+
+      console.log("subscribe request:", req);
 
       // 구독 API 호출
-      const response = await subscribeProduct(request);
+      const response = await subscribeProduct(req);
 
-      // 성공 시 가입 완료 화면으로 이동
       alert("상품 가입이 완료되었습니다!");
-      navigate("/token/onsale/products/signup-complete", {
-        state: { subscribeResponse: response }, // 응답 데이터를 다음 화면으로 전달
+      navigate(`/token/onsale/products/${productId}/signup-complete`, {
+        state: { subscribeResponse: response },
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("상품 가입 실패:", error);
-      alert("상품 가입 중 오류가 발생했습니다.");
+      alert(error.message || "상품 가입 중 오류가 발생했습니다.");
     }
   };
 
@@ -285,21 +371,204 @@ export default function TokenProductSignup() {
           )}
 
           {step === 4 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="mt-6 mb-4">
+                <h2 className="text-xl font-bold">상품 가입 자격 확인이 필요해요.</h2>
+                <h2 className="text-xl font-bold">{username}님의 직업과 소득을 조회할게요.</h2>
+              </div>
+
+              {/* 직업 입력 */}
+              <div className="mb-3">
+                <label className="block text-gray-500 text-sm mb-1">직업 등록</label>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    placeholder="직업 입력"
+                    value={occupation}
+                    onChange={(e) => setOccupation(e.target.value)}
+                    className="flex-1 p-2 border border-gray-300 rounded"
+                  />
+                  {!isOccupationRegistered && (
+                    <button
+                      onClick={async () => {
+                        if (!occupation.trim()) {
+                          alert("직업을 입력해주세요.");
+                          return;
+                        }
+                        try {
+                          const message = await addOccupation(occupation.trim());
+                          alert(message);
+                          setIsOccupationRegistered(true);
+                        } catch (err: any) {
+                          alert(err.message);
+                        }
+                      }}
+                      className="px-4 py-2 bg-blue text-white rounded-lg"
+                    >
+                      등록
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* 소득 조회 버튼 + 로딩 스피너 (직업 등록 후 나타나도록 처리) */}
+              {isOccupationRegistered && !isIncomeVisible && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="flex flex-col items-center mb-4"
+                >
+                  {isLoadingIncome ? (
+                    // LoadingPage에 쓰인 스피너 가져오기
+                    <div className="flex flex-col items-center">
+                      <div className="relative w-20 h-20 mb-2">
+                        <div className="absolute inset-0 border-4 border-gray-100 rounded-full"></div>
+                        <div className="absolute inset-0 border-4 border-[#0a2e64] border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                      <p className="text-gray-800 text-sm">소득 조회 중...</p>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleVerifyIncome}
+                      className="w-full py-2 bg-blue text-white rounded-lg flex justify-center items-center"
+                    >
+                      내 소득 조회하기
+                    </button>
+                  )}
+                </motion.div>
+              )}
+
+              {/* 소득 데이터 표출 */}
+              {isIncomeVisible && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <div className="mb-5">
+                    <label className="block text-gray-500 text-sm mb-1">소득 데이터</label>
+                    {/* 연소득 */}
+                    <div className="flex items-center mb-2">
+                      <label className="w-24 text-gray-700 text-sm font-medium">연소득</label>
+                      <input
+                        type="text"
+                        placeholder="연소득"
+                        readOnly
+                        value={annualIncome !== null ? annualIncome.toLocaleString() + " 원" : ""}
+                        className="flex-1 p-2 border border-gray-300 rounded"
+                      />
+                    </div>
+                    {/* 총자산 */}
+                    <div className="flex items-center">
+                      <label className="w-24 text-gray-700 text-sm font-medium">총자산</label>
+                      <input
+                        type="text"
+                        placeholder="총자산"
+                        readOnly
+                        value={totalAsset !== null ? totalAsset.toLocaleString() + " 원" : ""}
+                        className="flex-1 p-2 border border-gray-300 rounded"
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </motion.div>
+          )}
+
+
+          {step === 5 && (
+
             <div>
               <div className="mt-6 mb-4">
                 <h2 className="text-xl font-bold">가입 전 필수 정보를 입력해주세요.</h2>
               </div>
 
-              <div className="flex-1 space-y-6 px-1">
-                <Input
-                  label="가입목적"
-                  value={subscribePurpose}
-                  onChange={(e) => setSubscribePurpose(e.target.value)}
-                  placeholder="가입목적을 작성해주세요"
-                />
-              </div>  
+              {productType === "VOUCHER" ? (
+                <div className="space-y-6 px-1">
+                  {/* 자유납입 우대금리 선택 */}
+                  <div>
+                    <label className="block text-gray-500 text-sm mb-1">자유납입 우대금리</label>
+                    <select
+                      className="w-full p-2 border border-gray-300 rounded"
+                      value={selectedFreeDepositRate}
+                      onChange={(e) => setSelectedFreeDepositRate(e.target.value as FreeDepositCountPreferentialRate)}
+                    >
+                      <option value="NONE">자유 납입 없음</option>
+                      <option value="LEVEL1">월 3회 이상 자유 납입</option>
+                      <option value="LEVEL2">월 5회 이상 자유 납입</option>
+                      <option value="LEVEL3">월 10회 이상 자유 납입</option>
+                    </select>
+                  </div>
+
+                  {/* 상품권 수량 */}
+                  <div>
+                    <label className="block text-gray-500 text-sm mb-1">상품권 수량</label>
+                    <input
+                      type="number"
+                      className="w-full p-2 border border-gray-300 rounded"
+                      value={voucherQuantity}
+                      onChange={(e) => setVoucherQuantity(e.target.value)}
+                    />
+                  </div>
+
+                  {/* 가입목적 */}
+                  <Input
+                    label="가입목적"
+                    value={subscribePurpose}
+                    onChange={(e) => setSubscribePurpose(e.target.value)}
+                    placeholder="가입목적을 작성해주세요"
+                  />
+                </div>
+              ) : productType === "INSTALLMENT" || productType === "SAVING" ? (
+                <div className="space-y-6 px-1">
+                  {/* 초기 납입액 */}
+                  <div>
+                    <label className="block text-gray-500 text-sm mb-1">초기 납입액</label>
+                    <input
+                      type="number"
+                      className="w-full p-2 border border-gray-300 rounded"
+                      value={initialDepositAmount}
+                      onChange={(e) => setInitialDepositAmount(e.target.value)}
+                    />
+                  </div>
+
+                  {/* 자유납입 우대금리 선택 */}
+                  <div>
+                    <label className="block text-gray-500 text-sm mb-1">자유납입 우대금리</label>
+                    <select
+                      className="w-full p-2 border border-gray-300 rounded"
+                      value={selectedFreeDepositRate}
+                      onChange={(e) => setSelectedFreeDepositRate(e.target.value as FreeDepositCountPreferentialRate)}
+                    >
+                      <option value="NONE">자유 납입 없음</option>
+                      <option value="LEVEL1">월 3회 이상 자유 납입</option>
+                      <option value="LEVEL2">월 5회 이상 자유 납입</option>
+                      <option value="LEVEL3">월 10회 이상 자유 납입</option>
+                    </select>
+                  </div>
+
+                  {/* 가입목적 */}
+                  <Input
+                    label="가입목적"
+                    value={subscribePurpose}
+                    onChange={(e) => setSubscribePurpose(e.target.value)}
+                    placeholder="가입목적을 작성해주세요"
+                  />
+                </div>
+              ) : (
+                // 그 외(예외) 처리
+                <div className="px-1">
+                  <p>유효하지 않은 상품 유형입니다.</p>
+                </div>
+              )}
             </div>
           )}
+
 
         </div>
       </div>
@@ -335,8 +604,19 @@ export default function TokenProductSignup() {
           <Button text="확인했습니다" onClick={handleNextStep} fullWidth />
         )}
 
-        {/* 4단계: 가입 목적 작성 */}
+        {/* 4단계: 직업 및 소득 조회 */}
         {step === 4 && (
+          <Button
+            text="자격 확인하기"
+            onClick={handleCheckEligibility}
+            fullWidth
+            disabled={isCheckingEligibility}
+          />
+        )}
+
+
+        {/* 4단계: 가입 폼 작성 */}
+        {step === 5 && (
           <Button text="제출하기" onClick={handleSubscribe} fullWidth />
         )}
 
