@@ -1,5 +1,4 @@
 import React from "react";
-import { ProductTag } from "@/components/token/onsale-product/ProductTag";
 import { LucideIcon } from "lucide-react";
 
 export interface TokenProductItemProps {

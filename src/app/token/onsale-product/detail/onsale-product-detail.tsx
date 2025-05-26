@@ -1,27 +1,22 @@
+import { useEffect, useState } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import Header from "@/components/common/Header";
 import Button from "@/components/common/Button";
-import Header from "@/components/common/Header"
-import { BankLogo } from "@/components/common/BankLogo";
-import { ProductTag } from "@/components/token/onsale-product/ProductTag";
-import { useNavigate } from "react-router-dom"
 import BankProductInfo from "@/components/token/onsale-product/TokenProductInfo";
 import ProductDetailInfo from "@/components/token/onsale-product/ProductDetailInfo";
 import ProductAdditionalInfo from "@/components/token/onsale-product/ProductAdditionalInfo";
-import { useEffect, useState } from 'react'
-import { fetchProductDetail } from '@/api/product'
-import { useParams } from "react-router-dom"
-import { GetOnsaleProductListResponse, GetProductDetailResponse } from '@/types/product'
+import { fetchProductDetail } from "@/api/product";
+import { GetOnsaleProductListResponse, GetProductDetailResponse } from "@/types/product";
 import { bankMeta } from "@/utils/bankMeta";
-import { useLocation } from "react-router-dom";
 import { getTagColor } from "@/utils/tagUtils";
 import { mapProductTypeToFrontend } from "@/utils/productTypeUtils";
 import { AGE_OPTIONS, INCOME_OPTIONS, OCCUPATION_OPTIONS } from "@/constants/subscribe-condition";
+import { ProductLogo } from "@/components/common/ProductLogo";
 
-
-
+/* 나이•직업•소득 조건 매핑 함수 */
 function mapJoinCondition(condition: string[], options: { id: string; label: string }[]) {
   return condition.map((id) => options.find((option) => option.id === id)?.label || id).join(", ");
 }
-
 
 export default function OnSaleTokenProductDetail() {
   const navigate = useNavigate();
@@ -29,9 +24,12 @@ export default function OnSaleTokenProductDetail() {
   const [product, setProduct] = useState<GetProductDetailResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const location = useLocation();
+
+  // 목록 페이지(onsale-product-list 등)에서 넘어온 데이터(선택된 상품)
   const productFromList = location.state?.product as GetOnsaleProductListResponse | undefined;
 
   useEffect(() => {
+    // 상품 상세 정보 API 호출
     fetchProductDetail(Number(productId))
       .then(setProduct)
       .catch(() => setError("상품 정보를 불러오는 데 실패했습니다."));
@@ -41,11 +39,13 @@ export default function OnSaleTokenProductDetail() {
     return <div className="p-4">상품 정보를 불러오는 중입니다...</div>;
   }
 
+  // 전달받은 목록 데이터와 상세 API 데이터를 합쳐 최종 상품 정보를 구성
   const mergedProduct = {
     ...productFromList,
     ...product,
   };
 
+  // 가입 조건 매핑
   const mappedAgeGroups = mapJoinCondition(
     mergedProduct.joinCondition?.ageGroups || [],
     AGE_OPTIONS
@@ -59,10 +59,28 @@ export default function OnSaleTokenProductDetail() {
     INCOME_OPTIONS
   );
 
+  // 은행 메타정보(로고 등)
   const bankInfo = bankMeta[mergedProduct.bankName ?? "WTK"];
 
+  // 이자 범위 문자열 생성
+  const interestRange = mergedProduct.minInterestRate && mergedProduct.maxInterestRate
+    ? `연 ${mergedProduct.minInterestRate}% ~ 연 ${mergedProduct.maxInterestRate}%`
+    : `기본금리 연 ${mergedProduct.baseInterestRate}%`;
+
+  // 가입 버튼 클릭 시, signup 페이지로 필요한 데이터 전달
   const handleSignupClick = () => {
-    navigate("/token/onsale/products/signup", { state: { product: mergedProduct } });
+    navigate("/token/onsale/products/signup", {
+      state: {
+        // signup에서 사용할 데이터
+        productId: mergedProduct.id,
+        productName: mergedProduct.productName,
+        bankName: mergedProduct.bankName,
+        tags: mergedProduct.tags,
+        imageUrl: mergedProduct.imageUrl,
+        guideFile: mergedProduct.guideFile, // PDF 파일 경로 (필수)
+        interestRange,
+      },
+    });
   };
 
   return (
@@ -71,15 +89,12 @@ export default function OnSaleTokenProductDetail() {
 
       <div className="flex-1 overflow-auto bg-gray-50">
         <div className="p-4 space-y-4">
+          {/* 상품 대표 카드 */}
           <div className="bg-white rounded-2xl shadow-md p-4">
-            <BankLogo bank={bankInfo?.code ?? "WTK"} />
+            <ProductLogo imageUrl={mergedProduct.imageUrl} />
             <BankProductInfo
               productTitle={mergedProduct.productName}
-              interestRange={
-                mergedProduct.minInterestRate && mergedProduct.maxInterestRate
-                  ? `연 ${mergedProduct.minInterestRate}% ~ 연 ${mergedProduct.maxInterestRate}%`
-                  : `기본금리 연 ${mergedProduct.baseInterestRate}%`
-              }
+              interestRange={interestRange}
             />
 
             {/* 태그 렌더링 */}
@@ -95,32 +110,33 @@ export default function OnSaleTokenProductDetail() {
             </div>
           </div>
 
-
+          {/* 상품 안내 */}
           <div className="bg-white rounded-2xl shadow-md p-4">
             <h2 className="text-xl font-semibold mb-2">상품 안내</h2>
             <ProductDetailInfo
               productName={mergedProduct.productName}
-              productType={mapProductTypeToFrontend(mergedProduct.type)} 
+              productType={mapProductTypeToFrontend(mergedProduct.type)}
               target={mappedAgeGroups || "전 연령"}
               amount={`${mergedProduct.maxMonthlyPayment}`}
               condition={mappedOccupations || "-"}
-              incomeLevel={mappedIncomeLevels || "-"} // 소득 조건 추가
+              incomeLevel={mappedIncomeLevels || "-"}
               interestPayment="만기 일시 지급"
               baseRate={`연 ${mergedProduct.baseInterestRate}%`}
               preferentialRate={
                 mergedProduct.rateConditions?.length
-                  ? `최대 연 ${Math.max(...mergedProduct.rateConditions.map((c) => c.rate))}%`
+                  ? `최대 연 ${Math.max(...mergedProduct.rateConditions.map((c) => c.rate))}% 우대`
                   : "없음"
               }
               infoMessage="자세한 우대조건은 상품 가이드를 확인하세요."
             />
           </div>
 
+          {/* 추가 정보 */}
           <div className="bg-white rounded-2xl shadow-md p-4">
             <h2 className="text-xl font-semibold mb-2">추가 정보</h2>
             <ProductAdditionalInfo
               depositorProtection="예금자 보호 대상 아님"
-              productType={mapProductTypeToFrontend(mergedProduct.type)} 
+              productType={mapProductTypeToFrontend(mergedProduct.type)}
               selectionEnrollment={mergedProduct.rateConditions?.map((cond) => cond.title) ?? []}
               interestRateNotice={
                 mergedProduct.rateConditions?.length
@@ -132,6 +148,7 @@ export default function OnSaleTokenProductDetail() {
         </div>
       </div>
 
+      {/* 가입 버튼 */}
       <div className="p-4">
         <Button text="토큰 상품 가입" onClick={handleSignupClick} fullWidth />
       </div>
