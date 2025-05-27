@@ -64,7 +64,6 @@ export default function OtpSetup(): React.ReactElement {
   const verifyOtp = async () => {
     if (!verificationCode || verificationCode.length !== 6) {
       setError('6자리 인증 코드를 입력해주세요');
-      navigate(-1);
       return;
     }
 
