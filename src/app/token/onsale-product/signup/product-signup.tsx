@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import {  Navigate, useParams, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Document, Page, pdfjs } from "react-pdf";
 import Header from "@/components/common/Header";
@@ -63,6 +63,15 @@ export default function TokenProductSignup() {
     interestRange,
     step: stepFromState,
   } = signupState;
+
+    // ─────────────────────────────────────────────
+  // 가드: productId가 없으면 상세 페이지로 리다이렉트
+  if (!signupState.productId) {
+    alert('잘못된 접근입니다. 상세페이지로 이동합니다.')
+    return <Navigate to={`/token/onsale/products/${productId || ""}`} replace />;
+  }
+  // ─────────────────────────────────────────────
+
 
   // step 상태 관리
   const [step, setStep] = useState(() => stepFromState || 1);

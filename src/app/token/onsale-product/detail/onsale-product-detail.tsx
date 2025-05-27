@@ -112,6 +112,7 @@ export default function OnSaleTokenProductDetail() {
             <h2 className="text-xl font-semibold mb-2">상품 안내</h2>
             <ProductDetailInfo
               productName={mergedProduct.productName}
+              bankName={mergedProduct.bankName}
               productType={mapProductTypeToFrontend(mergedProduct.type)}
               target={mappedAgeGroups || "전 연령"}
               amount={`${mergedProduct.maxMonthlyPayment}`}

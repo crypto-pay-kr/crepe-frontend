@@ -53,6 +53,7 @@ export interface GetOnsaleProductListResponse {
 export interface GetProductDetailResponse {
   id: number;
   productName: string;
+  bankName: string;
   type: BankProductType;
   baseInterestRate: number;
   joinCondition: JoinConditionDto;

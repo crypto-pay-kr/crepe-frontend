@@ -14,6 +14,8 @@ export interface SubscribeProductRequest {
 export interface SubscribeProductResponse {
   subscribeId: number;
   productName: string;
+  productId : number;
+  bankName: string;
   productType: string; 
   status: string; 
   subscribeDate: string; 

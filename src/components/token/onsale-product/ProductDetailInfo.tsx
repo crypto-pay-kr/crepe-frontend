@@ -3,6 +3,7 @@ import { Info } from "lucide-react";
 
 export interface ProductInfoProps {
   productName: string;
+  bankName: string;
   productType: string;
   target: string;
   amount: string;
@@ -16,6 +17,7 @@ export interface ProductInfoProps {
 
 export default function ProductDetailInfo({
   productName,
+  bankName,
   productType,
   target,
   amount,
@@ -30,6 +32,10 @@ export default function ProductDetailInfo({
     <div className="border-t border-b py-4 px-4">
       <h2 className="font-medium mb-2">상품 안내</h2>
       <div className="space-y-4">
+        <div className="flex justify-between">
+          <div className="text-gray-600">주관 은행</div>
+          <div>{bankName}</div>
+        </div>
         <div className="flex justify-between">
           <div className="text-gray-600">상품명</div>
           <div>{productName}</div>
