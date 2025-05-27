@@ -289,20 +289,23 @@ export async function checkEligibility(productId: number): Promise<boolean> {
       
      
 // 사용자 결제 내역 조회
-export async function fetchUserPayHistory() {
+export async function fetchUserPayHistory(): Promise<any> {
   const token = sessionStorage.getItem("accessToken");
+  if (!token) {
+    throw new Error("인증 토큰이 없습니다.");
+  }
 
   const response = await fetch(`${API_BASE_URL}/api/pay`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+    },
+  });
 
+  if (!response.ok) {
     throw new Error("사용자의 결제내역 정보를 불러오지 못했습니다.");
   }
 
   return await response.json();
-  }
 }
-
-
