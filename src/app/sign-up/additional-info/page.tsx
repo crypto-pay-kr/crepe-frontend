@@ -1,17 +1,57 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/common/Header";
 import Button from "@/components/common/Button";
 import Input from "@/components/common/Input";
-import { signUpUser } from "@/api/user";
+import { signUpUser, checkNicknameDuplicate } from "@/api/user";
 
 export default function AdditionalUserInfoPage() {
   const navigate = useNavigate();
   const [name, setName] = useState(""); // 사용자 입력 이름
   const [nickname, setNickname] = useState(""); // 사용자 입력 닉네임
+  const [nicknameMessage, setNicknameMessage] = useState(""); // 닉네임 검증 메시지
+  const [nicknameMessageColor, setNicknameMessageColor] = useState(""); // 메시지 색상
+  const [isNicknameValid, setIsNicknameValid] = useState(false); // 닉네임 유효성 여부
 
   // 유효성 검사
-  const isFormValid = name.trim() && nickname.trim();
+  const isFormValid = name.trim() && isNicknameValid;
+
+  // 닉네임 중복 확인
+  useEffect(() => {
+    const checkNickname = async () => {
+      if (!nickname.trim()) {
+        setNicknameMessage("닉네임을 입력해주세요.");
+        setNicknameMessageColor("text-red-500");
+        setIsNicknameValid(false);
+        return;
+      }
+
+      try {
+        const isDuplicate = await checkNicknameDuplicate(nickname.trim());
+        if (isDuplicate) {
+          setNicknameMessage("이미 사용중인 닉네임입니다.");
+          setNicknameMessageColor("text-red-500");
+          setIsNicknameValid(false);
+        } else {
+          setNicknameMessage("사용 가능한 닉네임입니다.");
+          setNicknameMessageColor("text-green-500");
+          setIsNicknameValid(true);
+        }
+      } catch (error) {
+        console.error("닉네임 중복 확인 중 오류 발생:", error);
+        setNicknameMessage("닉네임 중복 확인 중 오류가 발생했습니다.");
+        setNicknameMessageColor("text-red-500");
+        setIsNicknameValid(false);
+      }
+    };
+
+    if (nickname.trim()) {
+      checkNickname();
+    } else {
+      setNicknameMessage("");
+      setIsNicknameValid(false);
+    }
+  }, [nickname]);
 
   const handleSubmit = async () => {
     if (!isFormValid) {
@@ -73,12 +113,17 @@ export default function AdditionalUserInfoPage() {
             onChange={(e) => setName(e.target.value)}
             placeholder="이름을 입력해주세요"
           />
-          <Input
-            label="닉네임"
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-            placeholder="닉네임을 입력해주세요"
-          />
+          <div>
+            <Input
+              label="닉네임"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              placeholder="닉네임을 입력해주세요"
+            />
+            {nicknameMessage && (
+              <p className={`text-sm mt-1 ${nicknameMessageColor}`}>{nicknameMessage}</p>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col items-center justify-center mt-auto mb-8">

@@ -2,15 +2,18 @@ import React from "react";
 import Header from "../common/Header";
 import Button from "../common/Button";
 import Input from "../common/Input";
-
 export interface EmailPasswordProps {
   email: string;
   password: string;
   onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
+  onEmailBlur: () => void; // 이메일 입력 후 포커스 아웃 핸들러
   onNext: () => void;
   isStore: boolean;
-  errorMessage: string;
+  emailMessage: string; // 이메일 검증 메시지
+  emailMessageColor: string; // 메시지 색상
+  isEmailValid: boolean; // 이메일 유효성 여부
+  passwordMessage: string; // 비밀번호 검증 메시지
 }
 
 export default function EmailPassword({
@@ -18,9 +21,13 @@ export default function EmailPassword({
   password,
   onEmailChange,
   onPasswordChange,
+  onEmailBlur,
   onNext,
   isStore,
-  errorMessage,
+  emailMessage,
+  emailMessageColor,
+  isEmailValid,
+  passwordMessage,
 }: EmailPasswordProps) {
   const [showPassword, setShowPassword] = React.useState(false); // 비밀번호 표시 상태
 
@@ -30,7 +37,7 @@ export default function EmailPassword({
   };
 
   // 버튼 활성화 여부
-  const isButtonDisabled = !email || !password;
+  const isButtonDisabled = !isEmailValid || !password;
 
   return (
     <div className="h-full flex flex-col bg-white">
@@ -43,25 +50,37 @@ export default function EmailPassword({
         </div>
 
         <div className="flex-1">
-          <Input
-            label="Email Address"
-            type="email"
-            value={email}
-            onChange={(e) => onEmailChange(e.target.value)}
-            placeholder="이메일을 입력해주세요"
-          />
-          <Input
-            label="Password"
-            type={showPassword ? "text" : "password"}
-            value={password}
-            onChange={(e) => onPasswordChange(e.target.value)}
-            placeholder="비밀번호를 입력해주세요"
-            showPassword={showPassword}
-            togglePasswordVisibility={togglePasswordVisibility}
-          />
-          {errorMessage && (
-            <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
-          )}
+          {/* 이메일 입력 */}
+          <div className="mb-4">
+            <Input
+              label="Email Address"
+              type="email"
+              value={email}
+              onChange={(e) => onEmailChange(e.target.value)}
+              onBlur={onEmailBlur} // 포커스 아웃 시 이메일 중복 확인
+              placeholder="이메일을 입력해주세요"
+            />
+            {emailMessage && (
+              <p className={`text-sm ${emailMessageColor}`}>{emailMessage}</p>
+            )}
+          </div>
+
+          {/* 비밀번호 입력 */}
+          <div className="mb-4">
+            <Input
+              label="Password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => onPasswordChange(e.target.value)}
+              placeholder="비밀번호를 입력해주세요"
+              showPassword={showPassword}
+              togglePasswordVisibility={togglePasswordVisibility}
+              disabled={!isEmailValid} // 이메일 유효하지 않으면 비활성화
+            />
+            {passwordMessage && (
+              <p className="text-red-500 text-sm">{passwordMessage}</p>
+            )}
+          </div>
         </div>
 
         {/* 자동으로 늘어나는 여백 추가 */}
