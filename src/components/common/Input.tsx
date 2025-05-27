@@ -1,15 +1,16 @@
 import CheckCircle from "./CheckCircle"
-
 interface InputProps {
-  label: string
-  type?: string
-  value: string
+  label: string;
+  type?: string;
+  value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  placeholder?: string
-  isValid?: boolean
-  showValidation?: boolean
-  showPassword?: boolean
-  togglePasswordVisibility?: () => void
+  onBlur?: () => void; // Add onBlur property
+  placeholder?: string;
+  isValid?: boolean;
+  showValidation?: boolean;
+  showPassword?: boolean;
+  togglePasswordVisibility?: () => void;
+  disabled?: boolean; // Add disabled property
 }
 
 export default function Input({
@@ -17,11 +18,13 @@ export default function Input({
   type = "text",
   value,
   onChange,
+  onBlur, // Add onBlur handler
   placeholder = "",
   isValid,
   showValidation = false,
   showPassword,
   togglePasswordVisibility,
+  disabled = false, // Add disabled property
 }: InputProps) {
   return (
     <div className="mb-4">
@@ -31,8 +34,11 @@ export default function Input({
           type={type === "password" && showPassword ? "text" : type}
           value={value}
           onChange={onChange}
+          onBlur={onBlur} // Pass onBlur handler
           placeholder={placeholder}
-          className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-blue-500"
+          disabled={disabled} // Pass disabled property
+          className={`w-full border-b border-gray-300 py-2 focus:outline-none ${disabled ? "bg-gray-100 cursor-not-allowed" : "focus:border-blue-500"
+            }`}
         />
         {showValidation && (
           <div className="absolute right-8 top-2">
@@ -70,5 +76,5 @@ export default function Input({
         )}
       </div>
     </div>
-  )
+  );
 }
