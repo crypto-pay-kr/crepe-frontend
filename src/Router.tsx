@@ -40,13 +40,13 @@ import IDVerificationStep3 from "./app/sign-up/common/idcard-verification/step03
 import TokenProductListPage from "./app/token/my-product/my-product-list";
 import OnSaleTokenProductDetail from "./app/token/onsale-product/detail/onsale-product-detail";
 import TokenProductSignup from "./app/token/onsale-product/signup/product-signup";
-import TokenProductSignupComplete from "./app/token/onsale-product/signup/signup-complete/product-signup-complete";
 import OnSaleTokenProductListPage from "./app/token/onsale-product/onsale-product-list";
 import BusinessCertificateVerifyPage from "./app/sign-up/store-register/business-verification/BusinessCertificateVerifyPage";
 import MenuAddPage from "./app/store/store-settings/add-store-menu/page";
 import MenuEditPage from "./app/store/store-settings/edit-store-menu/page";
 import IDVerificationStep4 from "./app/sign-up/common/idcard-verification/step04/page";
 import UnderDevelopment from "./app/develop/page";
+import TokenProductSignupComplete from "./app/token/onsale-product/signup/product-signup-complete";
 import ProtectedRoute from '@/routes/ProtectedRoute'
 import MyPaymentHistoryPage from "./app/mypage/pay-history/page";
 import OtpSetup from "./app/mypage/otp/page";
@@ -92,7 +92,6 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/store/register" element={<BusinessCertificateVerifyPage/>} />
         {/* 사업자 정보 입력  */}
         <Route path="/store/register/info" element={<AdditionalStoreInfoPage />} />
-
 
         <Route element={<ProtectedRoute />}>
           {/* 가맹점 및 유저 정보 관리 및 수정 페이지 */}
@@ -148,8 +147,8 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
 
           {/*Token Product 관련 페이지 */}
           <Route path="/token/onsale/products/:productId" element={<OnSaleTokenProductDetail />} />
-          <Route path="/token/onsale/products/signup" element={<TokenProductSignup />} />
-          <Route path="/token/onsale/products/signup-complete" element={<TokenProductSignupComplete/>} />
+          <Route path="/token/onsale/products/:productId/signup" element={<TokenProductSignup />} />
+          <Route path="/token/onsale/products/:productId/signup-complete" element={<TokenProductSignupComplete/>} />
           <Route path="/token/onsale/products" element={<OnSaleTokenProductListPage />} />
 
           {/* 개발중 페이지 */}
