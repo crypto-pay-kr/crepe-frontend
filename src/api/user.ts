@@ -302,6 +302,7 @@ export async function fetchUserPayHistory() {
   }
 
   return await response.json();
+  }
 }
 
 
