@@ -76,15 +76,17 @@ export default function MyPage(): React.ReactElement {
         label: "내 주문 내역",
         onClick: () => navigate("/my/orders"),
         icon: <ShoppingBag size={18} color="#10b981" />
-      });
+        },
+        {
+          label: "결제 내역",
+          onClick: () => navigate("/my/payments"),
+          icon: <CreditCard size={18} color="#f59e0b" />
+        }
+
+      );
     }
 
     baseMenuItems.push(
-      {
-        label: "결제 내역",
-        onClick: () => navigate(isSeller ? "/store/my/payment-history" : "/home/my/payment-history"),
-        icon: <CreditCard size={18} color="#f59e0b" />
-      },
       {
         label: "고객 센터",
         onClick: () => navigate(isSeller ? "/store/my/customer-support" : "/home/my/customer-support"),
