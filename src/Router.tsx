@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { useEffect } from "react"
 import SplashPage from "./app/splash/page";
 import MyPage from "./app/mypage/page";
@@ -49,6 +49,7 @@ import UnderDevelopment from "./app/develop/page";
 import TokenProductSignupComplete from "./app/token/onsale-product/signup/product-signup-complete";
 import ProtectedRoute from '@/routes/ProtectedRoute'
 import MyPaymentHistoryPage from "./app/mypage/pay-history/page";
+import OtpSetup from "./app/mypage/otp/page";
 
 
 
@@ -157,7 +158,8 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
 
           {/* 개발중 페이지 */}
           <Route path="/under-development" element={<UnderDevelopment />} />
-
+          <Route path="/otp/setup" element={<OtpSetup />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
     </BrowserRouter>
