@@ -49,9 +49,7 @@ import IDVerificationStep4 from "./app/sign-up/common/idcard-verification/step04
 import UnderDevelopment from "./app/develop/page";
 import ProtectedRoute from '@/routes/ProtectedRoute'
 import MyPaymentHistoryPage from "./app/mypage/pay-history/page";
-
-
-
+import StoreSettlementReportPage from "./app/mypage/settlement-report/page"
 
 
 
@@ -103,7 +101,7 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
           <Route path="/user/my" element={<MyPage />} />
           <Route path="/user/my/edit" element={<EditInfo />} />
           <Route path="/store/my" element={<MyPage />} />
-          <Route path="/store/my/settlement-report" element={<SettlementReport />} />
+          <Route path="/store/my/settlement-report" element={<StoreSettlementReportPage />} />
           <Route path="/store/my/edit" element={<StoreEditInfoPage />} />
 
 
@@ -136,8 +134,7 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
           <Route path="/coin/address/add" element={<AddCoinAddress />} />
           {/*가맹점 코인 정산 페이지*/}
           <Route path="/settlement" element={<SettlementCoin />} />
-          {/*마이페이지-결제 내역*/}
-          {/*가맹점 코인 정산 페이지*/}
+          {/*마이페이지-결제내역*/}
           <Route path="/my/payments" element={<MyPaymentHistoryPage />} />
 
           {/*토큰 상품 페이지*/}
