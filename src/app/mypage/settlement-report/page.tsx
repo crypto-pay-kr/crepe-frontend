@@ -27,41 +27,42 @@ export default function StoreSettlementReportPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const data = await getStorePayment()
+        const [paymentData, countData] = await Promise.all([
+          getStorePayment(),
+          getStatusCount(),
+        ])
 
+        // 월별 기본값 생성
         const baseMonths = Array.from({ length: 12 }, (_, i) => ({
           shortMonth: `${i + 1}`,
           amount: 0,
         }))
 
-        // 내역에 없어도 월 별 기본 값 0
+        // 월별 데이터 병합
         const transformed = baseMonths.map(base => {
-          const found = data.find((item: { month: number }) => `${item.month}` === base.shortMonth)
+          const found = paymentData.find((item: { month: number }) => `${item.month}` === base.shortMonth)
           return {
             ...base,
             amount: found ? found.totalAmount : 0,
           }
         })
-
         setMonthlyData(transformed)
-      } catch (error) {
-        console.error("월별 결제 금액 조회 실패:", error)
-      }
 
-      try {
-        const countData = await getStatusCount()
+        // 상태별 주문 수
         const formatted: { [key: string]: number } = {}
         countData.forEach((item: { status: string; count: number }) => {
           formatted[item.status] = item.count
         })
         setStatusStats(formatted)
+
       } catch (error) {
-        console.error("거래 상태별 통계 조회 실패:", error)
+        console.error("📉 데이터 조회 실패:", error)
       }
     }
 
     fetchData()
   }, [])
+
 
   return (
     <div className="flex flex-col h-screen relative bg-gray-50 overflow-hidden">
