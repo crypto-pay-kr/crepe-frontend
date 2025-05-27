@@ -297,7 +297,7 @@ export default function MyPage(): React.ReactElement {
     if (isSeller) {
       baseMenuItems.push({
         label: "결산리포트",
-        onClick: () => navigate("/settlement"),
+        onClick: () => navigate("/store/my/settlement-report"),
         icon: <BarChart2 size={18} color="#10b981" />
       });
     } else {
