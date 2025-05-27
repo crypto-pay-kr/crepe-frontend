@@ -1,50 +1,70 @@
 import React from 'react';
-import { LogOut, Shield } from 'lucide-react';
+import { Shield, ShieldCheck, ShieldX, LogOut, AlertTriangle } from 'lucide-react';
 
 interface ProfileHeaderProps {
   username: string;
   onLogout: () => void;
-  hasOtpEnabled?: boolean; // 2차 인증 활성화 여부
+  hasOtpEnabled: boolean;
 }
 
-export default function ProfileHeader({ 
-  username, 
-  onLogout, 
-  hasOtpEnabled = false 
-}: ProfileHeaderProps): React.ReactElement {
+export default function ProfileHeader({ username, onLogout, hasOtpEnabled }: ProfileHeaderProps): React.ReactElement {
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm mb-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-4">
-          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-            <span className="text-black text-xl font-bold">
+          {/* 프로필 아바타 */}
+          <div 
+            className="w-16 h-16 rounded-full border-1 border-gray-400 flex items-center justify-center"
+            style={{
+              background: 'linear-gradient(135deg, #93c5fd, #d8b4fe)'
+            }}
+          >
+            <span className="text-white text-xl font-semibold" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.7)' }}>
               {username.charAt(0).toUpperCase()}
             </span>
           </div>
+          
+          {/* 사용자 정보 */}
           <div>
-            <div className="flex items-center space-x-2">
-              <h2 className="text-xl font-semibold text-gray-900">
-                {username}
-              </h2>
-              {hasOtpEnabled && (
-                <div className="flex items-center space-x-1 bg-green-100 px-2 py-1 rounded-full">
-                  <Shield size={12} className="text-green-600" />
-                  <span className="text-xs font-medium text-green-600">2차인증</span>
+            <h2 className="text-xl font-semibold text-gray-900">{username}</h2>
+            <div className="flex items-center space-x-2 mt-1">
+              {hasOtpEnabled ? (
+                <div className="flex items-center space-x-1">
+                  <ShieldCheck className="w-4 h-4 text-green-500" />
+                  <span className="text-sm text-green-600 font-medium">보안 강화됨</span>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-1">
+                  <ShieldX className="w-4 h-4 text-orange-500" />
+                  <span className="text-sm text-orange-600 font-medium">보안 취약</span>
                 </div>
               )}
             </div>
-            <p className="text-gray-500 text-sm">프로필 관리</p>
           </div>
         </div>
         
+        {/* 로그아웃 버튼 */}
         <button
           onClick={onLogout}
-          className="flex items-center space-x-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-          aria-label="로그아웃"
+          className="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
         >
-          <LogOut size={18} />
-          <span className="text-sm font-medium">로그아웃</span>
+          <LogOut className="w-4 h-4 text-gray-600" />
+          <span className="text-sm font-medium text-gray-700">로그아웃</span>
         </button>
+      </div>
+      
+      {/* 간소화된 보안 상태 표시 */}
+      <div className={`rounded-lg p-3 ${hasOtpEnabled ? 'bg-green-50 border border-green-200' : 'bg-orange-50 border border-orange-200'}`}>
+        <div className="flex items-center space-x-2">
+          {hasOtpEnabled ? (
+            <ShieldCheck className="w-4 h-4 text-green-600" />
+          ) : (
+            <AlertTriangle className="w-4 h-4 text-orange-500" />
+          )}
+          <span className={`text-sm font-medium ${hasOtpEnabled ? 'text-green-800' : 'text-orange-800'}`}>
+            {hasOtpEnabled ? '2차 인증으로 계정이 보호되고 있습니다' : '2차 인증 설정을 권장합니다'}
+          </span>
+        </div>
       </div>
     </div>
   );

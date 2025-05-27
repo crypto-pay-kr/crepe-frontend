@@ -1,81 +1,150 @@
-import React, { useState, useEffect } from 'react';
-import { QrCode, Shield, Copy, Check, ArrowLeft } from 'lucide-react';
+import { useNavigate, useLocation } from "react-router-dom";
+import { Home, ShoppingBag, User, AlertTriangle } from "lucide-react";
+import { Settings, BarChart2, CreditCard, HelpCircle, Shield, ShieldX } from "lucide-react";
 import Header from "@/components/common/Header";
-import { useNavigate } from 'react-router-dom';
+import ProfileHeader from "@/components/profile/ProfileHeader";
+import MenuList, { MenuOption } from "@/components/profile/MenuList";
+import BottomNav from "@/components/common/BottomNavigate";
+import React, { useEffect, useState } from "react";
+import { fetchMyUserInfo } from "@/api/user";
+import { fetchMyStoreAllDetails } from "@/api/store";
+import { useAuthContext } from "@/context/AuthContext";
 
-interface OtpSetupResponse {
+interface OtpCredential {
+  enabled: boolean;
   secretKey: string;
-  qrCodeUrl: string;
 }
 
 interface ApiResponse<T> {
-  success: boolean;
+  status: string; // "success" 또는 "fail"
   message: string;
   data?: T;
+  timestamp?: string;
 }
 
-export default function OtpSetup(): React.ReactElement {
+export default function MyPage(): React.ReactElement {
+  const BASE_URL = import.meta.env.VITE_API_SERVER_URL || 'http://localhost:8080';
   const navigate = useNavigate();
-  const [step, setStep] = useState<'setup' | 'verify'>('setup');
-  const [otpData, setOtpData] = useState<OtpSetupResponse | null>(null);
-  const [verificationCode, setVerificationCode] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [copied, setCopied] = useState(false);
+  const location = useLocation();
+  const [username, setUsername] = useState("...");
+  const [userEmail, setUserEmail] = useState("");
+  const [hasOtpEnabled, setHasOtpEnabled] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [showSecurityNotice, setShowSecurityNotice] = useState(false);
+  const token = sessionStorage.getItem("accessToken");
+  
+  // AuthContext 사용
+  const { logout: logoutFromContext } = useAuthContext();
 
-  const email = sessionStorage.getItem('userEmail');
-  const BASE_URL = import.meta.env.VITE_API_SERVER_URL;
-  // OTP 초기 설정
-  const setupOtp = async () => {
-    setLoading(true);
-    setError('');
-    
-    try {
-      const response = await fetch(`${BASE_URL}/api/setup?email=${encodeURIComponent(email || '')}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`,
-          'Content-Type': 'application/json'
-        }
-      });
+  // 경로를 기반으로 사용자 타입 결정
+  const isSeller = location.pathname.includes('/store');
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      // 백엔드 응답 구조에 맞게 수정
-      if (result.status==='success' && result.data) {
-        setOtpData(result.data);
-        setStep('verify');
-      } else {
-        setError(result.message || 'OTP 설정에 실패했습니다');
-      }
-    } catch (err) {
-      setError('네트워크 오류가 발생했습니다');
-      console.error('OTP setup error:', err);
-    } finally {
-      setLoading(false);
+  const handleEditInfo = (): void => {
+    // 유저 타입에 따라 다른 편집 페이지로 이동
+    if (isSeller) {
+      navigate("/store/my/edit");
+    } else {
+      navigate("/user/my/edit");
     }
   };
 
-  // OTP 코드 검증 및 활성화
-  const verifyOtp = async () => {
-    if (!verificationCode || verificationCode.length !== 6) {
-      setError('6자리 인증 코드를 입력해주세요');
+  // OTP 상태 조회 - 수정된 버전 (이메일 파라미터로 변경)
+  const fetchOtpStatus = async (email: string) => {
+    try {
+      console.log('🔍 OTP 상태 조회 시작:', { email, BASE_URL });
+      console.log('🔑 사용할 토큰:', token ? `${token.substring(0, 20)}...` : 'null');
+      
+      if (!token) {
+        console.error('❌ 토큰이 없습니다. 로그인이 필요합니다.');
+        setHasOtpEnabled(false);
+        setShowSecurityNotice(true);
+        return;
+      }
+      
+      const response = await fetch(`${BASE_URL}/api/otp/status`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email: email })
+      });
+      
+      console.log('📨 OTP 상태 응답:', {
+        status: response.status,
+        statusText: response.statusText,
+        url: response.url,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+
+      if (response.status === 401) {
+        console.error('❌ 인증 실패 (401): 토큰이 유효하지 않거나 만료되었습니다.');
+        // 토큰 만료 시 로그아웃 처리
+        logoutFromContext();
+        navigate("/login", { replace: true });
+        return;
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ OTP 상태 조회 HTTP 오류:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorText
+        });
+        return;
+      }
+
+      const result: ApiResponse<OtpCredential> = await response.json();
+      console.log('✅ OTP 상태 응답 데이터:', result);
+
+      // 백엔드 응답 구조에 맞게 처리
+      if (result.status === "success") {
+        // result.data가 null이면 OTP가 설정되지 않은 상태
+        if (result.data && result.data.enabled) {
+          setHasOtpEnabled(true);
+          setShowSecurityNotice(false);
+          console.log('🛡️ OTP 활성화됨');
+        } else {
+          setHasOtpEnabled(false);
+          setShowSecurityNotice(true);
+          console.log('🔓 OTP 비활성화 또는 미설정');
+        }
+      } else {
+        console.warn('⚠️ OTP 상태 조회 실패:', result.message);
+        setHasOtpEnabled(false);
+        setShowSecurityNotice(true);
+      }
+    } catch (err) {
+      console.error("❌ OTP 상태 조회 네트워크 오류:", err);
+      setHasOtpEnabled(false); // 오류 시 기본값으로 설정
+      setShowSecurityNotice(true);
+    }
+  };
+
+  // OTP 해제 함수
+  const disableOtp = async () => {
+    if (!userEmail) {
+      alert('이메일 정보가 없습니다.');
       return;
     }
 
-    setLoading(true);
-    setError('');
+    const isConfirmed = confirm(
+      '⚠️ 2차 인증을 해제하시겠습니까?\n\n' +
+      '해제하면 계정 보안이 약화됩니다.\n' +
+      '정말로 해제하시겠습니까?'
+    );
+
+    if (!isConfirmed) return;
 
     try {
-      const response = await fetch(`${BASE_URL}/api/verify?email=${encodeURIComponent(email || '')}&otpCode=${verificationCode}`, {
+      const response = await fetch(`${BASE_URL}/api/otp/disable`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({ email: userEmail })
       });
 
       if (!response.ok) {
@@ -84,207 +153,241 @@ export default function OtpSetup(): React.ReactElement {
 
       const result = await response.json();
       
-      if (result.success) {
-        alert('2차 인증이 성공적으로 활성화되었습니다!');
-        navigate(-1); // 이전 페이지로 돌아가기
+      if (result.status === "success") {
+        alert('2차 인증이 성공적으로 해제되었습니다.');
+        setHasOtpEnabled(false);
+        setShowSecurityNotice(true);
       } else {
-        setError(result.message || '인증에 실패했습니다');
+        alert(result.message || 'OTP 해제에 실패했습니다.');
       }
     } catch (err) {
-      setError('네트워크 오류가 발생했습니다');
-      console.error('OTP verify error:', err);
-    } finally {
-      setLoading(false);
+      console.error('OTP 해제 오류:', err);
+      alert('네트워크 오류가 발생했습니다.');
     }
   };
 
-  // 비밀키 복사
-  const copySecretKey = async () => {
-    if (otpData?.secretKey) {
+  useEffect(() => {
+    const fetchUserData = async () => {
       try {
-        await navigator.clipboard.writeText(otpData.secretKey);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        if (!token) {
+          console.warn('⚠️ 토큰이 없어서 사용자 데이터 조회를 건너뜁니다.');
+          setShowSecurityNotice(true);
+          return;
+        }
+
+        console.log('👤 사용자 데이터 조회 시작...', { isSeller });
+
+        if (isSeller) {
+          const storeData = await fetchMyStoreAllDetails();
+          console.log('🏪 스토어 데이터:', storeData);
+          setUsername(storeData.storeName);
+          setUserEmail(storeData.email);
+          
+          // 판매자의 경우 스토어 이메일로 OTP 상태 조회
+          if (storeData.email) {
+            await fetchOtpStatus(storeData.email);
+          } else {
+            console.warn('⚠️ 스토어 이메일 정보가 없습니다.');
+            setShowSecurityNotice(true);
+          }
+        } else {
+          const userData = await fetchMyUserInfo();
+          console.log('👤 사용자 데이터:', userData);
+          setUsername(userData.nickname);
+          setUserEmail(userData.email);
+          
+          // 일반 사용자의 경우 사용자 이메일로 OTP 상태 조회
+          if (userData.email) {
+            await fetchOtpStatus(userData.email);
+          } else {
+            console.warn('⚠️ 사용자 이메일 정보가 없습니다.');
+            setShowSecurityNotice(true);
+          }
+        }
       } catch (err) {
-        console.error('복사 실패:', err);
+        console.error("❌ 사용자 정보 조회 실패:", err);
+        setShowSecurityNotice(true);
+      } finally {
+        setLoading(false);
       }
+    };
+
+    fetchUserData();
+  }, [token, isSeller, BASE_URL]);
+
+  // AuthContext를 통한 로그아웃 처리
+  const handleLogout = (): void => {
+    console.log('🚪 로그아웃 버튼 클릭');
+    
+    // AuthContext의 logout 함수 호출 (SSE 연결 해제 포함)
+    logoutFromContext();
+    
+    // 로그인 페이지로 즉시 리다이렉트 (replace 사용)
+    navigate("/login", { replace: true });
+  };
+
+  // OTP 설정 페이지로 이동
+  const handleOtpSetup = (): void => {
+    navigate("/otp/setup");
+  };
+
+  // OTP 관리 메뉴 클릭 핸들러
+  const handleOtpManagement = (): void => {
+    const options = [];
+    
+    if (hasOtpEnabled) {
+      options.push('해제하기');
+    }
+    options.push('재설정하기', '취소');
+
+    // 간단한 선택 다이얼로그 구현
+    let choice;
+    if (hasOtpEnabled) {
+      choice = confirm(
+        '2차 인증 관리\n\n' +
+        '• 확인: 2차 인증 해제\n' +
+        '• 취소: 2차 인증 재설정\n\n' +
+        '어떤 작업을 하시겠습니까?'
+      );
+      
+      if (choice) {
+        disableOtp();
+      } else {
+        handleOtpSetup();
+      }
+    } else {
+      handleOtpSetup();
     }
   };
 
-  // 인증 코드 입력 처리
-  const handleCodeChange = (value: string) => {
-    // 숫자만 입력 허용, 최대 6자리
-    const numericValue = value.replace(/\D/g, '').slice(0, 6);
-    setVerificationCode(numericValue);
-    setError(''); // 입력 시 에러 메시지 제거
+  // 보안 알림 닫기
+  const dismissSecurityNotice = (): void => {
+    setShowSecurityNotice(false);
   };
+
+  // 메뉴 항목 정의
+  const getMenuItems = (): MenuOption[] => {
+    const baseMenuItems: MenuOption[] = [
+      {
+        label: "내 정보 수정",
+        onClick: handleEditInfo,
+        icon: <Settings size={18} color="#6366f1" />
+      },
+    ];
+
+    // 2차 인증 메뉴 추가
+    baseMenuItems.push({
+      label: hasOtpEnabled ? "2차 인증 관리" : "2차 인증 설정",
+      onClick: handleOtpManagement,
+      icon: hasOtpEnabled ? 
+        <Shield size={18} color="#10b981" /> : 
+        <Shield size={18} color="#6b7280" />,
+      badge: hasOtpEnabled ? "활성화됨" : "미설정"
+    });
+
+    if (isSeller) {
+      baseMenuItems.push({
+        label: "결산리포트",
+        onClick: () => navigate("/settlement"),
+        icon: <BarChart2 size={18} color="#10b981" />
+      });
+    } else {
+      baseMenuItems.push({
+        label: "내 주문 내역",
+        onClick: () => navigate("/my/orders"),
+        icon: <ShoppingBag size={18} color="#10b981" />
+        },
+        {
+          label: "결제 내역",
+          onClick: () => navigate("/my/payments"),
+          icon: <CreditCard size={18} color="#f59e0b" />
+        }
+
+      );
+    }
+
+    baseMenuItems.push(
+      {
+        label: "고객 센터",
+        onClick: () => navigate(isSeller ? "/store/my/customer-support" : "/home/my/customer-support"),
+        icon: <HelpCircle size={18} color="#0ea5e9" />
+      }
+    );
+
+    return baseMenuItems;
+  };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col h-screen overflow-hidden">
+        <Header title={isSeller ? "판매자 페이지" : "마이페이지"} />
+        <main className="flex-1 overflow-y-auto min-h-0">
+          <div className="min-h-full p-4 pb-8 bg-gray-50 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        </main>
+        <BottomNav />
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
-      <Header 
-        title="2차 인증 설정" 
-      />
+    <div className="flex flex-col h-screen overflow-hidden">
+      <Header title={isSeller ? "판매자 페이지" : "마이페이지"} />
       
-      <main className="flex-1 p-6">
-        {step === 'setup' && (
-          <div className="max-w-md mx-auto">
-            <div className="bg-white rounded-xl p-6 shadow-sm mb-6">
-              <div className="text-center mb-6">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Shield className="w-8 h-8 text-blue-600" />
+      {/* 스크롤 가능한 메인 컨테이너 */}
+      <main className="flex-1 overflow-y-auto bg-gray-50 min-h-0">
+        <div className="p-4 pb-8">
+          {/* 보안 알림 배너 */}
+          {showSecurityNotice && !hasOtpEnabled && (
+            <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-l-4 border-amber-400 p-4 mb-4 rounded-lg shadow-sm">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <AlertTriangle className="h-5 w-5 text-amber-400" />
                 </div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                  2차 인증 설정
-                </h2>
-                <p className="text-gray-600 text-sm">
-                  계정 보안을 강화하기 위해 2차 인증을 설정하세요
-                </p>
-              </div>
-
-              <div className="space-y-4 mb-6">
-                <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-blue-600 text-sm font-medium">1</span>
+                <div className="ml-3 flex-1">
+                  <h3 className="text-sm font-medium text-amber-800">
+                    🔒 계정 보안 강화가 필요합니다
+                  </h3>
+                  <div className="mt-2 text-sm text-amber-700">
+                    <p className="mb-2">
+                      <strong>2차 인증(OTP)</strong>을 설정하여 계정을 더욱 안전하게 보호하세요!
+                    </p>
+                    <ul className="list-disc list-inside space-y-1 text-xs">
+                      <li>해킹 시도로부터 계정 보호</li>
+                      <li>무단 로그인 방지</li>
+                      <li>개인정보 및 {isSeller ? '판매' : '결제'} 정보 보안 강화</li>
+                    </ul>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">인증 앱 준비</p>
-                    <p className="text-xs text-gray-600">Google Authenticator 또는 Authy 앱을 설치하세요</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-blue-600 text-sm font-medium">2</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">QR 코드 스캔</p>
-                    <p className="text-xs text-gray-600">앱에서 QR 코드를 스캔하여 계정을 추가하세요</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-blue-600 text-sm font-medium">3</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">인증 코드 입력</p>
-                    <p className="text-xs text-gray-600">앱에서 생성된 6자리 코드를 입력하세요</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      onClick={handleOtpSetup}
+                      className="bg-amber-600 text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-amber-700 transition-colors"
+                    >
+                      지금 설정하기
+                    </button>
+                    <button
+                      onClick={dismissSecurityNotice}
+                      className="bg-gray-200 text-gray-600 px-3 py-1.5 rounded text-xs font-medium hover:bg-gray-300 transition-colors"
+                    >
+                      나중에
+                    </button>
                   </div>
                 </div>
-              </div>
-
-              {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-                  <p className="text-red-600 text-sm">{error}</p>
-                </div>
-              )}
-
-              <button
-                onClick={setupOtp}
-                disabled={loading}
-                className="w-full bg-blue-600 text-black py-3 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {loading ? '설정 중...' : '2차 인증 설정 시작'}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {step === 'verify' && otpData && (
-        
-            <div className="bg-white rounded-xl p-6 shadow-sm mb-6">
-              <div className="text-center mb-6">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <QrCode className="w-8 h-8 text-green-600" />
-                </div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                  QR 코드 스캔
-                </h2>
-                <p className="text-gray-600 text-sm">
-                  인증 앱으로 아래 QR 코드를 스캔하세요
-                </p>
-              </div>
-
-              {/* QR 코드 */}
-              <div className="bg-white p-4 rounded-lg border-2 border-dashed border-gray-200 mb-6">
-                <div className="text-center">
-                  <img 
-                    src={otpData.qrCodeUrl} 
-                    alt="QR Code" 
-                    className="mx-auto mb-4"
-                    style={{ maxWidth: '200px', maxHeight: '200px' }}
-                  />
-                  <p className="text-xs text-gray-500">QR 코드를 스캔할 수 없나요?</p>
-                </div>
-              </div>
-
-              {/* 수동 입력용 비밀키 */}
-              <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-medium text-gray-700">수동 입력 키</p>
-                  <button
-                    onClick={copySecretKey}
-                    className="flex items-center space-x-1 text-blue-600 hover:text-blue-700 transition-colors"
-                  >
-                    {copied ? (
-                      <>
-                        <Check size={14} />
-                        <span className="text-xs">복사됨</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy size={14} />
-                        <span className="text-xs">복사</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-                <p className="text-xs text-gray-600 break-all font-mono bg-white p-2 rounded border">
-                  {otpData.secretKey}
-                </p>
-              </div>
-
-              {/* 인증 코드 입력 */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  인증 코드 (6자리)
-                </label>
-                <input
-                  type="text"
-                  value={verificationCode}
-                  onChange={(e) => handleCodeChange(e.target.value)}
-                  placeholder="000000"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-lg font-mono tracking-widest"
-                  maxLength={6}
-                />
-              </div>
-
-              {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-                  <p className="text-red-600 text-sm">{error}</p>
-                </div>
-              )}
-
-              <div className="space-y-3">
-                <button
-                  onClick={verifyOtp}
-                  disabled={loading || verificationCode.length !== 6}
-                  className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {loading ? '인증 중...' : '인증하고 활성화'}
-                </button>
-                
-                <button
-                  onClick={() => setStep('setup')}
-                  className="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-200 transition-colors"
-                >
-                  다시 설정
-                </button>
               </div>
             </div>
-   
-        )}
+          )}
+
+          <ProfileHeader
+            username={username}
+            onLogout={handleLogout}
+            hasOtpEnabled={hasOtpEnabled}
+          />
+          <MenuList menuItems={getMenuItems()} />
+        </div>
       </main>
+      
+      <BottomNav />
     </div>
   );
 }

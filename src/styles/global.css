@@ -3,9 +3,10 @@
 @tailwind utilities;
 
 * {
-  color: #19191a;
   box-sizing: border-box;
+  /* color: #19191a; ← 이 줄을 제거하거나 주석 처리 */
 }
+
 
 html,
 body {
@@ -14,6 +15,9 @@ body {
 }
 
 body {
+  color: #19191a;
+  padding: 0;
+  margin: 0;
   height: 100dvh;
 }
 
@@ -71,7 +75,8 @@ input[type='radio']:checked {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background;
+    /* text-foreground 제거 */
   }
 }
 @layer base {
