@@ -6,7 +6,7 @@ import Input from "@/components/common/Input";
 
 interface OCRData {
   name: string;
-  personalNum: string;
+  personalNum: string; // 반드시 string
   address: string;
   issueDate: string;
   authority: string;
@@ -14,26 +14,41 @@ interface OCRData {
 
 export default function IDVerificationStep3() {
   const navigate = useNavigate();
-  const { state } = useLocation();
-  const ocrData: OCRData = state || {
-    // 기본 빈 값 또는 에러 처리
+  const location = useLocation();
+
+  // 안전하게 signupState에서 ocrData를 가져오거나 빈 객체로 기본값을 설정
+  const signupState = location.state?.signupState || {};
+  const defaultOcrData: OCRData = signupState.ocrData || {
     name: "",
     personalNum: "",
     address: "",
     issueDate: "",
-    authority: ""
+    authority: "",
   };
 
-  const [formData, setFormData] = React.useState<OCRData>(ocrData);
+  const [formData, setFormData] = React.useState<OCRData>(defaultOcrData);
 
+  // 값 변경 시에도 문자열로 설정
   const handleChange = (field: keyof OCRData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = () => {
-    // TODO: 회원 정보 조회 API 호출
-    navigate("/id/verification/step4");
+    navigate("/id/verification/step4", {
+      state: {
+        from: location.pathname,
+        signupState: {
+          ...signupState,
+          ocrData: formData,
+        },
+      },
+    });
   };
+
+  // personalNum 안전 처리
+  const personalNumSplit = formData.personalNum?.split("-") ?? [];
+  const frontNum = personalNumSplit[0] || "";
+  const backNum = personalNumSplit[1] || "";
 
   return (
     <div className="flex flex-col h-full">
@@ -53,9 +68,9 @@ export default function IDVerificationStep3() {
           <div className="flex items-center">
             <input
               type="text"
-              value={formData.personalNum.split("-")[0] || ""}
+              value={frontNum}
               onChange={(e) =>
-                handleChange("personalNum", e.target.value + "-" + (formData.personalNum.split("-")[1] || ""))
+                handleChange("personalNum", e.target.value + "-" + backNum)
               }
               className="w-full py-3 px-0 border-0 border-b border-gray-300 focus:outline-none focus:border-[#0a2d6b] text-xl"
               maxLength={6}
@@ -72,6 +87,11 @@ export default function IDVerificationStep3() {
         <Input
           label="발급일"
           value={formData.issueDate}
+          onChange={(e) => handleChange("issueDate", e.target.value)}
+        />
+        <Input
+          label="발급지역"
+          value={formData.authority}
           onChange={(e) => handleChange("issueDate", e.target.value)}
         />
       </div>

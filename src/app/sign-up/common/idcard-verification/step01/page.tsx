@@ -1,6 +1,4 @@
-import { useNavigate } from "react-router-dom"
-
-
+import { useLocation, useNavigate } from "react-router-dom";
 import Header from "@/components/common/Header";
 import { VerificationOption } from "@/components/signup/VerificationOption";
 import { KoreanEmblem } from "@/components/signup/KoreanEmblem";
@@ -8,12 +6,22 @@ import { KoreanEmblem } from "@/components/signup/KoreanEmblem";
 
 export default function IDVerificationStep1() {
   const navigate = useNavigate();
-
+  const location = useLocation();
+  
+  const signupState = location.state?.signupState || {};
 
   const handleOptionClick = () => {
-    navigate("/id/verification/step2")
-  }
-
+    // step01 → step02로 이동 (상품 데이터 포함)
+    navigate("/id/verification/step2", {
+      state: {
+        from: location.pathname,
+        signupState: {
+          ...signupState,
+          // ...
+        },
+      },
+    });
+  };
   return (
     <div className="flex flex-col h-full">
       <Header title="본인확인" />
