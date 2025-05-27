@@ -123,7 +123,6 @@ export default function OtpSetup(): React.ReactElement {
     <div className="flex flex-col h-screen bg-gray-50">
       <Header 
         title="2차 인증 설정" 
-        onLeftClick={() => navigate(-1)}
       />
       
       <main className="flex-1 p-6">

@@ -10,6 +10,9 @@ import { getCoinBalance } from '@/api/coin'
 import { useTokenStore } from '@/constants/useToken'
 import { useCoinStore } from '@/constants/useCoin'
 import { useTickerData } from '@/hooks/useTickerData'
+import { calculateTokenPrice } from '@/utils/exchangeCalculator'
+import { getTokenInfo } from '@/api/token'
+
 
 
 
@@ -25,6 +28,7 @@ interface GetAllBalanceResponse {
     currency: string;
     name: string;
     balance: number;
+    krw: string;
     product:BankProduct[];
   }[];
 
@@ -37,6 +41,49 @@ export default function CoinHome() {
   const [coinBalance, setCoinBalance] = useState<GetAllBalanceResponse['balance']>([]);
   const [tokenBalance, setTokenBalance] = useState<GetAllBalanceResponse['bankTokenInfo']>([]);
   const tickerData = useTickerData();
+  const [totalTokenBalanceKRW, setTotalTokenBalanceKRW] = useState(0);
+
+  useEffect(() => {
+    if (!tokenBalance.length || !tickerData) return;
+
+    const fetchAllTokenInfo = async () => {
+      try {
+        const tokenInfos = await Promise.all(
+          tokenBalance.map(token => getTokenInfo(token.currency))
+        );
+
+        let total = 0;
+
+        // 토큰별 가격 저장용
+        const enrichedTokens = tokenBalance.map((token) => {
+          const info = tokenInfos.find(i => i.currency === token.currency);
+          if (!info) return { ...token, krw: "- KRW" };
+
+          const unitPrice = info.portfolios.reduce((sum: number, p: any) => {
+            const price = tickerData[`KRW-${p.currency}`]?.trade_price ?? 0;
+            return sum + (p.amount ?? 0) * price;
+          }, 0) / (info.totalSupply || 1);
+
+          const totalKRW = Math.floor(token.balance * unitPrice);
+          total += totalKRW;
+
+          return {
+            ...token,
+            krw: `${totalKRW.toLocaleString()} KRW`
+          };
+        });
+
+        setTokenBalance(enrichedTokens);
+        setTotalTokenBalanceKRW(total);
+      } catch (e) {
+        console.error("토큰 정보 불러오기 실패:", e);
+      }
+    };
+
+    fetchAllTokenInfo();
+  }, [tokenBalance.length, tickerData]);
+
+
 
   // 잔액 - 초기 1회만 로딩
   useEffect(() => {
@@ -53,8 +100,6 @@ export default function CoinHome() {
         console.error("잔액 불러오기 실패", e);
       }
     };
-
-
     loadBalances();
   }, []);
 
@@ -112,7 +157,7 @@ export default function CoinHome() {
               <Wallet className="mr-2 h-6 w-6 text-blue-100" />
               <span className="text-lg font-medium text-blue-100">총 자산</span>
             </div>
-            <h2 className="mb-1 text-3xl font-bold text-white">{totalBalanceKRW.toLocaleString()} KRW</h2>
+            <h2 className="mb-1 text-3xl font-bold text-white">{totalTokenBalanceKRW+totalBalanceKRW} KRW</h2>
             <div className="flex items-center text-green-300">
             </div>
           </div>

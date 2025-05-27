@@ -31,7 +31,7 @@ export default function TokenExchangeCompletePage() {
 
   return (
     <div className="flex h-full flex-col bg-gray-50">
-      <Header title="토큰 환전" />
+      <Header disableBack={true} title="토큰 환전" />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col items-center justify-center px-6">

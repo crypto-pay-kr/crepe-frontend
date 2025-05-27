@@ -130,9 +130,7 @@ export default function TokenGroupDetailPage() {
     <div className="relative flex h-full flex-col bg-gray-50">
       <Header
         title={`${bank} 상세`}
-        onBackClick={() => {
-          setTimeout(() => navigate(-1), 200)
-        }}
+        onBackClick={() => {navigate('/my/coin')}}
       />
 
       <main

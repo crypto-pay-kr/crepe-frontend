@@ -48,11 +48,8 @@ import MenuEditPage from "./app/store/store-settings/edit-store-menu/page";
 import IDVerificationStep4 from "./app/sign-up/common/idcard-verification/step04/page";
 import UnderDevelopment from "./app/develop/page";
 import ProtectedRoute from '@/routes/ProtectedRoute'
+import MyPaymentHistoryPage from "./app/mypage/pay-history/page";
 import OtpSetup from "./app/mypage/otp/page";
-
-
-
-
 
 
 function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gray"; toggleButtonColor: () => void }) {
@@ -135,6 +132,9 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
           <Route path="/coin/address/add" element={<AddCoinAddress />} />
           {/*가맹점 코인 정산 페이지*/}
           <Route path="/settlement" element={<SettlementCoin />} />
+          {/*마이페이지-결제 내역*/}
+          {/*가맹점 코인 정산 페이지*/}
+          <Route path="/my/payments" element={<MyPaymentHistoryPage />} />
 
           {/*토큰 상품 페이지*/}
           <Route path="/token/product/detail/:subscribeId" element={<TokenProductListPage/>}/>
@@ -157,8 +157,6 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
 
 
           <Route path="/otp/setup" element={<OtpSetup />} />
-
-
           <Route path="*" element={<Navigate to="/" replace />} />
 
         </Route>

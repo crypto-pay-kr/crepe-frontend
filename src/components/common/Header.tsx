@@ -1,15 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { COLORS } from "../../constants/colors";
 import ProgressBar from "./ProgressBar";
-import React from "react";
 
 interface HeaderProps {
   title: string;
   progress?: number; // 0-3 for progress bar
   isStore?: boolean;
-  onBackClick?: () => void; // 커스텀 뒤로가기 함수 추가
-  leftIcon?: React.ReactNode; // 왼쪽 아이콘 추가
-  onLeftClick?: () => void; // 왼쪽 아이콘 클릭 핸들러 추가
+  onBackClick?: () => void;// 커스텀 뒤로가기 함수 추가
+  disableBack?: boolean;
 }
 
 export default function Header({
@@ -17,17 +15,13 @@ export default function Header({
   progress,
   isStore = false,
   onBackClick,
-  leftIcon,
-  onLeftClick
+  disableBack
 }: HeaderProps) {
   const navigate = useNavigate();
 
   // 뒤로가기 처리 함수
   const handleBackClick = () => {
-    if (onLeftClick) {
-      // onLeftClick이 있으면 그것을 우선 사용
-      onLeftClick();
-    } else if (onBackClick) {
+    if (onBackClick) {
       // 커스텀 뒤로가기 함수가 있으면 그것을 사용
       onBackClick();
     } else {
@@ -40,10 +34,8 @@ export default function Header({
     <>
       <div style={{ backgroundColor: COLORS.blue }} className="text-white">
         <div className="h-14 flex items-center px-6">
-          <button className="mr-4" onClick={handleBackClick}>
-            {leftIcon ? (
-              leftIcon
-            ) : (
+          {!disableBack && (
+            <button className="mr-4" onClick={handleBackClick}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -57,8 +49,8 @@ export default function Header({
               >
                 <path d="M15 18l-6-6 6-6"></path>
               </svg>
-            )}
-          </button>
+            </button>
+          )}
           <h1 className="text-lg font-medium flex-1 text-center pr-8 text-white">{title}</h1>
         </div>
       </div>
