@@ -19,12 +19,23 @@ interface MenuItem {
   menuImage: string;
 }
 
+interface StoreData {
+  storeId: number;
+  storeName: string;
+  storeAddress: string;
+  menuList: MenuItem[];
+  // ... 기타 필드들
+}
+
 export default function StoreEditInfoPage() {
   const [newStoreName, setStoreName] = useState("")
   const [newAddress, setAddress] = useState("")
+  const [originalStoreName, setOriginalStoreName] = useState("") // 원본 데이터 보관용
+  const [originalAddress, setOriginalAddress] = useState("") // 원본 데이터 보관용
   const navigate = useNavigate()
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [isModalOpen, setModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // 로딩 상태 추가
   const token = sessionStorage.getItem("accessToken");
 
   const handleStoreNameUpdate = async () => {
@@ -32,9 +43,17 @@ export default function StoreEditInfoPage() {
       alert("가게명을 입력해주세요!");
       return;
     }
+    
+    // 기존 이름과 같으면 업데이트하지 않음
+    if (newStoreName === originalStoreName) {
+      alert("변경된 내용이 없습니다.");
+      return;
+    }
+
     try {
       const response = await updateStoreName(newStoreName);
       alert(`가게명이 "${newStoreName}"(으)로 변경되었습니다.`);
+      setOriginalStoreName(newStoreName); // 성공시 원본 데이터 업데이트
     } catch (err) {
       console.error("가게명 변경 실패:", err);
       alert("가게명 변경 중 오류가 발생했습니다.");
@@ -46,6 +65,13 @@ export default function StoreEditInfoPage() {
       alert("주소를 입력해주세요!");
       return;
     }
+
+    // 기존 주소와 같으면 업데이트하지 않음
+    if (newAddress === originalAddress) {
+      alert("변경된 내용이 없습니다.");
+      return;
+    }
+
     try {
       const response = await updateStoreAddress(newAddress);
       if (!response.ok) {
@@ -53,6 +79,7 @@ export default function StoreEditInfoPage() {
         throw new Error(errorText || "주소 변경에 실패했습니다.");
       }
       alert(`주소가 "${newAddress}"(으)로 변경되었습니다.`);
+      setOriginalAddress(newAddress); // 성공시 원본 데이터 업데이트
     } catch (err) {
       console.error("주소 변경 실패:", err);
       alert("주소 변경 중 오류가 발생했습니다.");
@@ -68,19 +95,45 @@ export default function StoreEditInfoPage() {
   const isButtonDisabled = false
 
   useEffect(() => {
-    const loadMenus = async () => {
+    const loadStoreData = async () => {
       try {
+        setIsLoading(true);
         const token = sessionStorage.getItem("accessToken")!;
-        const data = await fetchMyStoreAllDetails();
+        const data: StoreData = await fetchMyStoreAllDetails();
         console.log("API 응답:", data);
+        
+        // 기존 데이터를 state에 설정
+        setStoreName(data.storeName || "");
+        setAddress(data.storeAddress || "");
+        setOriginalStoreName(data.storeName || "");
+        setOriginalAddress(data.storeAddress || "");
         setMenuItems(data.menuList ?? []);
       } catch (err) {
-        console.error("메뉴 불러오기 실패:", err);
-        alert("메뉴 정보를 불러오는 데 실패했습니다.");
+        console.error("가게 정보 불러오기 실패:", err);
+        alert("가게 정보를 불러오는 데 실패했습니다.");
+      } finally {
+        setIsLoading(false);
       }
     };
-    loadMenus();
+    
+    loadStoreData();
   }, []);
+
+  // 로딩 중일 때는 로딩 화면 표시
+  if (isLoading) {
+    return (
+      <div className="flex flex-col h-screen bg-white">
+        <Header title="메뉴/결제수단 설정" />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">가게 정보를 불러오는 중...</p>
+          </div>
+        </div>
+        <BottomNav />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen bg-white">
@@ -90,7 +143,6 @@ export default function StoreEditInfoPage() {
       <div className="flex-1 px-4 py-4 overflow-auto">
         {/* 가게명 변경 */}
         <div className="bg-white p-5 mb-2">
-          <h2 className="font-medium mb-2 font-bold">가게명 변경</h2>
           <Input
             label="가게명"
             value={newStoreName}
@@ -106,7 +158,6 @@ export default function StoreEditInfoPage() {
 
         {/* 주소 변경 */}
         <div className="bg-white p-5 mb-2">
-          <h2 className="font-medium mb-2 font-bold">주소</h2>
           <Input
             label="주소"
             value={newAddress}

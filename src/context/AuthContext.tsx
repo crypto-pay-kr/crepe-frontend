@@ -222,6 +222,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     sessionStorage.removeItem('accessToken');
     sessionStorage.removeItem('refreshToken');
     sessionStorage.removeItem('userEmail'); // 이메일 정보도 제거
+      sessionStorage.removeItem('userRole'); // 추가
+
     setIsAuthenticated(false);
 
     // 현재 페이지가 로그인 페이지가 아니라면 로그인 페이지로 리다이렉트
@@ -235,9 +237,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const checkLoginStatus = () => {
       try {
         const accessToken = sessionStorage.getItem('accessToken');
-        const userEmail = sessionStorage.getItem('userEmail');
         
-
         if (accessToken) {
           setIsAuthenticated(true);
 
@@ -304,6 +304,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     sessionStorage.removeItem('accessToken');
     sessionStorage.removeItem('refreshToken');
     sessionStorage.removeItem('userEmail'); // 이메일 정보도 제거
+    sessionStorage.removeItem('userRole'); 
     setIsAuthenticated(false);
 
   };
