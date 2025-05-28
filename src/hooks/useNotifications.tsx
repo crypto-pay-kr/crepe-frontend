@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect, useCallback } from 'react';
 import { NotificationManager } from '@/utils/notificationManager';
 
@@ -13,9 +12,10 @@ interface UseNotificationsReturn {
   showNotification: (title: string, options?: NotificationOptions) => Promise<void>;
   showOrderNotification: (orderData: {
     orderId: string;
-    type: 'new_order' | 'order_accepted' | 'order_ready' | 'order_cancelled';
+    type: 'new_order' | 'order_accepted' | 'order_ready' | 'order_cancelled' | 'order_rejected' | 'order_completed';
     message: string;
     storeName?: string;
+    details?: string; // details 속성 추가
   }) => Promise<void>;
 }
 
@@ -23,7 +23,6 @@ export const useNotifications = (): UseNotificationsReturn => {
   const [permission, setPermission] = useState<NotificationPermission>('default');
   const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
   const notificationManager = NotificationManager.getInstance();
-
   const isSupported = 'Notification' in window && 'serviceWorker' in navigator;
 
   useEffect(() => {
@@ -83,9 +82,10 @@ export const useNotifications = (): UseNotificationsReturn => {
 
   const showOrderNotification = useCallback(async (orderData: {
     orderId: string;
-    type: 'new_order' | 'order_accepted' | 'order_ready' | 'order_cancelled';
+    type: 'new_order' | 'order_accepted' | 'order_ready' | 'order_cancelled' | 'order_rejected' | 'order_completed';
     message: string;
     storeName?: string;
+    details?: string;
   }): Promise<void> => {
     await notificationManager.showOrderNotification(orderData);
   }, [notificationManager]);

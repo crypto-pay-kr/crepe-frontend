@@ -104,7 +104,6 @@ export default function OrderStatusPage() {
         orderId: orderData.orderId,
         type: 'new_order',
         message: `새로운 주문이 접수되었습니다: ${orderData.orderType}`,
-        details: itemsText,
         storeName: '내 가게'
       })
     }
@@ -195,9 +194,8 @@ export default function OrderStatusPage() {
       if (permission === 'granted') {
         await showOrderNotification({
           orderId: selectedOrderId,
-          type: 'order_rejected',
-          message: `주문이 거절되었습니다`,
-          details: `사유: ${reason}`,
+          type: 'order_cancelled',
+          message: `주문이 거절되었습니다\n사유: ${reason}`,
           storeName: '내 가게'
         })
       }
@@ -229,7 +227,7 @@ export default function OrderStatusPage() {
       if (permission === 'granted') {
         await showOrderNotification({
           orderId: id,
-          type: 'order_completed',
+          type: 'order_ready',
           message: `주문이 준비 완료되었습니다`,
           storeName: '내 가게'
         })

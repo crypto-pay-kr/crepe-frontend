@@ -1,3 +1,17 @@
+// NotificationAction 타입 정의 추가
+interface NotificationAction {
+  action: string;
+  title: string;
+  icon?: string;
+}
+
+// NotificationOptions 확장
+interface ExtendedNotificationOptions extends NotificationOptions {
+  actions?: NotificationAction[];
+  vibrate?: number[];
+  sound?: string;
+}
+
 export class NotificationManager {
   private static instance: NotificationManager;
   private registration: ServiceWorkerRegistration | null = null;
@@ -79,13 +93,13 @@ export class NotificationManager {
   }
 
   // 로컬 알림 표시
-  async showLocalNotification(title: string, options: NotificationOptions = {}): Promise<void> {
+  async showLocalNotification(title: string, options: ExtendedNotificationOptions = {}): Promise<void> {
     const permission = await this.requestPermission();
     if (permission !== 'granted') {
       return;
     }
 
-    const defaultOptions: NotificationOptions = {
+    const defaultOptions: ExtendedNotificationOptions = {
       icon: '/icons/icon-192x192.png',
       badge: '/icons/icon-72x72.png',
       tag: 'crepe-notification',
@@ -97,19 +111,21 @@ export class NotificationManager {
       // 서비스 워커를 통한 알림
       await this.registration.showNotification(title, defaultOptions);
     } else {
-      // 일반 브라우저 알림
-      new Notification(title, defaultOptions);
+      // 일반 브라우저 알림 (actions는 지원하지 않음)
+      const { actions, vibrate, sound, ...basicOptions } = defaultOptions;
+      new Notification(title, basicOptions);
     }
   }
 
   // 주문 관련 알림
   async showOrderNotification(orderData: {
     orderId: string;
-    type: 'new_order' | 'order_accepted' | 'order_ready' | 'order_cancelled';
+    type: 'new_order' | 'order_accepted' | 'order_ready' | 'order_cancelled' | 'order_rejected' | 'order_completed';
     message: string;
     storeName?: string;
+    details?: string;
   }): Promise<void> {
-    const { orderId, type, message, storeName } = orderData;
+    const { orderId, type, message, storeName, details } = orderData;
     
     let title = 'Crepe 주문 알림';
     let body = message;
@@ -118,7 +134,7 @@ export class NotificationManager {
     switch (type) {
       case 'new_order':
         title = '새로운 주문이 접수되었습니다';
-        body = `주문번호: ${orderId}`;
+        body = `주문번호: ${orderId}${details ? `\n${details}` : ''}`;
         actions = [
           { action: 'accept', title: '수락하기' },
           { action: 'reject', title: '거절하기' }
@@ -140,6 +156,20 @@ export class NotificationManager {
         break;
       case 'order_cancelled':
         title = '주문이 취소되었습니다';
+        body = message;
+        actions = [
+          { action: 'view', title: '확인하기' }
+        ];
+        break;
+      case 'order_rejected':
+        title = '주문이 거절되었습니다';
+        body = message;
+        actions = [
+          { action: 'view', title: '확인하기' }
+        ];
+        break;
+      case 'order_completed':
+        title = '주문이 완료되었습니다';
         body = message;
         actions = [
           { action: 'view', title: '확인하기' }
