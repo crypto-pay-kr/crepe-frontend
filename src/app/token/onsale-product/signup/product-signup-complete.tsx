@@ -28,6 +28,7 @@ export default function TokenProductSignupComplete() {
   const signupInfo = {
     productName: subscribeResponse.productName,
     productId: subscribeResponse.productId,
+    productType: subscribeResponse.productType,
     bankName: subscribeResponse.bankName,
     startDate: formatDate(subscribeResponse.subscribeDate),
     endDate: formatDate(subscribeResponse.expiredDate),

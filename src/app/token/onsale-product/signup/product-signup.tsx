@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import {  Navigate, useParams, useNavigate, useLocation } from "react-router-dom";
+import { Navigate, useParams, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Document, Page, pdfjs } from "react-pdf";
 import Header from "@/components/common/Header";
@@ -49,7 +49,7 @@ export default function TokenProductSignup() {
 
   const [initialDepositAmount, setInitialDepositAmount] = useState("");
   const [selectedFreeDepositRate, setSelectedFreeDepositRate] = useState<FreeDepositCountPreferentialRate>("NONE");
-  const [voucherQuantity, setVoucherQuantity] = useState("");
+  const [voucherQuantity, setVoucherQuantity] = useState("1");
 
 
   const signupState = location.state?.signupState || location.state || {};
@@ -64,7 +64,7 @@ export default function TokenProductSignup() {
     step: stepFromState,
   } = signupState;
 
-    // ─────────────────────────────────────────────
+  // ─────────────────────────────────────────────
   // 가드: productId가 없으면 상세 페이지로 리다이렉트
   if (!signupState.productId) {
     alert('잘못된 접근입니다. 상세페이지로 이동합니다.')
@@ -205,7 +205,7 @@ export default function TokenProductSignup() {
         setStep(5);
       } else {
         alert("상품 가입 자격이 없습니다.");
-        navigate(`/token/onsale/products/${productId}`); 
+        navigate(`/token/onsale/products/${productId}`);
       }
     } catch (error: any) {
       console.error("자격 확인 오류:", error.message);
@@ -394,13 +394,20 @@ export default function TokenProductSignup() {
               <div className="mb-3">
                 <label className="block text-gray-500 text-sm mb-1">직업 등록</label>
                 <div className="flex items-center space-x-2">
-                  <input
-                    type="text"
-                    placeholder="직업 입력"
+                  <select
                     value={occupation}
                     onChange={(e) => setOccupation(e.target.value)}
                     className="flex-1 p-2 border border-gray-300 rounded"
-                  />
+                  >
+                    <option value="">직업 선택</option>
+                    <option value="직장인">직장인</option>
+                    <option value="자영업자">자영업자</option>
+                    <option value="공무원">공무원</option>
+                    <option value="군인">군인</option>
+                    <option value="학생">학생</option>
+                    <option value="주부">주부</option>
+                    <option value="무직">무직</option>
+                  </select>
                   {!isOccupationRegistered && (
                     <button
                       onClick={async () => {
@@ -499,22 +506,7 @@ export default function TokenProductSignup() {
 
               {productType === "VOUCHER" ? (
                 <div className="space-y-6 px-1">
-                  {/* 자유납입 우대금리 선택 */}
-                  <div>
-                    <label className="block text-gray-500 text-sm mb-1">자유납입 우대금리</label>
-                    <select
-                      className="w-full p-2 border border-gray-300 rounded"
-                      value={selectedFreeDepositRate}
-                      onChange={(e) => setSelectedFreeDepositRate(e.target.value as FreeDepositCountPreferentialRate)}
-                    >
-                      <option value="NONE">자유 납입 없음</option>
-                      <option value="LEVEL1">월 3회 이상 자유 납입</option>
-                      <option value="LEVEL2">월 5회 이상 자유 납입</option>
-                      <option value="LEVEL3">월 10회 이상 자유 납입</option>
-                    </select>
-                  </div>
-
-                  {/* 상품권 수량 */}
+                  {/* 상품권 수량 (고정) */}
                   <div>
                     <label className="block text-gray-500 text-sm mb-1">상품권 수량</label>
                     <input
@@ -522,6 +514,7 @@ export default function TokenProductSignup() {
                       className="w-full p-2 border border-gray-300 rounded"
                       value={voucherQuantity}
                       onChange={(e) => setVoucherQuantity(e.target.value)}
+                      disabled
                     />
                   </div>
 
@@ -535,32 +528,6 @@ export default function TokenProductSignup() {
                 </div>
               ) : productType === "INSTALLMENT" || productType === "SAVING" ? (
                 <div className="space-y-6 px-1">
-                  {/* 초기 납입액 */}
-                  <div>
-                    <label className="block text-gray-500 text-sm mb-1">초기 납입액</label>
-                    <input
-                      type="number"
-                      className="w-full p-2 border border-gray-300 rounded"
-                      value={initialDepositAmount}
-                      onChange={(e) => setInitialDepositAmount(e.target.value)}
-                    />
-                  </div>
-
-                  {/* 자유납입 우대금리 선택 */}
-                  <div>
-                    <label className="block text-gray-500 text-sm mb-1">자유납입 우대금리</label>
-                    <select
-                      className="w-full p-2 border border-gray-300 rounded"
-                      value={selectedFreeDepositRate}
-                      onChange={(e) => setSelectedFreeDepositRate(e.target.value as FreeDepositCountPreferentialRate)}
-                    >
-                      <option value="NONE">자유 납입 없음</option>
-                      <option value="LEVEL1">월 3회 이상 자유 납입</option>
-                      <option value="LEVEL2">월 5회 이상 자유 납입</option>
-                      <option value="LEVEL3">월 10회 이상 자유 납입</option>
-                    </select>
-                  </div>
-
                   {/* 가입목적 */}
                   <Input
                     label="가입목적"
@@ -577,6 +544,7 @@ export default function TokenProductSignup() {
               )}
             </div>
           )}
+
 
 
         </div>
