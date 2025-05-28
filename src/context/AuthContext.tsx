@@ -6,10 +6,12 @@ const API_BASE_URL = import.meta.env.VITE_API_SERVER_URL || 'http://localhost:80
 interface AuthContextValue {
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (accessToken: string, refreshToken: string, userEmail?: string) => void; // 이메일 파라미터 추가
+  login: (accessToken: string, refreshToken: string, userEmail?: string) => void;
   logout: () => void;
   checkAuth: () => boolean;
-  getUserEmail: () => string | null; // 이메일 가져오는 함수 추가
+  getUserEmail: () => string | null;
+  reissueToken: () => Promise<boolean>; // 추가
+  authenticatedFetch: (url: string, options?: RequestInit) => Promise<Response>; // 추가
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -21,6 +23,99 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttempts = useRef<number>(0);
   const maxReconnectAttempts = 5;
+
+  // 토큰 재발행 함수
+  const reissueToken = async (): Promise<boolean> => {
+    try {
+      const refreshToken = sessionStorage.getItem('refreshToken');
+      const userEmail = sessionStorage.getItem('userEmail');
+      
+      if (!refreshToken || !userEmail) {
+        console.log('❌ 리프레시 토큰 또는 이메일이 없습니다.');
+        logout();
+        return false;
+      }
+
+      console.log('🔄 토큰 재발행 요청 중...', userEmail);
+
+      const response = await fetch(`${API_BASE_URL}/api/auth/reissue`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          refreshToken,
+          userEmail,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`토큰 재발행 실패: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.success && result.data) {
+        console.log('✅ 토큰 재발행 성공');
+        
+        // 새 토큰들 저장
+        sessionStorage.setItem('accessToken', result.data.accessToken);
+        sessionStorage.setItem('refreshToken', result.data.refreshToken);
+        
+        // SSE 연결도 새 토큰으로 재설정
+        setupSSEConnection();
+        
+        return true;
+      } else {
+        throw new Error(result.message || '토큰 재발행 실패');
+      }
+    } catch (error) {
+      console.error('❌ 토큰 재발행 오류:', error);
+      logout(); // 재발행 실패 시 로그아웃
+      return false;
+    }
+  };
+
+  // API 요청을 위한 fetch 래퍼 함수
+  const authenticatedFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
+    const accessToken = sessionStorage.getItem('accessToken');
+    
+    // 헤더에 토큰 추가
+    const headers = {
+      ...options.headers,
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    };
+
+    let response = await fetch(url, {
+      ...options,
+      headers,
+    });
+
+    // 401 오류 시 토큰 재발행 시도
+    if (response.status === 401) {
+      console.log('🔄 401 오류 발생, 토큰 재발행 시도');
+      
+      const reissueSuccess = await reissueToken();
+      
+      if (reissueSuccess) {
+        // 재발행 성공 시 원래 요청 재시도
+        const newAccessToken = sessionStorage.getItem('accessToken');
+        const retryHeaders = {
+          ...options.headers,
+          'Authorization': `Bearer ${newAccessToken}`,
+          'Content-Type': 'application/json',
+        };
+        
+        response = await fetch(url, {
+          ...options,
+          headers: retryHeaders,
+        });
+      }
+    }
+
+    return response;
+  };
 
   // SSE 연결 설정
   const setupSSEConnection = () => {
@@ -44,30 +139,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
-      console.log('🔗 User SSE 연결 시도 중...', `${API_BASE_URL}/api/auth/events`);
-      console.log('🔑 토큰 (앞 50자):', accessToken.substring(0, 50) + '...');
-
       // 토큰을 쿼리 파라미터로 전달
       const sseUrl = `${API_BASE_URL}/api/auth/events?token=${encodeURIComponent(accessToken)}`;
-      console.log('📏 SSE URL 길이:', sseUrl.length);
 
       const eventSource = new EventSource(sseUrl);
 
       eventSource.onopen = () => {
-        console.log('✅ User SSE 연결이 성공적으로 열렸습니다.');
         console.log('📊 EventSource readyState:', eventSource.readyState);
         reconnectAttempts.current = 0; // 성공 시 재연결 카운터 리셋
       };
-
-      // 연결 확인 메시지
-      eventSource.addEventListener('connected', (event) => {
-        console.log('✅ User SSE 연결 확인:', event.data);
-      });
-
-      // Keep-alive 메시지 처리
-      eventSource.addEventListener('keepalive', (event) => {
-        console.log('💓 User Keep-alive:', event.data);
-      });
 
       // 모든 메시지 수신 (디버깅용)
       eventSource.onmessage = (event) => {
@@ -108,7 +188,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               reconnectAttempts.current++;
               const delay = Math.min(1000 * reconnectAttempts.current, 10000); // 최대 10초
 
-              console.log(`🔄 ${delay/1000}초 후 User SSE 재연결 시도 (${reconnectAttempts.current}/${maxReconnectAttempts})`);
 
               reconnectTimeoutRef.current = setTimeout(() => {
                 setupSSEConnection();
@@ -127,13 +206,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       eventSourceRef.current = eventSource;
 
     } catch (error) {
-      console.error('❌ User SSE 연결 설정 실패:', error);
     }
   };
 
   // 강제 로그아웃 처리
   const handleForceLogout = () => {
-    console.log('🔄 User 강제 로그아웃 처리 중...');
 
     // SSE 연결 해제
     if (eventSourceRef.current) {
@@ -149,7 +226,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // 현재 페이지가 로그인 페이지가 아니라면 로그인 페이지로 리다이렉트
     if (window.location.pathname !== '/login') {
-      console.log('🔄 로그인 페이지로 리다이렉트...');
       window.location.href = '/login';
     }
   };
@@ -160,16 +236,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         const accessToken = sessionStorage.getItem('accessToken');
         const userEmail = sessionStorage.getItem('userEmail');
-        console.log('🔍 초기 토큰 확인:', accessToken ? '토큰 있음' : '토큰 없음');
-        console.log('📧 초기 이메일 확인:', userEmail ? userEmail : '이메일 없음');
+        
 
         if (accessToken) {
-          console.log('💾 저장된 User 토큰 발견, 인증 상태 설정 중...');
           setIsAuthenticated(true);
 
           // 약간의 지연 후 SSE 연결
           setTimeout(() => {
-            console.log('🔄 SSE 연결 지연 시작...');
             setupSSEConnection();
           }, 100);
         } else {
@@ -188,7 +261,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // 컴포넌트 언마운트 시 SSE 연결 해제
     return () => {
-      console.log('🧹 User AuthProvider 언마운트, SSE 연결 정리 중...');
       if (eventSourceRef.current) {
         eventSourceRef.current.close();
       }
@@ -200,8 +272,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // 로그인 함수 (토큰 및 이메일 저장, SSE 연결)
   const login = (accessToken: string, refreshToken: string, userEmail?: string) => {
-    console.log('🔐 User 로그인 처리 중...');
-    console.log('📧 로그인 이메일:', userEmail);
 
     sessionStorage.setItem('accessToken', accessToken);
     sessionStorage.setItem('refreshToken', refreshToken);
@@ -209,7 +279,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // 이메일이 제공된 경우 저장
     if (userEmail) {
       sessionStorage.setItem('userEmail', userEmail);
-      console.log('✅ 사용자 이메일 저장됨:', userEmail);
     }
 
     setIsAuthenticated(true);
@@ -237,7 +306,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     sessionStorage.removeItem('userEmail'); // 이메일 정보도 제거
     setIsAuthenticated(false);
 
-    console.log('✅ User 로그아웃 완료');
   };
 
   // 인증 상태 확인
@@ -251,6 +319,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return sessionStorage.getItem('userEmail');
   };
 
+  // 여기가 핵심! value에 새로운 함수들 추가
   return (
     <AuthContext.Provider value={{ 
       isAuthenticated, 
@@ -258,7 +327,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       login, 
       logout, 
       checkAuth, 
-      getUserEmail 
+      getUserEmail,
+      reissueToken,        // 추가
+      authenticatedFetch   // 추가
     }}>
       {children}
     </AuthContext.Provider>
