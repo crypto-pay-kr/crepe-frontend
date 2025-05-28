@@ -44,8 +44,8 @@ export default function CoinHome() {
   const [totalTokenBalanceKRW, setTotalTokenBalanceKRW] = useState(0);
 
   useEffect(() => {
-    if (!tokenBalance.length || !tickerData) return;
-
+  if (!tokenBalance.length || !tickerData) return;
+  if (tokenBalance.some(token => token.krw && token.krw !== "- KRW")) return;
     const fetchAllTokenInfo = async () => {
       try {
         const tokenInfos = await Promise.all(
