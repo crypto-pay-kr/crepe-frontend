@@ -318,7 +318,7 @@ export default function MyPage(): React.ReactElement {
     baseMenuItems.push(
       {
         label: "고객 센터",
-        onClick: () => navigate(isSeller ? "/store/my/customer-support" : "/home/my/customer-support"),
+        onClick: () => navigate("/crepe/cs"),
         icon: <HelpCircle size={18} color="#0ea5e9" />
       }
     );

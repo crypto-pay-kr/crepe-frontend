@@ -205,7 +205,6 @@ export default function TokenProductSignup() {
         setStep(5);
       } else {
         alert("상품 가입 자격이 없습니다.");
-        navigate(`/token/onsale/products/${productId}`);
       }
     } catch (error: any) {
       console.error("자격 확인 오류:", error.message);
@@ -504,9 +503,18 @@ export default function TokenProductSignup() {
                 <h2 className="text-xl font-bold">가입 전 필수 정보를 입력해주세요.</h2>
               </div>
 
-              {productType === "VOUCHER" ? (
-                <div className="space-y-6 px-1">
-                  {/* 상품권 수량 (고정) */}
+              <div className="space-y-6 px-1">
+                {/* 상품권 수량 (고정) */}
+                {/* 가입목적 */}
+                <Input
+                  label="가입목적"
+                  value={subscribePurpose}
+                  onChange={(e) => setSubscribePurpose(e.target.value)}
+                  placeholder="가입목적을 작성해주세요"
+                />
+
+                {/* 상품권 수량 (VOUCHER일 때만 표시) */}
+                {productType === "VOUCHER" && (
                   <div>
                     <label className="block text-gray-500 text-sm mb-1">상품권 수량</label>
                     <input
@@ -514,39 +522,27 @@ export default function TokenProductSignup() {
                       className="w-full p-2 border border-gray-300 rounded"
                       value={voucherQuantity}
                       onChange={(e) => setVoucherQuantity(e.target.value)}
-                      disabled
+                      placeholder="상품권 수량을 입력해주세요"
                     />
                   </div>
+                )}
 
-                  {/* 가입목적 */}
-                  <Input
-                    label="가입목적"
-                    value={subscribePurpose}
-                    onChange={(e) => setSubscribePurpose(e.target.value)}
-                    placeholder="가입목적을 작성해주세요"
-                  />
-                </div>
-              ) : productType === "INSTALLMENT" || productType === "SAVING" ? (
-                <div className="space-y-6 px-1">
-                  {/* 가입목적 */}
-                  <Input
-                    label="가입목적"
-                    value={subscribePurpose}
-                    onChange={(e) => setSubscribePurpose(e.target.value)}
-                    placeholder="가입목적을 작성해주세요"
-                  />
-                </div>
-              ) : (
-                // 그 외(예외) 처리
-                <div className="px-1">
-                  <p>유효하지 않은 상품 유형입니다.</p>
-                </div>
-              )}
+                {/* 최초 납입액 (SAVING일 때만 표시) */}
+                {productType === "SAVING" && (
+                  <div>
+                    <label className="block text-gray-500 text-sm mb-1">최초 납입액</label>
+                    <input
+                      type="number"
+                      className="w-full p-2 border border-gray-300 rounded"
+                      value={initialDepositAmount}
+                      onChange={(e) => setInitialDepositAmount(e.target.value)}
+                      placeholder="최초 납입액을 입력해주세요"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           )}
-
-
-
         </div>
       </div>
 
