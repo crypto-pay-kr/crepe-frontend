@@ -1,8 +1,9 @@
-import React from "react";
+
 import { motion } from "framer-motion";
 
 export interface SignUpCompleteProductInfoProps {
   productName: string;
+  productType: string;
   startDate: string;
   endDate: string;
   monthlyAmount: string;
@@ -13,6 +14,7 @@ export interface SignUpCompleteProductInfoProps {
 
 export default function SignUpCompleteProductInfo({
   productName,
+  productType,
   startDate,
   endDate,
   monthlyAmount,
@@ -41,10 +43,21 @@ export default function SignUpCompleteProductInfo({
           <div className="text-gray-600">만기일</div>
           <div>{endDate}</div>
         </div>
-        <div className="flex justify-between">
-          <div className="text-gray-600">월 납입금액</div>
-          <div>{monthlyAmount}</div>
-        </div>
+
+        {productType === "INSTALLMENT" && (
+          <div className="flex justify-between">
+            <div className="text-gray-600">납입액</div>
+            <div>예치 후 결정</div>
+          </div>
+        )}
+        {productType === "SAVING" && (
+          <div className="flex justify-between">
+            <div className="text-gray-600">납입금액</div>
+            <div>{monthlyAmount}</div>
+          </div>
+        )}
+        {/* VOUCHER는 월 납입금액 자체를 숨김 */}
+
         <div className="flex justify-between">
           <div className="text-gray-600">기본금리</div>
           <div>{baseRate}</div>
