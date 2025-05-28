@@ -141,7 +141,7 @@ export const requestWithdraw = async (currency: string, amount: string) => {
 export const getCoinHistory = async ({ pageParam = 0, queryKey }: { pageParam?: number; queryKey: any }) => {
   const token = sessionStorage.getItem("accessToken");
   const symbol = queryKey[1];
-  const res = await fetch(`${BASE_URL}/api/history?currency=${symbol}&page=${pageParam}&size=5`, {
+  const res = await fetch(`${BASE_URL}/api/history/coin?currency=${symbol}&page=${pageParam}&size=5`, {
     headers: {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
@@ -149,30 +149,22 @@ export const getCoinHistory = async ({ pageParam = 0, queryKey }: { pageParam?: 
   });
 
   if (!res.ok) throw new Error('입금 내역 조회 실패');
-  return res.json(); // Slice 형태의 응답 객체
+  return res.json();
 };
 
 
 
-// 코인 시세 가져오기
-export const fetchCoinPrices = async () => {
-  try {
-    const response = await fetch(`${COIN_PRICE_URL}`);
-    if (!response.ok) {
-      throw new Error(`시세 조회 실패: ${response.status}`);
-    }
+export async function unRegisterAccountAddress(currency: string): Promise<void> {
+  const token = sessionStorage.getItem("accessToken");
 
-    const data = await response.json();
+  const response = await fetch(`/api/unregister/address?currency=${currency}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
-    // 시세 데이터를 객체 형태로 변환
-    const updatedPrices = data.reduce((acc: any, item: any) => {
-      acc[item.market] = item.trade_price;
-      return acc;
-    }, {});
-
-    return updatedPrices; // 시세 데이터 반환
-  } catch (err) {
-    console.error("Error fetching coin prices:", err);
-    throw err; // 에러를 호출한 쪽으로 전달
+  if (!response.ok) {
+    throw new Error("계좌 등록 해제 실패: " + response.status);
   }
-};
+}

@@ -17,20 +17,34 @@ export default function TransactionItem({
                                           isDeposit,
                                           showAfterBalance,
                                         }: TransactionItemProps) {
-  const [rawAmount, symbol] = amount.split(" ");
+
+  const BANK_SYMBOL_MAP: Record<string, string> = {
+    'HANA': 'HTK',
+    'SHINHAN': 'STK',
+    'WOORI': 'WTK',
+  };
+
+  const [rawAmount, rawSymbol] = amount.split(" ");
   const parsed = parseFloat(rawAmount);
+  const bankSymbol = BANK_SYMBOL_MAP[rawSymbol?.toUpperCase()] ?? rawSymbol;
+
 
   const formattedAmount = isNaN(parsed)
     ? amount
-    : `${parsed > 0 ? "+" : ""}${parsed.toFixed(6)} ${symbol}`;
+    : `${parsed > 0 ? "+" : ""}${parsed.toFixed(2)} ${bankSymbol}`;
 
 
-  const [balanceValue, balanceSymbol] = balance.split(" ");
+
+  const [balanceValue, rawBalanceSymbol] = balance.split(" ");
   const parsedBalance = parseFloat(balanceValue);
+  const balanceSymbol = BANK_SYMBOL_MAP[rawBalanceSymbol?.toUpperCase()] ?? rawBalanceSymbol;
+
+
 
   const formattedBalance = isNaN(parsedBalance)
     ? balance
-    : `${parsedBalance.toFixed(6)} ${balanceSymbol}`;
+    : `${parsedBalance.toFixed(2)} ${balanceSymbol}`;
+
 
   return (
     <div className="space-y-2 border-b border-gray-300 pb-4">
@@ -39,7 +53,7 @@ export default function TransactionItem({
         <div>
           <p
             className={`text-xl font-bold ${
-              isDeposit ? "text-sky-700" : "text-red-500"
+              isDeposit ? "text-indigo-800" : "text-red-600"
             } mb-2`}
           >
             {type}
@@ -49,12 +63,10 @@ export default function TransactionItem({
           )}
         </div>
         <div className="text-right">
-          <p
-            className={`text-lg font-bold ${
-              isDeposit ? "text-sky-700" : "text-red-500"
-            } mb-2`}
-          >
-            <span>{formattedAmount}</span>
+          <p>
+            <span  className={`text-lg font-bold ${
+              isDeposit ? "text-indigo-800" : "text-red-500"
+            } mb-2`}>{formattedAmount}</span>
           </p>
           <p className="text-sm text-gray-600">= {krw} KRW</p>
         </div>

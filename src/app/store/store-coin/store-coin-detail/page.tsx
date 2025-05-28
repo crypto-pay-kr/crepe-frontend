@@ -8,108 +8,40 @@ import CoinAddressModal from "@/components/coin/CoinAddressModal";
 import {
   isAccountAddressRegistered,
   getCoinBalanceByCurrency,
-  getCoinHistory, fetchCoinPrices,
+  getCoinHistory,
 } from '@/api/coin'
 import { useInfiniteQuery } from '@tanstack/react-query'
-
+import { useCoinStore } from '@/constants/useCoin';
+import { useTickerData } from '@/hooks/useTickerData'
 export interface PaymentHistory {
-  status: 'ACCEPTED' | 'PENDING' | 'FAILED'; // PaymentStatus enum
+  status: 'ACCEPTED' | 'PENDING' | 'FAILED';
   amount: number;
-  transferredAt: string; // ISO string
+  transferredAt: string;
   afterBalance: number;
   type: string;
 
 }
-const coinMeta = {
-  XRP: {
-    name: "리플",
-    icon: <X className="w-5 h-5 md:w-6 md:h-6" />,
-    bg: "bg-gray-200",
-    balance: "0.3 XRP",
-    krw: "1000 KRW",
-  },
-  SOL: {
-    name: "솔라나",
-    icon: (
-      <div className="w-4 h-4 md:w-5 md:h-5 flex flex-col justify-between">
-        <div className="h-[2px] bg-white" />
-        <div className="h-[2px] bg-white" />
-        <div className="h-[2px] bg-white" />
-      </div>
-    ),
-    bg: "bg-[#9945FF]",
-    balance: "0.3 SOL",
-    krw: "1000 KRW",
-  },
-  USDT: {
-    name: "테더",
-    icon: <div className="text-white text-xs md:text-sm font-bold">T</div>,
-    bg: "bg-[#26A17B]",
-    balance: "0.3 USDT",
-    krw: "1000 KRW",
-  },
-}
+
 
 export default function CoinDetailPage() {
-  // Add CSS keyframes for animations
   const styleSheet = document.createElement("style");
-  styleSheet.type = "text/css";
-  styleSheet.innerText = `
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes slideIn {
-      from { transform: translateY(10px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-  `;
   document.head.appendChild(styleSheet);
   const { symbol } = useParams()
   const location = useLocation()
   const isUser = location.state?.isUser ?? false
-
-  const [addressStatus, setAddressStatus] = useState<'ACTIVE' | 'REGISTERING' | 'NOT_REGISTERED' | null>(null);
+  const tickerData = useTickerData();
+  const [addressStatus, setAddressStatus] = useState<'ACTIVE' | 'REGISTERING' | 'NOT_REGISTERED' |'UNREGISTERED'|'UNREGISTERED_AND_REGISTERING'|'REJECTED'| null>(null);
   const [showModal, setShowModal] = useState(false)
-  const [selectedPeriod, setSelectedPeriod] = useState('day')
   const [addressInfo, setAddressInfo] = useState<{
     address: string;
     tag?: string;
+    addressStatus?: string;
   } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [pageVisible, setPageVisible] = useState(false);
-
   const navigate = useNavigate()
-  const isSeller = location.pathname.includes('/store');
-  const [history, setHistory] = useState<PaymentHistory[]>([]);
-  const coin = coinMeta[symbol as keyof typeof coinMeta]
   const [balance, setBalance] = useState<number>(0);
-
-  // Handle page transitions
-  useEffect(() => {
-    // Start with loading state
-    setIsLoading(true);
-
-    // After a short delay, show the page with a fade-in effect
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-      setPageVisible(true);
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [symbol]);
-
-  if (!coin) return <div className="p-4">잘못된 경로입니다.</div>
+  const coinList = useCoinStore(state => state.coins);
+  const coinMeta = coinList.find(c => c.currency === symbol);
+  const livePrice = tickerData[`KRW-${symbol}`]?.trade_price ?? 0;
 
   // 입금 주소가 유효한지 확인
   useEffect(() => {
@@ -117,9 +49,8 @@ export default function CoinDetailPage() {
       isAccountAddressRegistered(symbol)
         .then((res) => {
           setAddressStatus(res.addressRegistryStatus);
-          if (res.addressRegistryStatus === 'ACTIVE' || res.addressRegistryStatus === 'REGISTERING') {
-            setAddressInfo({ address: res.address, tag: res.tag });
-          }
+          setAddressInfo({ address: res.address, tag: res.tag, addressStatus: res.addressRegistryStatus });
+
         })
         .catch((err) => {
           console.error("등록된 주소없음", err);
@@ -129,33 +60,6 @@ export default function CoinDetailPage() {
     }
   }, [symbol]);
 
-
-  const [prices, setPrices] = useState<{ [key: string]: number }>({
-    "KRW-XRP": 0,
-    "KRW-USDT": 0,
-    "KRW-SOL": 0,
-  });
-
-
-  // 코인 시세 가져오기
-  useEffect(() => {
-    const loadPrices = async () => {
-      try {
-        const updatedPrices = await fetchCoinPrices();
-        setPrices(updatedPrices);
-      } catch (err) {
-        console.error("시세 조회 실패", err);
-      }
-    };
-
-    loadPrices();
-
-    const interval = setInterval(() => {
-      loadPrices();
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
 
 
   // 코인 잔액 조회
@@ -207,88 +111,69 @@ export default function CoinDetailPage() {
 
 
   return (
-    <div className="flex h-full flex-col bg-gray-50 relative">
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-50">
-          <div className="w-12 h-12 rounded-full border-4 border-t-[#0a2e64] border-gray-200 animate-spin"></div>
-        </div>
-      )}
-
+    <div className="relative flex h-full flex-col bg-gray-50">
       <Header
-        title={`${coin.name} 상세`}
-        onBackClick={() => {
-          // Add fade-out transition before navigating
-          setPageVisible(false);
-          setTimeout(() => navigate('/my/coin'), 200);
-        }}
+        title={`${coinMeta?.coinName ?? symbol} 상세`}
+        onBackClick={() => {navigate('/my/coin')}}
       />
 
       <main
-        className={`flex-1 overflow-auto p-3 sm:p-4 md:p-5 transition-all duration-500 ease-in-out ${
-          pageVisible
-            ? 'opacity-100 transform translate-y-0'
-            : 'opacity-0 transform translate-y-4'
-        }`}>
+        className={`flex-1 overflow-auto p-3 transition-all duration-500 ease-in-out sm:p-4 md:p-5`}
+      >
         {/* 보유 자산 카드 */}
-        <div
-          className="mb-4 sm:mb-5 md:mb-6 rounded-xl md:rounded-2xl border border-gray-200 md:border-2 bg-white p-4 sm:p-8 md:p-12 shadow-[0_2px_10px_rgba(0,0,0,0.04)] md:shadow-[0_4px_20px_rgba(0,0,0,0.06)] transition-all duration-500 ease-in-out"
-          style={{
-            animationName: 'fadeIn',
-            animationDuration: '0.6s',
-            animationFillMode: 'both',
-            animationDelay: '0.3s'
-          }}>
+        <div className="mb-4 rounded-xl border border-gray-200 bg-white p-4 shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-all duration-500 ease-in-out sm:mb-5 sm:p-8 md:mb-6 md:rounded-2xl md:border-2 md:p-12 md:shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div
-                className={`h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 ${coin.bg} mr-2 sm:mr-3 md:mr-4 flex items-center justify-center rounded-full`}
+                className={`mr-2 flex h-8 w-8 items-center justify-center rounded-full sm:mr-3 sm:h-9 sm:w-9 md:mr-4 md:h-10 md:w-10`}
               >
-                {coin.icon}
+                <img
+                  src={coinMeta?.coinImageUrl}
+                  alt={coinMeta?.coinName ?? symbol}
+                  className="mr-2 h-8 w-8 rounded-full sm:mr-3 sm:h-9 sm:w-9 md:mr-4 md:h-10 md:w-10"
+                />
               </div>
-              <p className="text-lg sm:text-xl md:text-2xl font-semibold">총 보유</p>
+              <p className="text-lg font-semibold sm:text-xl md:text-2xl">
+                총 보유
+              </p>
             </div>
             <div className="text-right">
-              <p className="text-lg sm:text-xl md:text-2xl font-bold">
-                {balance.toFixed(6)} {symbol}
+              <p className="text-lg font-bold sm:text-xl md:text-2xl">
+                {balance.toFixed(2)} {symbol}
               </p>
-              <p className="text-sm sm:text-base text-gray-500">
-                = {(balance * (prices[`KRW-${symbol}`] ?? 0)).toLocaleString()} KRW
+              <p className="text-sm text-gray-500 sm:text-base">
+                = {(balance * livePrice).toLocaleString()} KRW
+                KRW
               </p>
             </div>
           </div>
         </div>
 
         {/* 버튼 영역 */}
-        <div
-          className="mb-4 sm:mb-5 md:mb-6 w-full"
-          style={{
-            animationName: 'slideIn',
-            animationDuration: '0.6s',
-            animationFillMode: 'both',
-            animationDelay: '0.5s'
-          }}>
+        <div className="mb-4 w-full sm:mb-5 md:mb-6">
           <div className="flex gap-2 sm:gap-3">
             {/* 코인 충전 버튼 */}
             <button
-              className="flex flex-1 items-center justify-center gap-1 sm:gap-2 rounded-lg sm:rounded-xl bg-[#0a2e64] py-1.5 sm:py-2 text-base sm:text-lg font-semibold text-white shadow"
+              className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-[#0a2e64] py-1.5 text-base font-semibold text-white shadow sm:gap-2 sm:rounded-xl sm:py-2 sm:text-lg"
               onClick={() => {
                 // Add transition before navigation
-                setPageVisible(false);
                 setTimeout(() => {
                   navigate(`/coin/address/${symbol}`, {
                     state: { isUser, symbol },
-                  });
-                }, 200);
+                  })
+                }, 200)
               }}
             >
               <CircleDollarSign
                 className="h-4 w-4 sm:h-5 sm:w-5"
                 stroke={addressStatus === 'ACTIVE' ? 'white' : 'gray'}
               />
-              <span className="text-sm sm:text-base, text-white">코인 충전</span>
+              <span className="sm:text-base, text-sm text-white">
+                코인 충전
+              </span>
             </button>
             <button
-              className={`flex flex-1 items-center justify-center gap-1 sm:gap-2 rounded-lg sm:rounded-xl py-1.5 sm:py-2 text-base sm:text-lg font-semibold shadow transition ${
+              className={`flex flex-1 items-center justify-center gap-1 rounded-lg py-1.5 text-base font-semibold shadow transition sm:gap-2 sm:rounded-xl sm:py-2 sm:text-lg ${
                 addressStatus === 'ACTIVE'
                   ? 'bg-[#0a2e64] text-white'
                   : 'cursor-not-allowed bg-gray-300 text-gray-400'
@@ -297,10 +182,9 @@ export default function CoinDetailPage() {
               onClick={() => {
                 if (addressStatus === 'ACTIVE') {
                   // Add transition before navigation
-                  setPageVisible(false);
                   setTimeout(() => {
-                    navigate('/settlement', { state: { isUser, symbol } });
-                  }, 200);
+                    navigate('/settlement', { state: { isUser, symbol } })
+                  }, 200)
                 }
               }}
             >
@@ -308,92 +192,47 @@ export default function CoinDetailPage() {
                 className="h-4 w-4 sm:h-5 sm:w-5"
                 stroke={addressStatus === 'ACTIVE' ? 'white' : 'gray'}
               />
-              <span className="text-sm sm:text-base text-white">코인 출금</span>
+              <span className="text-sm text-white sm:text-base">코인 출금</span>
             </button>
           </div>
 
           <div
-            className={`mt-2 sm:mt-3 w-full rounded-lg sm:rounded-xl py-2 sm:py-3 text-center text-sm sm:text-base font-medium transition ${
-              addressStatus === 'REGISTERING'
+            className={`mt-2 w-full rounded-lg py-2 text-center text-sm font-medium transition sm:mt-3 sm:rounded-xl sm:py-3 sm:text-base ${
+              addressStatus === 'REGISTERING' ||
+              addressStatus === 'UNREGISTERED_AND_REGISTERING'
                 ? 'cursor-not-allowed bg-gray-300 text-gray-400'
                 : 'cursor-pointer bg-[#0a2e64] text-white'
             }`}
             style={{ boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.1)' }}
             onClick={() => {
-              if (addressStatus === 'REGISTERING') {
-                setShowModal(true);
-              } else if (addressStatus === 'NOT_REGISTERED' || (addressStatus === 'ACTIVE' && addressInfo)) {
-                // Add transition before navigation
-                setPageVisible(false);
-                setTimeout(() => {
-                  if (addressStatus === 'NOT_REGISTERED') {
-                    navigate('/coin/address/add', { state: { isUser, symbol } });
-                  } else if (addressStatus === 'ACTIVE' && addressInfo) {
-                    navigate('/coin/address/add', {
-                      state: {
-                        symbol,
-                        isUser: false,
-                        useExistingAddress: true,
-                        address: addressInfo.address,
-                        tag: addressInfo.tag,
-                      },
-                    });
-                  }
-                }, 200);
+              if (
+                addressStatus === 'REGISTERING' ||
+                addressStatus === 'UNREGISTERED_AND_REGISTERING'
+              ) {
+                setShowModal(true)
+              } else {
+                navigate('/coin/address/add', { state: { symbol } })
               }
             }}
           >
-            <span
-              className={
-                addressStatus === 'ACTIVE'
-                  ? 'text-white'
-                  : addressStatus === 'REGISTERING'
-                    ? 'text-red-500'
-                    : 'text-white'
-              }
-            >
-              {addressStatus === 'ACTIVE'
-                ? '계좌가 등록되어 있습니다. 변경하려면 눌러주세요.'
-                : addressStatus === 'REGISTERING'
-                  ? '계좌가 등록중입니다..'
-                  : '출금계좌 등록하기'}
+            <span className="text-white">
+              {addressStatus === 'ACTIVE' &&
+                '계좌가 등록되어 있습니다. 변경하려면 눌러주세요.'}
+              {addressStatus === 'REGISTERING' && '계좌가 등록중입니다.'}
+              {addressStatus === 'UNREGISTERED' &&
+                '계좌가 등록 해제 중입니다...'}
+              {addressStatus === 'UNREGISTERED_AND_REGISTERING' &&
+                '계좌 등록 해제 후 변경 중입니다...'}
+              {addressStatus === 'NOT_REGISTERED' && '출금계좌 등록하기'}
+              {addressStatus === 'REJECTED' && '거절 되었습니다 다시 등록하기'}
             </span>
-          </div>
-        </div>
-
-        {/* 기간 선택 탭 */}
-        <div
-          className="mb-4 sm:mb-5 md:mb-6"
-          style={{
-            animationName: 'slideIn',
-            animationDuration: '0.6s',
-            animationFillMode: 'both',
-            animationDelay: '0.7s'
-          }}>
-          <div className="flex rounded-lg sm:rounded-xl bg-white p-1 shadow-sm">
-            {['day', 'week', 'month', 'year'].map(period => (
-              <button
-                key={period}
-                onClick={() => setSelectedPeriod(period)}
-                className={`flex-1 rounded-md sm:rounded-lg py-1.5 sm:py-2 text-center text-xs sm:text-sm font-medium transition-all duration-300 ${
-                  selectedPeriod === period
-                    ? 'bg-[#0a2e64] text-white'
-                    : 'text-gray-500 hover:bg-gray-50'
-                }`}
-              >
-                {period === 'day' && '1일'}
-                {period === 'week' && '1주'}
-                {period === 'month' && '1개월'}
-                {period === 'year' && '1년'}
-              </button>
-            ))}
           </div>
         </div>
 
         {showModal && addressInfo && (
           <CoinAddressModal
             symbol={symbol!}
-            coinName={coin.name}
+            coinName={coinMeta?.coinName || symbol || ''}
             address={addressInfo.address}
             tag={addressInfo.tag}
             onClose={() => setShowModal(false)}
@@ -401,16 +240,11 @@ export default function CoinDetailPage() {
         )}
 
         {/* 거래 내역 섹션 */}
-        <div
-          className="mb-3 sm:mb-4 flex items-center justify-between"
-          style={{
-            animationName: 'slideIn',
-            animationDuration: '0.6s',
-            animationFillMode: 'both',
-            animationDelay: '0.9s'
-          }}>
-          <h3 className="text-base sm:text-lg font-bold text-gray-800">거래 내역</h3>
-          <button className="flex items-center text-xs sm:text-sm font-medium text-[#0a2e64]">
+        <div className="mb-3 flex items-center justify-between sm:mb-4">
+          <h3 className="text-base font-bold text-gray-800 sm:text-lg">
+            거래 내역
+          </h3>
+          <button className="flex items-center text-xs font-medium text-[#0a2e64] sm:text-sm">
             전체보기
             <svg
               width="14"
@@ -432,24 +266,17 @@ export default function CoinDetailPage() {
         </div>
 
         {/* 거래 내역 */}
-        <div className="space-y-4 sm:space-y-5 md:space-y-6 pb-16 sm:pb-10 text-sm sm:text-base md:text-lg lg:text-xl">
-          {/* Fade-in animation for each transaction item */}
+        <div className="space-y-4 pb-16 text-sm sm:space-y-5 sm:pb-10 sm:text-base md:space-y-6 md:text-lg lg:text-xl">
           {data?.pages.map((page, pageIndex) =>
             page.content.map((item: PaymentHistory, idx: number) => {
-              const rate = prices[`KRW-${symbol}`] ?? 0;
-              const krw = Math.floor(item.amount * rate).toLocaleString();
-              const showAfterBalance = item.status === 'ACCEPTED';
+              const rate = tickerData[`KRW-${symbol}`]?.trade_price ?? 0
+              const krw = Math.floor(item.amount * rate).toLocaleString()
+              const showAfterBalance = item.status === 'ACCEPTED'
 
               return (
                 <div
                   key={`${pageIndex}-${idx}`}
                   className="transition-all duration-300 ease-in-out"
-                  style={{
-                    animationName: 'fadeInUp',
-                    animationDuration: '0.5s',
-                    animationDelay: `${idx * 0.1}s`,
-                    animationFillMode: 'both'
-                  }}
                 >
                   <TransactionItem
                     date={new Date(item.transferredAt).toLocaleString()}
@@ -467,37 +294,47 @@ export default function CoinDetailPage() {
                               ? '결제 완료'
                               : item.status === 'PENDING'
                                 ? '정산 대기중'
-                                : '결제 취소'
-                            : '알 수 없음'
+                                : item.status === 'FAILED'
+                                  ? '결제 취소'
+                                  : '환불 완료'
+                            : item.type === 'REFUND'
+                              ? '환불 완료'
+                              : item.type === 'EXCHANGE'
+                                ? item.amount > 0
+                                  ? '환전 입금 완료'
+                                  : '환전 출금 완료'
+                                : '알 수 없음'
                     }
                     balance={`${item.afterBalance ?? '-'} ${symbol}`}
-                    amount={item.amount.toFixed(6) + ' ' + symbol}
+                    amount={item.amount.toFixed(2) + ' ' + symbol}
                     krw={`${krw} KRW`}
-                    isDeposit={item.type === 'DEPOSIT'}
+                    isDeposit={item.type === 'DEPOSIT'|| item.type==="EXCHANGE" && item.amount < 0|| item.type==="PAY"&& item.amount<0}
                     showAfterBalance={showAfterBalance}
                   />
                 </div>
-              );
+              )
             })
           )}
           <div
             ref={observerElemRef}
-            className="h-10 flex items-center justify-center mt-4"
+            className="mt-4 flex h-10 items-center justify-center"
           >
             {isFetchingNextPage && (
-              <div className="w-8 h-8 rounded-full border-2 border-t-[#0a2e64] border-gray-200 animate-spin"></div>
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-200 border-t-[#0a2e64]"></div>
             )}
             {!hasNextPage && data?.pages[0]?.content.length > 0 && (
-              <p className="text-gray-500 text-sm">더 이상 거래 내역이 없습니다</p>
+              <p className="text-sm text-gray-500">
+                더 이상 거래 내역이 없습니다
+              </p>
             )}
             {data?.pages[0]?.content.length === 0 && (
-              <p className="text-gray-500 text-sm">거래 내역이 없습니다</p>
+              <p className="text-sm text-gray-500">거래 내역이 없습니다</p>
             )}
           </div>
-    </div>
-</main>
+        </div>
+      </main>
 
-  <BottomNav />
-</div>
-)
+      <BottomNav />
+    </div>
+  )
 }

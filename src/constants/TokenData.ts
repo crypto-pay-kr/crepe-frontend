@@ -1,5 +1,5 @@
-// components/token/tokenData.ts
-import { BankLogoProps } from '@/components/common/BankLogo'
+import { BankLogoProps } from '@/components/common/BankLogo';
+
 
 export interface TokenItem {
   name: string;
@@ -20,8 +20,8 @@ export interface TokenGroup {
 export const dummyTokenData: TokenGroup[] = [
   {
     groupName: "우리-토큰",
-    bank: "woori",
-    total: "5000 KRW", // 전체 보유량 (상품 포함 + 예치 안 된 잔액 포함)
+    bank: "HTK",
+    total: "5000 KRW",
     tokens: [
       {
         name: "우리청년도약토큰",
@@ -41,7 +41,7 @@ export const dummyTokenData: TokenGroup[] = [
   },
   {
     groupName: "신한-토큰",
-    bank: "shinhan",
+    bank: "STK",
     total: "1000 KRW",
     tokens: [
       {

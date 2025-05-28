@@ -1,12 +1,26 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from 'react'
 import { ChevronDown, ChevronUp ,ChevronRight} from "lucide-react";
+import { useNavigate, useParams } from 'react-router-dom'
+import { useBankStore } from '@/stores/BankStore'
+import { Product } from '@/types/store'
 
-import { useNavigate } from 'react-router-dom'
-import { dummyTokenData } from "@/constants/TokenData";
-import { BankLogo } from "@/components/common/BankLogo";
+export interface BankProduct{
+  subId: string
+  name: string
+  balance:number
+}
 
 
-export default function TokenAssets() {
+export interface Token {
+  bankImageUrl: string;
+  currency: string;
+  name: string;
+  balance: number;
+  product: BankProduct[] ;
+  krw :string;
+}
+
+export default function TokenAssets({tokens, onClick}: { tokens:Token[], onClick: (symbol: string) => void }) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const navigate = useNavigate()
 
@@ -17,58 +31,82 @@ export default function TokenAssets() {
     }));
   };
 
+
+
   return (
     <div className="rounded-xl bg-white p-4 shadow">
-      <h3 className="text-lg font-bold text-gray-800 mb-4">보유 토큰</h3>
+      <h3 className="mb-4 text-lg font-bold text-gray-800">보유 토큰</h3>
 
-      {dummyTokenData.map((group) => (
-        <div key={group.groupName} className="border-t border-b border-gray-200 mb-2">
-          <div className="flex items-center justify-between p-4 bg-white">
+      {tokens.map(token => (
+        <div key={token.currency}>
+          <div className="flex items-center justify-between bg-white p-4">
             <div
-              className="flex items-center gap-3 cursor-pointer"
-              onClick={() => navigate(`/token/detail/${group.bank}`)}
+              className="flex cursor-pointer items-center gap-3"
+              onClick={() => navigate(`/token/detail/${token.currency}`)}
             >
-              <BankLogo bank={group.bank} />
+              <img
+                src={token.bankImageUrl}
+                alt={token.name}
+                className="h-6 w-6 rounded-full"
+              />
               <div>
-                <p className="font-medium">{group.groupName}</p>
-                <p className="text-xs text-gray-500">KRWT</p>
+                <p className="font-medium">{token.name}</p>
+                <p className="text-xs text-gray-500">{token.currency}</p>
               </div>
             </div>
             <div
-              className="flex items-center gap-2 cursor-pointer"
-              onClick={() => toggle(group.groupName)}
+              className="flex cursor-pointer items-center gap-2"
+              onClick={() => toggle(token.currency)}
             >
-              <p className="text-black font-medium">{group.total}</p>
-              {expanded[group.groupName] ? (
-                <ChevronUp size={20} />
-              ) : (
-                <ChevronDown size={20} />
-              )}
+              {/* 오른쪽 가운데: 수량 + krw 세로 묶음 */}
+              <div className="flex flex-col items-end">
+                <p className="text-sm font-medium text-gray-900">
+                  {token.balance.toLocaleString()} {token.currency}
+                </p>
+                <p className="text-sm text-gray-500">{token.krw}</p>
+              </div>
+
+              {/* 오른쪽 끝: 아이콘 */}
+              <div>
+                {expanded[token.currency] ? (
+                  <ChevronUp size={16} className="text-gray-500" />
+                ) : (
+                  <ChevronDown size={16} className="text-gray-500" />
+                )}
+              </div>
             </div>
           </div>
 
-          {expanded[group.groupName] &&
-            group.tokens.map((token) => (
+          {expanded[token.name] &&
+            token.product?.map(products => (
               <div
-                key={token.code}
-                className="flex items-center justify-between p-4 bg-gray-50 border-t border-gray-200"
+                key={products.subId}
+                className="flex items-center justify-between border-t border-gray-200 bg-gray-50 p-4"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                    <span className="text-xs font-medium whitespace-pre">{token.rate}</span>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200">
+                    <span className="whitespace-pre text-xs font-medium"></span>
                   </div>
                   <div>
-                    <p className="font-medium">{token.name}</p>
-                    <p className="text-xs text-gray-500">{token.code}</p>
+                    <p className="font-medium">{products.name}</p>
                   </div>
                 </div>
                 <div
-                  className="flex items-center gap-2 text-right cursor-pointer"
-                  onClick={() => navigate(`/token/product/detail/${token.code}`)}
+                  className="flex cursor-pointer items-center gap-2 text-right"
+                  onClick={() =>
+                    navigate(`/token/product/detail/${products.subId}`, {
+                      state: {
+                        products,
+                        tokenInfo: token,
+                      },
+                    })
+                  }
                 >
                   <div className="flex flex-col items-end">
-                    <p className="text-blue-600 font-medium">{token.amount}</p>
-                    <p className="text-xs text-gray-500">{token.evaluated}</p>
+                    <p className="text-blue-600 font-medium">
+                      {products.balance}
+                    </p>
+                    <p className="text-xs text-gray-500">{token.currency}</p>
                   </div>
                   <ChevronRight size={16} className="text-gray-500" />
                 </div>
@@ -77,5 +115,5 @@ export default function TokenAssets() {
         </div>
       ))}
     </div>
-  );
+  )
 }

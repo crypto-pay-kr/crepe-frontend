@@ -7,7 +7,8 @@ export default function LoginPage() {
 
   return (
     <LoginHome
-      onSignup={() => navigate("/signup")} // 회원가입 페이지로 이동
+      onSignup={() => navigate("/terms")}
+      onStoreSignup={() => navigate("/store/terms")}
     />
   );
 }

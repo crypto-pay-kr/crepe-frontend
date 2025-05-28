@@ -1,11 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from 'react'
 import Button from '@/components/common/Button';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '@/components/common/Header';
 import BottomNav from '@/components/common/BottomNavigate';
 import AddressInput from "@/components/coin/AddressInput";
 import AddressInstructions from "@/components/coin/AddressInstructions";
-import { registerAccountAddress, reRegisterAccountAddress } from '@/api/coin';
+import {
+  unRegisterAccountAddress,
+  isAccountAddressRegistered,
+  registerAccountAddress,
+  reRegisterAccountAddress,
+} from '@/api/coin'
 
 interface LocationState {
   symbol?: string;
@@ -20,21 +25,69 @@ export default function AddCoinAddress() {
   const location = useLocation();
   const {
     symbol,
-    isUser = false,
-    useExistingAddress = false,
-    address: prefillAddress = "",
-    tag: prefillTag = "",
   } = location.state as LocationState || {};
 
-  const [address, setAddress] = useState<string>(prefillAddress);
-  const [tagAddress, setTagAddress] = useState<string>(prefillTag);
+  const [address, setAddress] = useState<string>();
+  const [tagAddress, setTagAddress] = useState<string>();
+  const [existingAddress, setExistingAddress] = useState<boolean>();
+  const [addressStatus, setAddressStatus] = useState<'ACTIVE' | 'REGISTERING' | 'NOT_REGISTERED' |'UNREGISTERED'|'UNREGISTERED_AND_REGISTERING' | null>(null);
+  const [addressInfo, setAddressInfo] = useState<{
+    address: string;
+    tag?: string;
+    addressStatus: string;
+  } | null>(null);
 
-  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAddress(e.target.value);
+
+  // 입금 주소가 유효한지 확인
+  useEffect(() => {
+    if (symbol) {
+      isAccountAddressRegistered(symbol)
+        .then((res) => {
+          setAddressStatus(res.addressRegistryStatus);
+          setAddressInfo({ address: res.address, tag: res.tag ,addressStatus: res.addressRegistryStatus });
+
+          if(res.address!){
+            setExistingAddress(true);
+          }
+
+        })
+        .catch((err) => {
+          console.error("등록된 주소없음", err);
+          setAddressStatus('NOT_REGISTERED');
+          setAddressInfo(null);
+        });
+    }
+  }, [symbol]);
+
+
+  const handleDeactivateClick = async () => {
+    if (!symbol) return;
+
+    try {
+      await unRegisterAccountAddress(symbol);
+
+      const res = await isAccountAddressRegistered(symbol);
+
+      if (res?.addressRegistryStatus) {
+        setAddressStatus(res.addressRegistryStatus);
+        setAddressInfo({
+          address: res.address,
+          tag: res.tag,
+          addressStatus: res.addressRegistryStatus,
+        });
+      } else {
+        throw new Error('계좌 상태를 불러오지 못했습니다.');
+      }
+    } catch (e) {
+      alert("등록 해제 요청 실패");
+      console.error(e);
+    }
   };
 
-  const handleTagAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTagAddress(e.target.value);
+  const renderDeactivateButtonText = () => {
+    if (addressStatus === 'UNREGISTERED_AND_REGISTERING') return '등록 해제 후 변경 중..';
+    if (addressStatus === 'UNREGISTERED') return '등록 해제중..';
+    return '등록 해제';
   };
 
   const handleNext = async () => {
@@ -46,11 +99,11 @@ export default function AddCoinAddress() {
     try {
       const payload = {
         currency: symbol,
-        address,
+        address:address!,
         tag: symbol === "XRP" ? tagAddress : undefined,
       };
 
-      if (useExistingAddress) {
+      if (existingAddress) {
         await reRegisterAccountAddress(payload);
         alert("계좌가 재등록되었습니다.");
       } else {
@@ -68,47 +121,107 @@ export default function AddCoinAddress() {
   const isButtonDisabled = !address;
 
   return (
-    <div className="flex flex-col h-screen bg-white">
+    <div className="flex h-screen flex-col bg-white">
       <Header title="코인 입금" />
-      <div className="flex-1 px-6 py-6 overflow-auto">
+      <div className="flex-1 overflow-auto px-6 py-6">
         <div className="mb-8">
-          <div className="bg-gray-50 rounded-lg p-4 mb-8 shadow-sm">
+          <div className="mb-8 rounded-lg bg-gray-50 p-4 shadow-sm">
             <div className="flex items-center">
-              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
+              <div className="bg-blue-100 mr-3 flex h-10 w-10 items-center justify-center rounded-full">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="text-blue-600 h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </div>
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">네트워크: {symbol}</h2>
-                <p className="text-sm text-gray-600">{symbol} 토큰을 지원하는 블록체인 네트워크</p>
+              <div className="flex items-start justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    네트워크: {symbol}
+                  </h2>
+                  <p className="text-sm text-gray-600">
+                    {symbol} 토큰을 지원하는 블록체인 네트워크
+                  </p>
+                </div>
+
+                {(addressStatus === 'ACTIVE' ||
+                  addressStatus === 'UNREGISTERED_AND_REGISTERING' ||
+                  addressStatus === 'UNREGISTERED') && (
+                  <button
+                    onClick={handleDeactivateClick}
+                    disabled={addressStatus === 'UNREGISTERED'}
+                    className="ml-32 mt-1.5 min-w-[140px] whitespace-nowrap rounded px-4 py-1 text-sm font-bold text-red-600 hover:bg-red-200 disabled:opacity-50"
+                  >
+                    {renderDeactivateButtonText()}
+                  </button>
+                )}
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg p-4 mb-8 border border-gray-100 shadow-sm">
+          <div className="mb-8 rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
             <AddressInput
               label={`고객님의 ${symbol} 주소`}
-              value={address}
-              onChange={handleAddressChange}
+              value={address!}
+              onChange={e => setAddress(e.target.value)}
               placeholder={`고객님의 ${symbol} 주소를 입력해주세요.`}
             />
 
-            {symbol === "XRP" && (
+            {symbol === 'XRP' && (
               <AddressInput
                 label="고객님의 XRP Tag 주소"
-                value={tagAddress}
-                onChange={handleTagAddressChange}
+                value={tagAddress!}
+                onChange={e => setTagAddress(e.target.value)}
                 placeholder="고객님의 XRP 태그를 입력해주세요."
                 className="mt-6"
               />
             )}
           </div>
 
-          <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-100">
-            <h3 className="text-sm font-medium text-yellow-800 mb-2 flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z" clipRule="evenodd" />
+          {addressInfo?.address && (
+            <>
+              <div className="mb-6">
+                <p className="mb-1 text-sm font-medium text-gray-600">
+                  {symbol} 출금 주소
+                </p>
+                <div className="text-blue-900 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold">
+                  {addressInfo.address}
+                </div>
+              </div>
+
+              {symbol === 'XRP' && (
+                <div className="mb-6">
+                  <p className="mb-1 text-sm font-medium text-gray-600">
+                    태그 주소
+                  </p>
+                  <div className="text-blue-900 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold">
+                    {addressInfo.tag}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          <div className="rounded-lg border border-yellow-100 bg-yellow-50 p-4">
+            <h3 className="mb-2 flex items-center text-sm font-medium text-yellow-800">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="mr-1 h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z"
+                  clipRule="evenodd"
+                />
               </svg>
               안내사항
             </h3>
@@ -117,17 +230,17 @@ export default function AddCoinAddress() {
         </div>
       </div>
 
-      <div className="p-5 bg-white">
+      <div className="bg-white p-5">
         <Button
-          text={useExistingAddress ? "계좌 재등록 요청" : "계좌 등록 요청"}
+          text={existingAddress ? '계좌 재등록 요청' : '계좌 등록 요청'}
           onClick={handleNext}
           disabled={isButtonDisabled}
-          color={isButtonDisabled ? "gray" : "blue"}
-          className="rounded-lg shadow-md w-full py-3 text-lg font-medium"
+          color={isButtonDisabled ? 'gray' : 'blue'}
+          className="w-full rounded-lg py-3 text-lg font-medium shadow-md"
         />
       </div>
 
       <BottomNav />
     </div>
-  );
+  )
 }

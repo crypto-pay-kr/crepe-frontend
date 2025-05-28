@@ -26,7 +26,7 @@ export default function ProductAdditionalInfo({
         <InfoItem text={productType} />
       </div>
 
-      <h2 className="font-medium mb-2 mt-4">선택순 가입</h2>
+      <h2 className="font-medium mb-2 mt-4">우대금리 적용 조건</h2>
       <div className="space-y-2">
         {selectionEnrollment.map((item, index) => (
           <InfoItem key={index} text={item} />

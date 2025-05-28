@@ -6,7 +6,7 @@ interface CoinItemProps {
 }
 
 export function CoinItem({ coin, onClick }: CoinItemProps) {
-  const { symbol, name, icon, bg, balance, krw } = coin;
+  const { currency, coinName, icon, balance, krw } = coin;
   
   return (
     <div
@@ -14,12 +14,12 @@ export function CoinItem({ coin, onClick }: CoinItemProps) {
       onClick={onClick}
     >
       <div className="flex items-center">
-        <div className={`mr-4 flex h-14 w-14 items-center justify-center rounded-full ${bg}`}>
+        <div className={`mr-4 flex h-14 w-14 items-center justify-center rounded-full`}>
           {icon}
         </div>
         <div>
-          <p className="text-xl font-semibold">{name}</p>
-          <p className="text-sm text-gray-500">{symbol}</p>
+          <p className="text-xl font-semibold">{coinName}</p>
+          <p className="text-sm text-gray-500">{currency}</p>
         </div>
       </div>
       <div className="flex items-center">

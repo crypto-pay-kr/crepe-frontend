@@ -273,3 +273,35 @@ export async function completeOrder(orderId: string) {
   return response;
 }
 
+// 내 가게 월별 결제 내역 총합 조회
+export async function getStorePayment() {
+  const token = sessionStorage.getItem("accessToken");
+  const response = await fetch(`${API_BASE_URL}/api/store/my/settlement`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    });
+  if (!response.ok) {
+    throw new Error("월별 정산 내역 조회에 실패했습니다.");
+  }
+  return await response.json();
+}
+
+// 내 가게 결제내역 상태별 수 조회
+export async function getStatusCount() {
+  const token = sessionStorage.getItem("accessToken");
+  const response = await fetch(`${API_BASE_URL}/api/store/my/transaction/count`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error("상태 건수 조회에 실패했습니다.");
+  }
+  return await response.json();
+}
+

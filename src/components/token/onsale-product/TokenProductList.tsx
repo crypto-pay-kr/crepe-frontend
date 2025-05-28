@@ -1,17 +1,16 @@
-import React from "react"
-import BankProductItem, {BankProductItemProps} from "./TokenProductItem"
+import React from "react";
+import TokenProductItem, { TokenProductItemProps } from "./TokenProductItem";
 
-
-interface BankProductListProps {
-  items: BankProductItemProps[]
+interface TokenProductListProps {
+  items: TokenProductItemProps[];
 }
 
-export default function BankProductList({ items }: BankProductListProps) {
+export default function TokenProductList({ items }: TokenProductListProps) {
   return (
     <div className="space-y-6 p-3">
-      {items.map((item, idx) => (
-        <BankProductItem key={idx} {...item} />
+      {items.map((item) => (
+        <TokenProductItem key={item.productId} {...item} />
       ))}
     </div>
-  )
+  );
 }

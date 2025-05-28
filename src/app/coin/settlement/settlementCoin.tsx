@@ -6,7 +6,8 @@ import AmountInput from '@/components/coin/AmountInput'
 import PercentageSelector from '@/components/coin/PercentageSelector'
 import AvailableAmount from '@/components/coin/AvailableAmount'
 import Button from '@/components/common/Button'
-import { fetchCoinPrices, getCoinBalanceByCurrency, requestWithdraw } from '@/api/coin'
+import {getCoinBalanceByCurrency, requestWithdraw } from '@/api/coin'
+import { useTickerData } from '@/hooks/useTickerData'
 
 
 export default function SettlementCoin() {
@@ -15,12 +16,8 @@ export default function SettlementCoin() {
   const navigate = useNavigate();
   const location = useLocation()
   const symbol = location.state?.symbol || 'XRP'
-  const [prices, setPrices] = useState<{ [key: string]: number }>({
-    "KRW-XRP": 0,
-    "KRW-USDT": 0,
-    "KRW-SOL": 0,
-  });
-  
+  const tickerData = useTickerData();
+  const livePrice = tickerData[`KRW-${symbol}`]?.trade_price ?? 0;
   const handleAmountChange = (value: string) => {
     setAmount(value)
   }
@@ -34,26 +31,11 @@ export default function SettlementCoin() {
 
   const [availableAmount, setAvailableAmount] = useState<number>(0);
 
-  useEffect(() => {
-    const loadPrices = async () => {
-      try {
-        const updatedPrices = await fetchCoinPrices();
-        setPrices(updatedPrices);
-      } catch (err) {
-        console.error("시세 조회 실패", err);
-      }
-    };
 
-    loadPrices();
-    const interval = setInterval(loadPrices, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   const getKRWValue = (amount: string) => {
     const num = parseFloat(amount);
-    const price = prices[`KRW-${symbol}`] ?? 0;
-    return isNaN(num) ? "0 KRW" : `${Math.floor(num * price).toLocaleString()} KRW`;
+    return isNaN(num) ? "0 KRW" : `${Math.floor(num * livePrice).toLocaleString()} KRW`;
   };
 
 
@@ -141,7 +123,7 @@ export default function SettlementCoin() {
             <div>
               <h3 className="text-sm font-medium text-gray-900 mb-1">정산 안내</h3>
               <p className="text-sm text-gray-600">
-                정산 요청 후 영업일 기준 1-2일 내에 처리됩니다. 정산 최소 금액은 10 {symbol}입니다.
+                정산 요청 후 영업일 기준 1-2일 내에 처리됩니다. 정산 최소 금액은 0.4 {symbol}입니다.
               </p>
             </div>
           </div>

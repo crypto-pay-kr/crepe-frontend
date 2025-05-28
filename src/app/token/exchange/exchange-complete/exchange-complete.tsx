@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+
 import { dummyTokenData } from "@/constants/TokenData";
 import { dummyTokenTransactions } from "@/constants/TokenTransactionData";
 import Header from "@/components/common/Header";
@@ -7,22 +7,31 @@ import TransactionItem from "@/components/coin/TransactionItem";
 import React, { useState } from 'react'
 import { BankLogo } from '@/components/common/BankLogo'
 import Button from '@/components/common/Button'
-
-
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function TokenExchangeCompletePage() {
   const navigate = useNavigate();
-
+  const location = useLocation();
+  const {
+    bank,
+    fromCurrency,
+    toCurrency,
+    fromAmount,
+    toAmount,
+    isCoinToToken,
+  } = location.state || {};
 
   const onNext = () => {
-    navigate(``, {
-      state: { isUser: true }
-    });
-  }
+    if (bank) {
+      navigate(`/token/detail/${bank}`);
+    } else {
+      alert("잘못된 접근입니다.");
+    }
+  };
 
   return (
     <div className="flex h-full flex-col bg-gray-50">
-      <Header title="토큰 환전" />
+      <Header disableBack={true} title="토큰 환전" />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col items-center justify-center px-6">
@@ -31,7 +40,11 @@ export default function TokenExchangeCompletePage() {
           <h2 className="text-2xl font-medium mb-12">완료되었습니다.</h2>
 
           <div className="flex flex-col items-center gap-4">
-            <p className="text-3xl font-bold">0.3XRP</p>
+            <p className="text-3xl font-bold">
+              {isCoinToToken
+                ? `${fromAmount} ${fromCurrency}`
+                : `${toAmount} ${toCurrency}`}
+            </p>
 
             <div className="w-10 h-10 flex items-center justify-center">
               <svg
@@ -48,12 +61,14 @@ export default function TokenExchangeCompletePage() {
               </svg>
             </div>
 
-            <p className="text-3xl font-bold">1000KRWT</p>
+            <p className="text-3xl font-bold">
+              {isCoinToToken
+                ? `${toAmount} ${toCurrency}`
+                : `${fromAmount} ${fromCurrency}`}
+            </p>
           </div>
         </div>
       </div>
-
-
 
       <div className="p-5 bg-gray-50 shadow-lg border-t border-gray-50">
         <Button

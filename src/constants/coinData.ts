@@ -3,11 +3,11 @@ import React from 'react';
 export interface Coin {
   currency: string;
   coinName: string;
-  icon: React.ReactNode;
-  bg: string;
+  icon: string;
   balance: string;
   krw: string;
   change: string;
+
 }
 
 export interface Order {
@@ -21,4 +21,5 @@ export interface Order {
   storeLocation: string;
   totalPrice: string;
 }
+
 

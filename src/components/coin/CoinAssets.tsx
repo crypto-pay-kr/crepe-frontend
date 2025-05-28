@@ -7,15 +7,26 @@ export default function CoinAssets({ coins, onClick }: { coins: Coin[], onClick:
         <h3 className="text-lg font-bold text-gray-800">보유 가상자산</h3>
       </div>
       <div className="space-y-3">
-        {coins.map((coin) => (
-          <div key={coin.currency} onClick={() => onClick(coin.currency)} className="flex cursor-pointer items-center justify-between rounded-lg p-3 hover:bg-gray-50">
+        {coins.map(coin => (
+          <div
+            key={coin.currency}
+            onClick={() => onClick(coin.currency)}
+            className="flex cursor-pointer items-center justify-between rounded-lg p-3 hover:bg-gray-50"
+          >
             <div className="flex items-center">
-              <div className={`flex h-10 w-10 items-center justify-center rounded-full ${coin.bg}`}>
-                {coin.icon}
+              <div
+                className={`flex h-10 w-10 items-center justify-center rounded-full `}
+              >
+                <img
+                  src={coin.icon}
+                  alt={coin.coinName}
+                  className="h-5 w-5 rounded-full"
+                />
               </div>
               <div className="ml-3">
                 <h4 className="font-medium text-gray-900">
-                  {coin.coinName} <span className="text-sm text-gray-500">{coin.currency}</span>
+                  {coin.coinName}{' '}
+                  <span className="text-sm text-gray-500">{coin.currency}</span>
                 </h4>
                 <div className="text-sm text-green-500">{coin.change}</div>
               </div>
@@ -28,5 +39,5 @@ export default function CoinAssets({ coins, onClick }: { coins: Coin[], onClick:
         ))}
       </div>
     </div>
-  );
+  )
 }
