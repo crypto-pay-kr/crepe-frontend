@@ -5,7 +5,9 @@ import BottomNav from "@/components/common/BottomNavigate"
 import { TimeSelectionModal } from "@/components/order/time-selection-modal"
 import { RejectionReasonModal } from "@/components/order/reject-reason-modal"
 import Button from '@/components/common/Button'
-import { fetchOrders, acceptOrder, rejectOrder, completeOrder } from "@/api/store";
+import { fetchOrders, acceptOrder, rejectOrder, completeOrder } from "@/api/store"
+import { useNotifications } from '@/hooks/useNotifications'
+import NotificationPermissionModal from '@/components/common/NotificationPermissionModal'
 
 interface OrderItem {
   name: string
@@ -30,6 +32,25 @@ export default function OrderStatusPage() {
   const [timeModalOpen, setTimeModalOpen] = useState(false)
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false)
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
+  const [showNotificationModal, setShowNotificationModal] = useState(false)
+
+  // 알림 관련 hooks
+  const { 
+    isSupported, 
+    permission, 
+    isSubscribed, 
+    requestPermission, 
+    subscribeToPush,
+    showOrderNotification 
+  } = useNotifications()
+
+  // 컴포넌트 마운트 시 알림 권한 확인
+  useEffect(() => {
+    if (isSupported && permission === 'default') {
+      // 첫 방문 시 알림 권한 요청 모달 표시
+      setShowNotificationModal(true)
+    }
+  }, [isSupported, permission])
 
   useEffect(() => {
     const loadOrders = async () => {
@@ -47,6 +68,22 @@ export default function OrderStatusPage() {
           })),
           expanded: false,
         }));
+        
+        // 기존 주문과 비교하여 새 주문 감지
+        const previousOrderIds = orders.map(order => order.id)
+        const newOrders = mappedOrders.filter(order => !previousOrderIds.includes(order.id))
+        
+        // 새 주문이 있으면 알림 표시
+        if (newOrders.length > 0 && orders.length > 0) {
+          newOrders.forEach(order => {
+            handleNewOrder({
+              orderId: order.id,
+              orderType: order.type,
+              items: order.items
+            })
+          })
+        }
+        
         setOrders(mappedOrders);
       } catch (error) {
         console.error("Failed to fetch orders:", error);
@@ -55,6 +92,32 @@ export default function OrderStatusPage() {
 
     loadOrders();
   }, []);
+
+  // 새 주문이 들어왔을 때 알림 표시
+  const handleNewOrder = async (orderData: any) => {
+    if (permission === 'granted') {
+      const itemsText = orderData.items.map((item: OrderItem) => 
+        `${item.name} ${item.quantity}개`
+      ).join(', ')
+      
+      await showOrderNotification({
+        orderId: orderData.orderId,
+        type: 'new_order',
+        message: `새로운 주문이 접수되었습니다: ${orderData.orderType}`,
+        details: itemsText,
+        storeName: '내 가게'
+      })
+    }
+  }
+
+  // 알림 권한 허용 처리
+  const handleNotificationAllow = async () => {
+    await requestPermission()
+    if (permission === 'granted') {
+      await subscribeToPush()
+    }
+    setShowNotificationModal(false)
+  }
 
   const handleToggleExpand = (id: string) => {
     setOrders(orders.map((order) => (order.id === id ? { ...order, expanded: !order.expanded } : order)))
@@ -93,6 +156,16 @@ export default function OrderStatusPage() {
           order.id === selectedOrderId ? { ...order, status: "수락 완료", timeRemaining: parseInt(time) } : order,
         ),
       );
+
+      // 주문 수락 알림
+      if (permission === 'granted') {
+        await showOrderNotification({
+          orderId: selectedOrderId,
+          type: 'order_accepted',
+          message: `주문이 수락되었습니다 (${time}분 소요 예정)`,
+          storeName: '내 가게'
+        })
+      }
     } catch (error) {
       console.error("Failed to accept order:", error);
     } finally {
@@ -117,6 +190,17 @@ export default function OrderStatusPage() {
           order.id === selectedOrderId ? { ...order, status: "거절됨", rejectionReason: reason } : order,
         ),
       );
+
+      // 주문 거절 알림
+      if (permission === 'granted') {
+        await showOrderNotification({
+          orderId: selectedOrderId,
+          type: 'order_rejected',
+          message: `주문이 거절되었습니다`,
+          details: `사유: ${reason}`,
+          storeName: '내 가게'
+        })
+      }
     } catch (error) {
       console.error("Failed to refuse order:", error);
     } finally {
@@ -124,7 +208,7 @@ export default function OrderStatusPage() {
     }
   };
 
-  // 주문 거절
+  // 주문 완료
   const handlePrepareComplete = async (id: string) => {
     try {
 
@@ -140,6 +224,16 @@ export default function OrderStatusPage() {
           order.id === id ? { ...order, status: "준비 완료", timeRemaining: undefined } : order,
         ),
       );
+
+      // 주문 완료 알림
+      if (permission === 'granted') {
+        await showOrderNotification({
+          orderId: id,
+          type: 'order_completed',
+          message: `주문이 준비 완료되었습니다`,
+          storeName: '내 가게'
+        })
+      }
     } catch (error) {
       console.error("Failed to complete order:", error);
     }
@@ -152,7 +246,6 @@ export default function OrderStatusPage() {
   const handleStoreSettings = () => {
     navigate("/store/manage")
   }
-
 
   const isSeller = location.pathname.includes('/store')
 
@@ -211,7 +304,6 @@ export default function OrderStatusPage() {
                       <span>{item.quantity}개</span>
                     </div>
                   ))}
-
 
                   {order.status === "거절됨" && order.rejectionReason && (
                     <div className="mt-2 p-2 bg-red-50 rounded-md">
@@ -285,6 +377,14 @@ export default function OrderStatusPage() {
         isOpen={rejectionModalOpen}
         onClose={() => setRejectionModalOpen(false)}
         onReject={handleReject}
+      />
+
+      {/* 알림 권한 요청 모달 */}
+      <NotificationPermissionModal
+        isOpen={showNotificationModal}
+        onClose={() => setShowNotificationModal(false)}
+        onAllow={handleNotificationAllow}
+        onDeny={() => setShowNotificationModal(false)}
       />
     </div>
   )
