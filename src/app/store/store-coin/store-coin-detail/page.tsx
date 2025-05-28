@@ -1,4 +1,4 @@
-import { CircleDollarSign, X } from 'lucide-react'
+import { Calendar, CircleDollarSign, X } from 'lucide-react'
 import Header from "@/components/common/Header"
 import { useNavigate, useParams, useLocation } from "react-router-dom"
 import React, { useEffect, useState, useRef } from 'react'
@@ -42,7 +42,6 @@ export default function CoinDetailPage() {
   const coinList = useCoinStore(state => state.coins);
   const coinMeta = coinList.find(c => c.currency === symbol);
   const livePrice = tickerData[`KRW-${symbol}`]?.trade_price ?? 0;
-
   // 입금 주소가 유효한지 확인
   useEffect(() => {
     if (symbol) {
@@ -114,7 +113,9 @@ export default function CoinDetailPage() {
     <div className="relative flex h-full flex-col bg-gray-50">
       <Header
         title={`${coinMeta?.coinName ?? symbol} 상세`}
-        onBackClick={() => {navigate('/my/coin')}}
+        onBackClick={() => {
+          navigate('/my/coin')
+        }}
       />
 
       <main
@@ -142,8 +143,7 @@ export default function CoinDetailPage() {
                 {balance.toFixed(2)} {symbol}
               </p>
               <p className="text-sm text-gray-500 sm:text-base">
-                = {(balance * livePrice).toLocaleString()} KRW
-                KRW
+                = {(balance * livePrice).toLocaleString()} KRW KRW
               </p>
             </div>
           </div>
@@ -244,29 +244,10 @@ export default function CoinDetailPage() {
           <h3 className="text-base font-bold text-gray-800 sm:text-lg">
             거래 내역
           </h3>
-          <button className="flex items-center text-xs font-medium text-[#0a2e64] sm:text-sm">
-            전체보기
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="ml-1"
-            >
-              <path
-                d="M6 12L10 8L6 4"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
         </div>
 
         {/* 거래 내역 */}
-        <div className="space-y-4 pb-16 text-sm sm:space-y-5 sm:pb-10 sm:text-base md:space-y-6 md:text-lg lg:text-xl">
+        <div className="mb-0 space-y-4 pb-16 text-sm sm:space-y-5 sm:pb-10 sm:text-base md:space-y-6 md:text-lg lg:text-xl">
           {data?.pages.map((page, pageIndex) =>
             page.content.map((item: PaymentHistory, idx: number) => {
               const rate = tickerData[`KRW-${symbol}`]?.trade_price ?? 0
@@ -308,7 +289,12 @@ export default function CoinDetailPage() {
                     balance={`${item.afterBalance ?? '-'} ${symbol}`}
                     amount={item.amount.toFixed(2) + ' ' + symbol}
                     krw={`${krw} KRW`}
-                    isDeposit={item.type === 'DEPOSIT'|| item.type==="EXCHANGE" && item.amount < 0|| item.type==="PAY"&& item.amount<0}
+                    isDeposit={
+                      (item.type === 'DEPOSIT'&& item.amount<0) ||
+                      (item.type === 'EXCHANGE' && item.amount < 0) ||
+                      (item.type === 'PAY' && item.amount < 0) ||
+                      (item.type === 'WITHDRAW' && item.amount < 0)
+                    }
                     showAfterBalance={showAfterBalance}
                   />
                 </div>

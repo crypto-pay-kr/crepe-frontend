@@ -1,11 +1,8 @@
 
-import { dummyTokenData } from "@/constants/TokenData";
-import { dummyTokenTransactions } from "@/constants/TokenTransactionData";
 import Header from "@/components/common/Header";
 import BottomNav from "@/components/common/BottomNavigate";
-import TransactionItem from "@/components/coin/TransactionItem";
 import React, { useState } from 'react'
-import { BankLogo } from '@/components/common/BankLogo'
+
 import Button from '@/components/common/Button'
 import { useNavigate, useLocation } from "react-router-dom";
 

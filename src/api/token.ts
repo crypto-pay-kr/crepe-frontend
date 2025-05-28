@@ -1,6 +1,5 @@
 
 const API_BASE_URL = import.meta.env.VITE_API_SERVER_URL || "http://localhost:8080";
-// import { GetTransactionHistoryResponse, SliceResponse } from '@/app/token/my-product/detail/my-product-detail'
 
 const BASE_URL = import.meta.env.VITE_API_SERVER_URL;
 
@@ -122,7 +121,7 @@ export  const GetTerminatePreview = async (subscribeId: string) => {
 };
 
 // 내 가입 상품 거래내역 조회
-export const GetMySubscribeTransactionList = async (subscribeId: string, page:number, size: number = 3) => {
+export const GetMySubscribeTransactionList = async (subscribeId: number, page:number, size: number = 3) => {
   const token = sessionStorage.getItem("accessToken");
 
   if (!token) {

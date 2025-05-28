@@ -16,7 +16,8 @@ interface Transaction {
   amount: number;
   afterBalance: number;
   transferredAt: string;
-  status: 'ACCEPTED' | 'PENDING' | 'FAILED'; // 필요한 status만 추가
+  status: 'ACCEPTED' | 'PENDING' | 'FAILED';
+  type:string;
 }
 
 export default function TokenGroupDetailPage() {
@@ -181,25 +182,6 @@ export default function TokenGroupDetailPage() {
           <h3 className="text-base font-bold text-gray-800 sm:text-lg">
             거래 내역
           </h3>
-          <button className="flex items-center text-xs font-medium text-[#0a2e64] sm:text-sm">
-            전체보기
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="ml-1"
-            >
-              <path
-                d="M6 12L10 8L6 4"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
         </div>
 
         {/* 거래 내역 리스트 */}
@@ -226,12 +208,20 @@ export default function TokenGroupDetailPage() {
                       <TransactionItem
                         date={new Date(tx.transferredAt).toLocaleString()}
                         type={
-                          tx.amount > 0 ? '환전 입금 완료' : '환전 출금 완료'
+                          tx.type === "EXCHANGE"
+                            ? tx.amount > 0
+                              ? "환전 입금 완료"
+                              : "환전 출금 완료"
+                            : tx.type === "SUBSCRIBE"
+                              ? tx.amount < 0
+                                ? "상품 예치 완료"
+                                : "상품 해지 및 만기 입금"
+                              : "-"
                         }
                         balance={`${tx.afterBalance?.toFixed(2) ?? '-'} ${bank}`}
                         amount={`${tx.amount.toFixed(2)} ${bank}`}
                         krw={`${krw} KRW`}
-                        isDeposit={tx.amount > 0}
+                        isDeposit={tx.amount < 0}
                         showAfterBalance={tx.status === 'ACCEPTED'}
                       />
                     </div>

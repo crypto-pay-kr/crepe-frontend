@@ -43,5 +43,6 @@ export interface Product {
 export interface SubscribeTransaction {
   eventType: string;
   amount: string;
+  afterBalance: number;
   date: string;
 }

@@ -1,24 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { ChevronDown, ChevronUp ,ChevronRight} from "lucide-react";
 import { useNavigate, useParams } from 'react-router-dom'
-import { useBankStore } from '@/stores/BankStore'
-import { Product } from '@/types/store'
+import {Token} from '@/types/token';
 
-export interface BankProduct{
-  subId: string
-  name: string
-  balance:number
-}
-
-
-export interface Token {
-  bankImageUrl: string;
-  currency: string;
-  name: string;
-  balance: number;
-  product: BankProduct[] ;
-  krw :string;
-}
 
 export default function TokenAssets({tokens, onClick}: { tokens:Token[], onClick: (symbol: string) => void }) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
@@ -63,29 +47,41 @@ export default function TokenAssets({tokens, onClick}: { tokens:Token[], onClick
                 <p className="text-sm font-medium text-gray-900">
                   {token.balance.toLocaleString()} {token.currency}
                 </p>
-                <p className="text-sm text-gray-500">{token.krw}</p>
+                <p className="text-sm text-gray-500">{token.krw}{""}</p>
               </div>
 
               {/* 오른쪽 끝: 아이콘 */}
               <div>
                 {expanded[token.currency] ? (
-                  <ChevronUp size={16} className="text-gray-500" />
-                ) : (
                   <ChevronDown size={16} className="text-gray-500" />
+                ) : (
+                  <ChevronUp size={16} className="text-gray-500" />
                 )}
               </div>
             </div>
           </div>
 
-          {expanded[token.name] &&
+          {expanded[token.currency] &&
             token.product?.map(products => (
               <div
-                key={products.subId}
+                key={products.subscribeId}
+                onClick={() =>
+                  navigate(`/token/product/detail/${products.subscribeId}`, {
+                    state: {
+                      products,
+                      tokenInfo: token,
+                    },
+                  })
+                }
                 className="flex items-center justify-between border-t border-gray-200 bg-gray-50 p-4"
               >
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200">
-                    <span className="whitespace-pre text-xs font-medium"></span>
+                    {products.imageUrl ? (
+                      <img src={products.imageUrl} alt={products.name} className="h-8 w-8 rounded-full" />
+                    ) : (
+                      <span className="whitespace-pre text-xs font-medium">?</span>
+                    )}
                   </div>
                   <div>
                     <p className="font-medium">{products.name}</p>
@@ -93,14 +89,6 @@ export default function TokenAssets({tokens, onClick}: { tokens:Token[], onClick
                 </div>
                 <div
                   className="flex cursor-pointer items-center gap-2 text-right"
-                  onClick={() =>
-                    navigate(`/token/product/detail/${products.subId}`, {
-                      state: {
-                        products,
-                        tokenInfo: token,
-                      },
-                    })
-                  }
                 >
                   <div className="flex flex-col items-end">
                     <p className="text-blue-600 font-medium">

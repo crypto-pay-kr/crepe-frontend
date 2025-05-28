@@ -53,7 +53,7 @@ export default function TransactionItem({
         <div>
           <p
             className={`text-xl font-bold ${
-              isDeposit ? "text-indigo-800" : "text-red-600"
+              isDeposit ? "text-indigo-800" : "text-red-500"
             } mb-2`}
           >
             {type}
@@ -68,7 +68,7 @@ export default function TransactionItem({
               isDeposit ? "text-indigo-800" : "text-red-500"
             } mb-2`}>{formattedAmount}</span>
           </p>
-          <p className="text-sm text-gray-600">= {krw} KRW</p>
+          <p className="text-sm text-gray-600">= {krw}</p>
         </div>
       </div>
     </div>

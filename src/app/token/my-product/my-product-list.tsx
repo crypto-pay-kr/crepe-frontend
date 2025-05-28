@@ -3,7 +3,6 @@ import Header from "@/components/common/Header";
 import BottomNav from "@/components/common/BottomNavigate";
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import Button from '@/components/common/Button'
-import { BankLogo, BankLogoProps } from '@/components/common/BankLogo'
 import { GetMySubscribeTransactionList, GetMyTokenList } from '@/api/token'
 import { SubscribeTransaction } from '@/types/BankTokenAccount';
 import SubscribeTransactionList from '@/components/token/transaction/SubscribeTransactionList'
@@ -26,7 +25,7 @@ export default function TokenProductListPage() {
   const [hasFetchedOnce, setHasFetchedOnce] =  useState(false);
   const [productState, setProductState] = useState<any>(null);
   const [tokenInfoState, setTokenInfoState] = useState<any>(null);
-
+  const { products, } = (location.state as any) || {};
 
   const handleCancelClick = () => {
     navigate(`/token/product/cancel/${subscribeId}`, {
@@ -39,6 +38,7 @@ export default function TokenProductListPage() {
   const handleExchangeClick = () => {
     navigate(`/token/product/deposit/${subscribeId}`, {
       state: {
+        products,
         productState,
         tokenInfoState
       },
@@ -51,11 +51,12 @@ export default function TokenProductListPage() {
     if (!subscribeId || !hasNext || loading) return;
     setLoading(true);
     try {
-      const data = await GetMySubscribeTransactionList(subscribeId.toString(), page, 3);
+      const data = await GetMySubscribeTransactionList(Number(subscribeId), page, 3);
 
       const mapped: SubscribeTransaction[] = (data.content || []).map((transaction: any) => ({
         eventType: transaction.eventType,
         amount: transaction.amount,
+        afterBalance: transaction.afterBalance,
         date: transaction.date,
       }));
 
@@ -147,16 +148,17 @@ export default function TokenProductListPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <div className="mr-3">
-                  <BankLogo bank={tokenInfoState.currency as BankLogoProps["bank"]} />
+                  {products.imageUrl ? (
+                    <img src={products.imageUrl} alt={products.name} className="h-8 w-8 rounded-full" />
+                  ) : (
+                    <span className="whitespace-pre text-xs font-medium">?</span>
+                  )}
                 </div>
                 <p className="text-2xl font-semibold">총 보유</p>
               </div>
               <div className="text-right">
                 <p className="text-2xl font-bold">
                   {productState.amount} {tokenInfoState.currency}
-                </p>
-                <p className="text-base text-gray-500">
-                  = {productState.evaluated}
                 </p>
                 <p className="text-lg mt-1 font-semibold text-indigo-800">연 <span className="text-lg font-semibold text-indigo-800">{productState.rate}</span></p>
               </div>
@@ -181,6 +183,7 @@ export default function TokenProductListPage() {
             loading={loading}
             hasNext={hasNext}
             currency={tokenInfoState.currency}
+            afterBalance={tokenInfoState.afterBalance}
             totalBalance={tokenInfoState.totalBalance}
           />
         </main>
