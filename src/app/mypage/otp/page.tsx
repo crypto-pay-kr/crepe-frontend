@@ -24,6 +24,7 @@ export default function OtpSetup(): React.ReactElement {
   const [copied, setCopied] = useState(false);
 
   const email = sessionStorage.getItem('userEmail');
+  const userRole = sessionStorage.getItem('userRole'); // 사용자 역할 가져오기
   const BASE_URL = import.meta.env.VITE_API_SERVER_URL;
   
   // OTP 초기 설정
@@ -85,9 +86,28 @@ export default function OtpSetup(): React.ReactElement {
 
       const result = await response.json();
       
-      if (result.success) {       
-        navigate(-1); // 이전 페이지로 돌아가기
+      // API 응답 전체 구조 확인
+      console.log('🔍 OTP 인증 응답 전체:', result);
+      console.log('📊 응답 status:', result.status);
+      console.log('✅ 응답 success:', result.success);
+      console.log('👤 현재 userRole:', userRole);
+      
+      // 기존 설정과 마찬가지로 status로 체크 (setup에서와 동일)
+      if (result.status === 'success' || result.success === true) {
+        // 성공 메시지 표시
+        alert('OTP가 성공적으로 활성화되었습니다');
+        
+        // 사용자 역할에 따라 다른 페이지로 리다이렉트
+        console.log('🚀 리다이렉트 시작...');
+        if (userRole === 'SELLER') {
+          console.log('🏪 가맹점 사용자 - /store/my로 이동');
+          navigate('/store/my', { replace: true });
+        } else {
+          console.log('👨‍💼 일반 사용자 - /user/my로 이동');
+          navigate('/user/my', { replace: true });
+        }
       } else {
+        console.log('❌ 인증 실패:', result.message);
         setError(result.message || '인증에 실패했습니다');
       }
     } catch (err) {

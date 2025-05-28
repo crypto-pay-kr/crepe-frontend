@@ -49,9 +49,11 @@ export default function CoinHome() {
 
 // 1. 최초 한 번만 서버 호출
   useEffect(() => {
-    if (!tokenBalance.length || tokenInfosFetched.current) return;
 
+    if (!tokenBalance.length || tokenInfosFetched.current) return;
+    if (tokenBalance.some(token => token.krw && token.krw !== "- KRW")) return;
     const fetchTokenInfos = async () => {
+
       try {
         const infos = await Promise.all(
           tokenBalance.map(token => getTokenInfo(token.currency))
