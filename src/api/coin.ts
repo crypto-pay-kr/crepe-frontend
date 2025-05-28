@@ -1,3 +1,5 @@
+
+
 const BASE_URL = import.meta.env.VITE_API_SERVER_URL;
 const COIN_PRICE_URL = import.meta.env.VITE_COIN_PRICE_URL;
 
@@ -168,3 +170,22 @@ export async function unRegisterAccountAddress(currency: string): Promise<void> 
     throw new Error("계좌 등록 해제 실패: " + response.status);
   }
 }
+
+export const getCoinInfo= async ( currency: string)=> {
+  const token = sessionStorage.getItem("accessToken");
+
+  const response = await fetch(`${BASE_URL}/api/coin/info/${currency}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  if (!response.ok) {
+    throw new Error("코인 정보 조회 실패" + response.status);
+  }
+
+  return await response.json();
+}
+
+

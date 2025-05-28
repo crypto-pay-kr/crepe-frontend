@@ -14,8 +14,7 @@ export default function NetworkDisplay({ networkName }: NetworkDisplayProps) {
           </svg>
         </div>
         <div>
-          <h2 className="text-xl font-bold text-gray-800">네트워크: {networkName}</h2>
-          <p className="text-sm text-gray-500">{networkName} 토큰을 지원하는 네트워크</p>
+          <h2 className="text-xl font-bold text-gray-800">코인 종류  : {networkName}</h2>
         </div>
       </div>
     </div>

@@ -2,7 +2,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import Header from "@/components/common/Header";
 import BottomNav from "@/components/common/BottomNavigate";
 import React, { useEffect, useState } from 'react'
-import { BankLogo, BankLogoProps } from '@/components/common/BankLogo'
+// import { BankLogo, BankLogoProps } from '@/components/common/BankLogo'
 import Button from '@/components/common/Button'
 import { GetTerminatePreview, terminateSubscription } from '@/api/token'
 import { useBankStore } from '@/stores/BankStore'
@@ -215,7 +215,7 @@ export default function TokenCancelPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div className="mr-3">
-                <BankLogo bank={tokenInfoState.currency as BankLogoProps["bank"]} />
+                {/*<BankLogo bank={tokenInfoState.currency as BankLogoProps["bank"]} />*/}
               </div>
               <p className="text-xl font-semibold">{tokenInfoState.bankTokenName}</p>
             </div>

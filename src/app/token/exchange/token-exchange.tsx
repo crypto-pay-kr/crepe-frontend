@@ -2,7 +2,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import Header from "@/components/common/Header";
 import BottomNav from "@/components/common/BottomNavigate";
 import React, { useEffect, useMemo, useState } from 'react'
-import { BankLogo } from '@/components/common/BankLogo';
 import Button from '@/components/common/Button';
 import { getCoinBalanceByCurrency } from '@/api/coin'
 import { ArrowUpDown } from 'lucide-react'
@@ -16,6 +15,9 @@ import {
 import { useTokenStore } from '@/constants/useToken';
 import { useCoinStore } from '@/constants/useCoin';
 import { useTickerData } from '@/hooks/useTickerData'
+import PercentageSelector from '@/components/coin/PercentageSelector'
+// 기존 코드에서 select 부분만 교체하면 됩니다
+import { ChevronDown } from 'lucide-react'; // 아이콘 import 추가
 interface Portfolio {
   currency: string;
   amount: number;
@@ -35,11 +37,21 @@ export default function TokenExchangePage() {
   const selectedPortfolio = tokenInfo?.portfolios.find(
     (p: Portfolio) => p.currency === selectedCurrency
   );
+  const [selectedPercentage, setSelectedPercentage] = useState(70)
   const coinList = useCoinStore(state => state.coins);
   const tokenList = useTokenStore(state => state.tokens);
   const coinMeta = coinList.find(c => c.currency === selectedCurrency);
   const tokenMeta = tokenList.find(t => t.currency === bank);
   const tickerData = useTickerData();
+// 드롭다운이 필요하다면 추가 상태와 UI:
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const handleCurrencyClick = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+  const [isHovered, setIsHovered] = useState(false);
+
+
 
   // 토큰 정보 불러오기
   useEffect(() => {
@@ -57,6 +69,20 @@ export default function TokenExchangePage() {
     };
     fetchAllData();
   }, [bank]);
+
+  const handlePercentageClick = (percentage: number) => {
+    setSelectedPercentage(percentage);
+    const availableAmount = isCoinToToken ? myCoinBalance : myTokenBalance;
+    const calculatedAmount = (availableAmount * (percentage / 100)).toFixed(2);
+    if (isCoinToToken) {
+      setCoinAmount(Number(calculatedAmount));
+    } else {
+      setTokenAmount(Number(calculatedAmount));
+    }
+  };
+
+
+
 
 
   // 환전 수량 계산 (코인 < - > 토큰 )
@@ -175,109 +201,15 @@ export default function TokenExchangePage() {
   return (
     <div className="flex h-full flex-col bg-gray-50">
       <Header title="토큰 환전" />
-      <main className="flex-1 overflow-auto p-5">
+      <main className="flex-1 overflow-scroll p-5">
         {/* 위 상단 입력 박스 */}
-        <div className="mb-6 mt-6 min-h-[10px] rounded-2xl border-2 border-gray-200 bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-0.5">
-              {tokenInfo && (
-                <>
-                  <div className="ml-3 flex items-center gap-3">
-                    {isCoinToToken
-                      ? coinMeta?.coinImageUrl && (
-                          <img
-                            src={coinMeta.coinImageUrl}
-                            alt={coinMeta.coinName}
-                            className="h-10 w-10 rounded-full"
-                          />
-                        )
-                      : tokenMeta?.bankImageUrl && (
-                          <img
-                            src={tokenMeta.bankImageUrl}
-                            alt={tokenMeta.name}
-                            className="h-10 w-10 rounded-full"
-                          />
-                        )}
-                  </div>
-
-                  {/* 셀렉트 or 고정 텍스트 */}
-                  {isCoinToToken ? (
-                    tokenInfo?.portfolios?.length > 0 && (
-                      <select
-                        value={selectedCurrency}
-                        onChange={e => setSelectedCurrency(e.target.value)}
-                        className="rounded border border-none px-3 py-1 text-lg font-bold outline-none"
-                      >
-                        {tokenInfo.portfolios.map((item: any) => (
-                          <option key={item.currency} value={item.currency}>
-                            {item.currency}
-                          </option>
-                        ))}
-                      </select>
-                    )
-                  ) : (
-                    <p className="ml-3 text-lg font-bold">
-                      {tokenInfo.currency}
-                    </p>
-                  )}
-                </>
-              )}
-            </div>
-
-            <div className="mr-3 mt-0 flex min-w-[140px] flex-col items-end space-y-1">
-              <p className="text-xs text-gray-400">
-                보유:{' '}
+        {/* 입력 박스 (코인/토큰 수량 입력) */}
+        <div className="mb-6 mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-md">
+          <div className="flex mt-3 items-start justify-between">
+            {/* 좌측: 코인/토큰 이미지 + 이름 + 보유 */}
+            <div className="flex flex-col items-start">
+              <div className="mb-1 flex items-center space-x-3">
                 {isCoinToToken
-                  ? `${myCoinBalance} ${selectedCurrency}`
-                  : `${myTokenBalance} ${bank}`}
-              </p>
-              {/* 수량 입력 + 단위 */}
-              <div className="flex items-baseline space-x-1">
-                <input
-                  type="number"
-                  step="any"
-                  min="0"
-                  className="appearance-none border-none bg-transparent text-right text-lg font-bold outline-none"
-                  value={isCoinToToken ? coinAmount : tokenAmount}
-                  onChange={e => {
-                    const value = Number(e.target.value)
-                    const max = isCoinToToken ? myCoinBalance : myTokenBalance
-                    const clamped = Math.min(value, max)
-                    isCoinToToken
-                      ? setCoinAmount(clamped)
-                      : setTokenAmount(clamped)
-                  }}
-                  placeholder="0"
-                />
-                <span className="text-lg font-bold">
-                  {isCoinToToken ? selectedCurrency : tokenInfo?.currency}
-                </span>
-              </div>
-
-              {/* 환산값 (KRW) */}
-              <p className="text-xs text-gray-500">
-                {isCoinToToken ? `≈ ${coinToKRW} KRW` : `≈ ${tokenToKRW} KRW`}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="mb-4 flex justify-center">
-          <button
-            onClick={() => setIsCoinToToken(!isCoinToToken)}
-            className="border-blue-300 hover:bg-blue-50 flex items-center justify-center rounded-full border bg-white p-3 shadow transition"
-            aria-label="Switch direction"
-          >
-            <ArrowUpDown size={20} className="text-blue-800" />
-          </button>
-        </div>
-
-        {/* 아래 결과 박스 */}
-        <div className="mb-6 min-h-[110px] rounded-2xl border-2 border-gray-200 bg-white p-9 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
-          <div className="flex items-center justify-between">
-            {/* 좌측: 로고 + 이름 */}
-            <div className="flex items-center gap-0.5">
-                {!isCoinToToken
                   ? coinMeta?.coinImageUrl && (
                       <img
                         src={coinMeta.coinImageUrl}
@@ -292,22 +224,178 @@ export default function TokenExchangePage() {
                         className="h-10 w-10 rounded-full"
                       />
                     )}
+                <div className="text-lg font-semibold">
+                  {isCoinToToken
+                    ? tokenInfo?.portfolios?.length > 0 && (
+                        <div className="relative ml-4">
+                          <div
+                            className="group flex cursor-pointer items-center gap-2"
+                            onMouseEnter={() => setIsHovered(true)}
+                            onMouseLeave={() => setIsHovered(false)}
+                            onClick={handleCurrencyClick}
+                          >
+                            <span className="text-lg font-bold text-gray-800">
+                              {selectedCurrency}
+                            </span>
+                            <ChevronDown
+                              className={`h-4 w-4 text-gray-400 transition-all duration-200 ${
+                                isHovered || isDropdownOpen
+                                  ? 'rotate-180 text-gray-600'
+                                  : ''
+                              }`}
+                            />
+                          </div>
+
+                          {isDropdownOpen && (
+                            <div className="absolute left-0 top-full z-10 mt-2 min-w-[120px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
+                              {tokenInfo.portfolios.map((item: Portfolio) => (
+                                <button
+                                  key={item.currency}
+                                  onClick={() => {
+                                    setSelectedCurrency(item.currency)
+                                    setIsDropdownOpen(false)
+                                  }}
+                                  className="w-full px-4 py-2 text-left font-medium text-gray-800 transition-colors hover:bg-gray-50"
+                                >
+                                  {item.currency}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    : tokenInfo?.currency}
+                </div>
+              </div>
+              <p className="text-xs text-gray-400">
+                보유:{' '}
+                {isCoinToToken
+                  ? `${myCoinBalance} ${selectedCurrency}`
+                  : `${myTokenBalance} ${bank}`}
+              </p>
+            </div>
+
+            {/* 우측: 입력창 */}
+            <div className="mt-1 flex w-1/2 flex-col items-end space-y-1">
+              <input
+                type="number"
+                step="1"
+                min="0"
+                className="w-full border-none bg-transparent text-right text-xl font-bold outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                value={isCoinToToken ? coinAmount : tokenAmount}
+                onChange={e => {
+                  const value = Number(e.target.value)
+                  const max = isCoinToToken ? myCoinBalance : myTokenBalance
+                  const clamped = Math.min(value, max)
+                  isCoinToToken
+                    ? setCoinAmount(clamped)
+                    : setTokenAmount(clamped)
+                }}
+                placeholder="0"
+              />
+              <p className="text-sm text-gray-500">
+                ≈ {isCoinToToken ? `${coinToKRW} KRW` : `${tokenToKRW} KRW`}
+              </p>
+            </div>
+          </div>
+
+          {/* 빠른 금액 선택 - 새로운 버전 */}
+          <div className="mt-4 flex justify-end gap-2">
+            {[25, 50, 75, 100].map(percent => {
+              const maxBalance = isCoinToToken ? myCoinBalance : myTokenBalance
+              const expectedAmount = Math.floor((maxBalance * percent) / 100)
+              const currentAmount = isCoinToToken ? coinAmount : tokenAmount
+              const isSelected = currentAmount === expectedAmount
+
+              return (
+                <button
+                  key={percent}
+                  onClick={() => {
+                    const amount = Math.floor((maxBalance * percent) / 100)
+                    isCoinToToken
+                      ? setCoinAmount(amount)
+                      : setTokenAmount(amount)
+                  }}
+                  className={`rounded-full px-4 py-2 text-sm text-black font-medium transition-colors bg-gray-100`}
+                >
+                  {percent}%
+                </button>
+              )
+            })}
+          </div>
+
+        </div>
+        <div className="my-4 flex justify-center">
+          <button
+            onClick={() => setIsCoinToToken(!isCoinToToken)}
+            className="h-10 w-10 rounded-full border border-gray-300 bg-white shadow transition hover:bg-gray-100"
+            aria-label="Switch direction"
+          >
+            <ArrowUpDown size={18} className="m-auto text-gray-600" />
+          </button>
+        </div>
+
+        {/* 아래 결과 박스 */}
+        <div className="mb-6 min-h-[110px] rounded-2xl border-2 border-gray-200 bg-white p-9 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
+          <div className="flex items-center justify-between">
+            {/* 좌측: 로고 + 이름 */}
+            <div className="flex items-center gap-0.5">
+              {!isCoinToToken
+                ? coinMeta?.coinImageUrl && (
+                    <img
+                      src={coinMeta.coinImageUrl}
+                      alt={coinMeta.coinName}
+                      className="h-10 w-10 rounded-full"
+                    />
+                  )
+                : tokenMeta?.bankImageUrl && (
+                    <img
+                      src={tokenMeta.bankImageUrl}
+                      alt={tokenMeta.name}
+                      className="h-10 w-10 rounded-full"
+                    />
+                  )}
               {/* 셀렉트 or 고정 텍스트 */}
               {isCoinToToken ? (
                 <p className="ml-4 text-lg font-bold">{tokenInfo?.currency}</p>
               ) : (
                 tokenInfo?.portfolios?.length > 0 && (
-                  <select
-                    value={selectedCurrency}
-                    onChange={e => setSelectedCurrency(e.target.value)}
-                    className="rounded border border-none px-3 py-1 text-lg font-bold outline-none"
-                  >
-                    {tokenInfo.portfolios.map((item: any) => (
-                      <option key={item.currency} value={item.currency}>
-                        {item.currency}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative ml-4">
+                    <div
+                      className="group flex cursor-pointer items-center gap-2"
+                      onMouseEnter={() => setIsHovered(true)}
+                      onMouseLeave={() => setIsHovered(false)}
+                      onClick={handleCurrencyClick}
+                    >
+                      <span className="text-lg font-bold text-gray-800">
+                        {selectedCurrency}
+                      </span>
+                      <ChevronDown
+                        className={`h-4 w-4 text-gray-400 transition-all duration-200 ${
+                          isHovered || isDropdownOpen
+                            ? 'rotate-180 text-gray-600'
+                            : ''
+                        }`}
+                      />
+                    </div>
+
+                    {isDropdownOpen && (
+                      <div className="absolute left-0 top-full z-10 mt-2 min-w-[120px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
+                        {tokenInfo.portfolios.map((item: Portfolio) => (
+                          <button
+                            key={item.currency}
+                            onClick={() => {
+                              setSelectedCurrency(item.currency)
+                              setIsDropdownOpen(false)
+                            }}
+                            className="w-full px-4 py-2 text-left font-medium text-gray-800 transition-colors hover:bg-gray-50"
+                          >
+                            {item.currency}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 )
               )}
             </div>
@@ -364,54 +452,54 @@ export default function TokenExchangePage() {
               : `${tokenInfo?.currency} → ${selectedCurrency} : ${maxExchangeCoin} ${selectedCurrency}`}
           </p>
         </div>
-      </main>
 
-      <div className="mb-28 border-none p-5">
-        <div className="mb-3 flex items-end justify-between">
-          <h2 className="text-xl font-bold">토큰 구성</h2>
-          <p className="text-sm text-gray-500">
-            총 자본금 {tokenCapital?.toFixed(2).toLocaleString()} KRW
-          </p>
+        <div className="mb-20 border-none p-5">
+          <div className="mb-3 flex items-end justify-between">
+            <h2 className="text-xl font-bold">토큰 구성</h2>
+            <p className="text-sm text-gray-500">
+              총 자본금 {tokenCapital?.toFixed(2).toLocaleString()} KRW
+            </p>
+          </div>
+
+          {tokenInfo?.portfolios.map((p: any) => {
+            const swappedRatio =
+              p.nonAvailableAmount && p.amount > 0
+                ? (p.nonAvailableAmount / p.amount) * 100
+                : 0
+
+            return (
+              <div key={p.currency} className="mb-4">
+                <div className="mb-1 flex justify-between">
+                  <span className="text-sm font-medium text-gray-700">
+                    {p.currency}
+                  </span>
+                  <span className="text-sm text-gray-600">
+                    교환됨 {swappedRatio.toFixed(2)}%
+                  </span>
+                </div>
+                <div className="flex h-3 w-full overflow-hidden rounded-full bg-gray-200">
+                  <div
+                    className="bg-indigo-500"
+                    style={{ width: `${100 - swappedRatio}%` }}
+                  />
+                  <div
+                    className="bg-fuchsia-400"
+                    style={{ width: `${swappedRatio}%` }}
+                  />
+                </div>
+              </div>
+            )
+          })}
         </div>
 
-        {tokenInfo?.portfolios.map((p: any) => {
-          const swappedRatio =
-            p.nonAvailableAmount && p.amount > 0
-              ? (p.nonAvailableAmount / p.amount) * 100
-              : 0
-
-          return (
-            <div key={p.currency} className="mb-4">
-              <div className="mb-1 flex justify-between">
-                <span className="text-sm font-medium text-gray-700">
-                  {p.currency}
-                </span>
-                <span className="text-sm text-gray-600">
-                  교환됨 {swappedRatio.toFixed(2)}%
-                </span>
-              </div>
-              <div className="flex h-3 w-full overflow-hidden rounded-full bg-gray-200">
-                <div
-                  className="bg-indigo-500"
-                  style={{ width: `${100 - swappedRatio}%` }}
-                />
-                <div
-                  className="bg-fuchsia-400"
-                  style={{ width: `${swappedRatio}%` }}
-                />
-              </div>
-            </div>
-          )
-        })}
-      </div>
-
-      <div className="border-t border-gray-50 bg-gray-50 p-5 shadow-lg">
+        {/*<div className="border-t border-gray-50 bg-gray-50 p-5 shadow-lg">*/}
         <Button
           text="환전 요청"
           onClick={handleExchangeClick}
           className="w-full rounded-lg py-3 text-lg font-semibold shadow-md"
         />
-      </div>
+        {/*</div>*/}
+      </main>
       <BottomNav />
     </div>
   )
