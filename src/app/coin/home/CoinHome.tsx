@@ -162,18 +162,19 @@ export default function CoinHome() {
       <Header title="자산관리" />
       <main className="flex-1 overflow-auto bg-gray-50">
         <div className="px-4 py-6">
-          <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-400 to-blue-500 p-5 shadow-lg">
+          <div className="overflow-hidden rounded-2xl bg-white p-6 shadow-sm transition hover:shadow-xl">
             <div className="mb-4 flex items-center">
-              <Wallet className="mr-2 h-6 w-6 text-blue-100" />
-              <span className="text-lg font-medium text-blue-100">총 자산</span>
+              <Wallet className="mr-2 h-6 w-6 text-[#4B5EED] drop-shadow-sm" />
+              <span className="text-base font-bold text-[#4B5EED]">총 자산</span>
             </div>
-            <h2 className="mb-1 text-3xl font-bold text-white">{(totalTokenBalanceKRW+totalBalanceKRW).toLocaleString()} KRW</h2>
-            <div className="flex items-center text-green-300">
-            </div>
+            <h2 className="mb-1 text-2xl font-bold text-gray-800 tracking-tight">
+              {(totalTokenBalanceKRW + totalBalanceKRW).toLocaleString()} KRW
+            </h2>
           </div>
+
           <div className="mt-5 w-full">
             <button
-              className="w-full bg-[#0a2e64] text-white py-2 rounded-xl font-medium text-base shadow-sm"
+              className="w-full bg-[#4B5EED] text-white py-2 rounded-xl font-medium text-base shadow-sm"
               onClick={handleExchangeClick}
             >
               K-토큰 상품 가입
@@ -183,13 +184,13 @@ export default function CoinHome() {
 
         <div className="mb-4 flex border-b border-gray-200 bg-white">
           <button
-            className={`flex-1 py-3 text-center text-sm font-medium ${activeTab === 'coin' ? 'border-b-2 border-indigo-400 text-indigo-400' : 'text-gray-500'}`}
+            className={`flex-1 py-3 text-center text-sm font-medium ${activeTab === 'coin' ? 'border-b-2 border-[#4B5EED] text-[#4B5EED]' : 'text-gray-500'}`}
             onClick={() => setActiveTab('coin')}
           >
             가상 자산
           </button>
           <button
-            className={`flex-1 py-3 text-center text-sm font-medium ${activeTab === 'token' ? 'border-b-2 border-indigo-400 text-indigo-400' : 'text-gray-500'}`}
+            className={`flex-1 py-3 text-center text-sm font-medium ${activeTab === 'token' ? 'border-b-2 border-[#4B5EED] text-[#4B5EED]' : 'text-gray-500'}`}
             onClick={() => setActiveTab('token')}
           >
             K-토큰
@@ -203,14 +204,6 @@ export default function CoinHome() {
             <TokenAssets tokens={enrichedTokenBalance} onClick={handleExchangeClick} />
           )}
         </div>
-
-        <button
-          onClick={() => navigate('/my/orders')}
-          className="fixed bottom-24 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-500 text-white shadow-lg hover:bg-indigo-500"
-          aria-label="주문 내역으로 이동"
-        >
-          <ShoppingCart className="h-6 w-6 stroke-white" />
-        </button>
 
       </main>
       <BottomNav />

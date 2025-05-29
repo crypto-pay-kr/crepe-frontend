@@ -1,8 +1,8 @@
 "use client"
 
 const COLORS = {
-  checkedBorder: "#0a2158",
-  checkedText: "#0a2158",
+  checkedBorder: "#4B5EED",
+  checkedText: "#4B5EED",
   uncheckedBorder: "gray-300",
   uncheckedText: "transparent",
 }

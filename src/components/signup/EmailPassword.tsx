@@ -45,8 +45,8 @@ export default function EmailPassword({
 
       <main className="flex-1 overflow-auto px-6 pt-6 pb-24 flex flex-col">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold mb-2">회원가입을 위한</h2>
-          <p className="text-2xl font-bold mb-8">정보를 입력해주세요</p>
+          <h2 className="text-2xl text-gray-800 font-bold mb-2">회원가입을 위한</h2>
+          <p className="text-2xl text-gray-800 font-bold mb-8">정보를 입력해주세요</p>
         </div>
 
         <div className="flex-1">
@@ -87,7 +87,7 @@ export default function EmailPassword({
         <div className="flex-grow"></div>
       </main>
 
-      <div className="p-5 bg-white">
+      <div className="p-12 bg-white">
         <Button
           text="다음"
           onClick={onNext}

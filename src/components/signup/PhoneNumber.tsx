@@ -48,8 +48,8 @@ export default function PhoneNumber({
       <Header title="회원가입" progress={2} isStore={isStore} />
       <div className="flex-1 flex flex-col p-5">
         <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-2">휴대폰 번호를</h2>
-          <p className="text-2xl font-bold mb-8">입력해주세요</p>
+          <h2 className="text-2xl text-gray-800 font-bold mb-2">휴대폰 번호를</h2>
+          <p className="text-2xl text-gray-800 font-bold mb-8">입력해주세요</p>
         </div>
         <div className="flex-1 px-4">
           <div className="border-b border-gray-300 py-2">
@@ -67,7 +67,7 @@ export default function PhoneNumber({
           </div>
         </div>
       </div>
-      <div className="p-5">
+      <div className="p-12 mt-10">
         <Button
           text={isSending ? "요청 중..." : "인증번호 요청"}
           onClick={onNext}

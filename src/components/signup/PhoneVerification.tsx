@@ -45,7 +45,7 @@ export default function PhoneVerification({
 
       <main className="flex-1 overflow-auto px-6 pt-6 pb-24 flex flex-col">
         <div className="mb-10">
-          <h2 className="text-2xl font-bold mb-2">휴대폰 번호 인증</h2>
+          <h2 className="text-2xl text-gray-800 font-bold mb-2">휴대폰 번호 인증</h2>
           <p className="text-sm text-gray-500 mb-1">
             휴대폰에 전송된 6자리 숫자를 입력해주세요
           </p>

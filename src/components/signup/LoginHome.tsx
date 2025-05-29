@@ -155,7 +155,7 @@ export default function LoginHome({ onSignup, onStoreSignup, buttonClassName }: 
           <Button
             text="로그인"
             onClick={handleLogin}
-            className={`w-full rounded-[9px] font-medium bg-[#0C2B5F] text-white ${buttonClassName}`}
+            className={`w-full rounded-[9px] font-medium bg-[#4B5EED] text-white ${buttonClassName}`}
           />
 
           <div className="flex justify-center gap-4 mt-4 mb-4 text-sm text-gray-500">

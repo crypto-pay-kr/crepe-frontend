@@ -64,7 +64,7 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      '/api': 'https://dev.rolling-crepe.co.kr',
+      '/api': 'http://localhost:8080',
 
     },
     host: '0.0.0.0',

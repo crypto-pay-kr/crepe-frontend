@@ -98,7 +98,7 @@ const ShoppingMall: React.FC = () => {
                 placeholder="상품 검색어를 입력해 주세요."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full h-12 bg-gray-100 rounded-full pl-5 pr-12 focus:outline-none focus:ring-2 focus:ring-[#002169] focus:ring-opacity-30 transition-all"
+                className="w-full h-12 bg-gray-100 rounded-full pl-5 pr-12 focus:outline-none focus:ring-2 text-[#4B5EED] focus:ring-[#4B5EED] focus:ring-opacity-10 transition-all"
               />
               <button type="submit" className="absolute right-4 top-3">
                 <svg
@@ -107,7 +107,7 @@ const ShoppingMall: React.FC = () => {
                   viewBox="0 0 24 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
-                  className="text-gray-500"
+                  className="text-[#4B5EED]"
                 >
                   <path
                     d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"
@@ -127,18 +127,18 @@ const ShoppingMall: React.FC = () => {
                   key={`tab-${tab}`}
                   className={`px-5 py-3 text-sm font-medium relative transition-all ${
                     activeTab === tab
-                      ? "text-[#002169] font-semibold"
+                      ? "text-[#4B5EED] font-semibold"
                       : "text-gray-500 hover:text-gray-700"
                   }`}
                   onClick={() => setActiveTab(tab)}
                 >
                   {tab}
                   {activeTab === tab && (
-                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#002169] rounded-t-full"></span>
+                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#4B5EED] rounded-t-full"></span>
                   )}
                 </button>
               ))}
-              <button className="ml-auto px-4 py-3 text-sm font-medium text-gray-600 flex items-center">
+              <button className="ml-auto px-4 py-3 text-sm font-medium text-[#4B5EED] flex items-center">
                 최신순
                 <svg 
                   width="16" 
@@ -164,7 +164,7 @@ const ShoppingMall: React.FC = () => {
         {/* 로딩 상태 표시 */}
         {loading ? (
           <div className="flex justify-center items-center p-10">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#002169]"></div>
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#4B5EED]"></div>
           </div>
         ) : error ? (
           // 에러 메시지 표시
@@ -172,7 +172,7 @@ const ShoppingMall: React.FC = () => {
             <p>{error}</p>
             <button 
               onClick={() => window.location.reload()} 
-              className="mt-4 px-4 py-2 bg-[#002169] text-white rounded-lg hover:bg-opacity-90"
+              className="mt-4 px-4 py-2 bg-[#4B5EED] text-white rounded-lg hover:bg-opacity-90"
             >
               새로고침
             </button>

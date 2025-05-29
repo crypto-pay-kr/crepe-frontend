@@ -19,9 +19,9 @@ export default function Button({
 }: ButtonProps) {
   // 색상 클래스 매핑
   const colorClasses = {
-    blue: "bg-[#0C2B5F] text-white",
+    blue: "bg-[#4B5EED] text-white",
     gray: "bg-gray-400 text-white",
-    primary: "bg-[#0a2e64] text-white"
+    primary: "bg-[#4B5EED] text-white"
   };
 
   return (
