@@ -27,19 +27,19 @@ export default function ProductProtectionInfo({
         </p>
       </div>
       <p className="mb-4">
-        예금자 보호에 대한 내용을  <span className="font-bold">충분</span>히 <span className="font-bold">이해</span>하고 확인하셨나요?
+        예금자 보호에 대한 내용을  <span className="font-bold text-[#4B5EED]">충분히</span> <span className="font-bold text-[#4B5EED]">이해하고 확인</span>하셨나요?
       </p>
       <div className="flex gap-2">
         <button
           onClick={onDeny}
-          className="flex-1 py-3 border border-[#0a2d6b] rounded-md text-center"
+          className="flex-1 py-2  text-sm font-medium border border-gray-200 rounded-md text-center"
         >
           아니오
         </button>
         <button
           onClick={onConfirm}
-          className={`flex-1 py-3 rounded-md text-center ${protectionConfirmed
-            ? "bg-[#0a2d6b] text-white"
+          className={`flex-1 py-2 rounded-md text-center text-sm font-medium ${protectionConfirmed
+            ? "bg-[#4B5EED] text-white"
             : "bg-gray-200 border border-gray-200 text-gray-500"
             }`}
         >

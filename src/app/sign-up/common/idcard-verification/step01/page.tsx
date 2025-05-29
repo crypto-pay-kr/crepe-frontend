@@ -27,7 +27,7 @@ export default function IDVerificationStep1() {
       <Header title="본인확인" />
 
       <div className="flex-1 p-6 overflow-auto">
-        <h1 className="text-2xl font-bold text-[#0a2d6b] mb-2">STEP1 신분증 확인</h1>
+        <h1 className="text-xl font-bold text-[#4B5EED] mb-2">STEP1 신분증 확인</h1>
         <p className="text-gray-600 mb-6">원하는 방법을 선택해주세요</p>
 
         <div className="flex justify-center my-8">

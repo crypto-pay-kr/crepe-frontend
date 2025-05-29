@@ -12,7 +12,7 @@ export default function ProductSignUpAgreement({ label, checked, onToggle }: Pro
       <div className="flex items-center">
         <div
           className={`w-6 h-6 rounded-full flex items-center justify-center mr-3 ${
-            checked ? "bg-[#0a2d6b]" : "border border-gray-300"
+            checked ? "bg-[#4B5EED]" : "border border-gray-300"
           }`}
         >
           {checked && (

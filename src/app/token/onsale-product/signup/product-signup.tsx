@@ -302,7 +302,7 @@ export default function TokenProductSignup() {
           {step === 1 && (
             <div>
               <div className="mt-6 mb-4">
-                <h2 className="text-xl font-bold">가입 전 꼭 알아야 할 내용도 확인해주세요.</h2>
+                <h2 className="text-base font-bold text-gray-800">가입 전 꼭 알아야 할 내용도 확인해주세요.</h2>
               </div>
 
               {/* 동의 항목들 */}
@@ -338,7 +338,7 @@ export default function TokenProductSignup() {
                   <span>{pageNumber} / {numPages}</span>
                   <button
                     onClick={nextPage}
-                    className="px-3 py-1 bg-gray-200 rounded-md"
+                    className="px-3 py-1 bg-gray-200 text-base font-medium rounded-md"
                     disabled={pageNumber >= numPages}
                   >
                     다음
@@ -422,7 +422,7 @@ export default function TokenProductSignup() {
                           alert(err.message);
                         }
                       }}
-                      className="px-4 py-2 bg-blue text-white rounded-lg"
+                      className="px-4 py-2 bg-[#4B5EED] text-sm font-medium text-white rounded-lg"
                     >
                       등록
                     </button>
@@ -443,14 +443,14 @@ export default function TokenProductSignup() {
                     <div className="flex flex-col items-center">
                       <div className="relative w-20 h-20 mb-2">
                         <div className="absolute inset-0 border-4 border-gray-100 rounded-full"></div>
-                        <div className="absolute inset-0 border-4 border-[#0a2e64] border-t-transparent rounded-full animate-spin"></div>
+                        <div className="absolute inset-0 border-4 border-[#4B5EED] border-t-transparent rounded-full animate-spin"></div>
                       </div>
                       <p className="text-gray-800 text-sm">소득 조회 중...</p>
                     </div>
                   ) : (
                     <button
                       onClick={handleVerifyIncome}
-                      className="w-full py-2 bg-blue text-white rounded-lg flex justify-center items-center"
+                      className="w-full py-2 bg-[#4B5EED] text-sm font-medium  text-white rounded-lg flex justify-center items-center"
                     >
                       내 소득 조회하기
                     </button>
@@ -554,7 +554,7 @@ export default function TokenProductSignup() {
             onClick={handleNextStep}
             disabled={!allRequiredAgreed || !protectionConfirmed}
             className={`w-full py-3 rounded-md ${allRequiredAgreed && protectionConfirmed
-              ? "bg-[#0a2d6b] text-white"
+              ? "bg-[#4B5EED] text-white"
               : "bg-gray-200 text-gray-400"
               }`}
           >
@@ -568,13 +568,14 @@ export default function TokenProductSignup() {
             text="다음"
             onClick={handleNextStep}
             fullWidth
+            className="text-base font-medium"
             disabled={numPages > 0 && pageNumber < numPages}
           />
         )}
 
         {/* 3단계: 상품설명서 최종 확인 */}
         {step === 3 && (
-          <Button text="확인했습니다" onClick={handleNextStep} fullWidth />
+          <Button text="확인했습니다" onClick={handleNextStep} fullWidth className="text-sm font-medium" />
         )}
 
         {/* 4단계: 직업 및 소득 조회 */}
@@ -583,6 +584,7 @@ export default function TokenProductSignup() {
             text="자격 확인하기"
             onClick={handleCheckEligibility}
             fullWidth
+            className="text-base font-medium"
             disabled={isCheckingEligibility}
           />
         )}
@@ -590,7 +592,7 @@ export default function TokenProductSignup() {
 
         {/* 4단계: 가입 폼 작성 */}
         {step === 5 && (
-          <Button text="제출하기" onClick={handleSubscribe} fullWidth />
+          <Button text="제출하기" onClick={handleSubscribe} fullWidth className="text-base font-medium" />
         )}
 
       </div>
