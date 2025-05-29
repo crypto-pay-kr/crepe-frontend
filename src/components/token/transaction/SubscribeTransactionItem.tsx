@@ -4,6 +4,7 @@ interface SimpleTransactionItemProps {
   date: string;
   currency: string;
   totalBalance?: number;
+  afterBalance?: number;
 }
 
 export default function SimpleTransactionItem({
@@ -12,6 +13,7 @@ export default function SimpleTransactionItem({
                                                 date,
                                                 currency,
                                                 totalBalance,
+                                                afterBalance
                                               }: SimpleTransactionItemProps) {
   const isCancel = eventType === "TERMINATION";
   const isDeposit = parseFloat(amount) > 0 && !isCancel;
@@ -37,28 +39,32 @@ export default function SimpleTransactionItem({
   return (
     <div className="space-y-2 border-b border-gray-200 pb-4">
       <p className="text-sm text-gray-500">{formattedDate}</p>
-      <div className="flex justify-between items-center">
+      <div className="flex justifty-between justify-between">
         <p
           className={`text-base font-semibold ${
-            isCancel ? "text-red-500" : "text-indigo-800"
+            isCancel ? 'text-red-500' : 'text-indigo-800'
           }`}
         >
           {EVENT_TYPE_KO[eventType] ?? eventType}
         </p>
+
         <p
           className={`text-base font-bold ${
-            isCancel ? "text-red-500" : "text-indigo-800"
+            isCancel ? 'text-red-500' : 'text-indigo-800'
           }`}
         >
           {formattedAmount}
         </p>
       </div>
+      {!isCancel || totalBalance === undefined ? (
+        <p className="text-sm text-gray-600">잔액: {afterBalance}</p>
+      ) : null}
       {isCancel && totalBalance !== undefined && (
         <p className="text-sm font-medium text-gray-700">
           계좌 잔액: {totalBalance.toLocaleString()} {currency}
         </p>
       )}
     </div>
-  );
+  )
 
 }

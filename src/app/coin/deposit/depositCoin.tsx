@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import Button from '@/components/common/Button'
 import Header from '@/components/common/Header'
@@ -6,18 +6,41 @@ import BottomNav from '@/components/common/BottomNavigate'
 import NetworkDisplay from "@/components/coin/NetworkDispaly"
 import DepositAddress from "@/components/coin/DepositAddress"
 import DepositInstructions from "@/components/coin/DepositInstructions"
+import { getCoinInfo } from '@/api/coin'
+
+export interface coin {
+  currency: string,
+  address: string,
+  tag?: string
+}
+
 
 
 export default function CoinDeposit() {
   const [copied, setCopied] = useState(false)
   const navigate = useNavigate()
   const { symbol } = useParams()
-  
-  const handleCopy = () => {
-    navigator.clipboard.writeText("TNgzwecDR23DDKFodjkfn20d")
+  const [coinInfo, setCoinInfo] = useState<coin| null>(null);
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
+
+  useEffect(() =>{
+    const fetchCoinInfo =async ()=> {
+      try {
+        const data = await getCoinInfo(symbol as string);
+
+        setCoinInfo(data);
+      }catch (error){
+        console.log("코인 정보 조회 오류"+ error)
+      }
+    }
+    fetchCoinInfo()
+  }, [])
+
+
 
   const onNext = () => {
     navigate(`/coin/transaction/${symbol}`, {
@@ -36,12 +59,13 @@ export default function CoinDeposit() {
           <NetworkDisplay networkName={symbol || "Unknown"} />
           
           <DepositAddress 
-            address="TNgzwecDR23DDKFodjkfn20d" 
-            copied={copied} 
-            onCopy={handleCopy} 
+            address={coinInfo?.address?? ' '}
+            tag={coinInfo?.tag?? ''}
+            copied={copied}
+            onCopy={handleCopy}
           />
           
-          <DepositInstructions />
+          <DepositInstructions currency={coinInfo?.currency?? ''} />
         </div>
       </div>
 

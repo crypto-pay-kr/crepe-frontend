@@ -8,6 +8,7 @@ interface TransactionProps {
   loading: boolean;
   hasNext: boolean;
   currency: string;
+  afterBalance:number
   totalBalance?: number;
 }
 
@@ -26,6 +27,7 @@ const SubscribeTransactionList: React.FC<TransactionProps> = ({ transactions, lo
             date={tx.date}
             currency={currency}
             totalBalance={tx.eventType === "TERMINATION" ? totalBalance : undefined}
+            afterBalance={tx.afterBalance}
           />
         ))
       ) : (
