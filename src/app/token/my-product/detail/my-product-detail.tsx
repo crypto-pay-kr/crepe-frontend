@@ -128,66 +128,62 @@ export default function TokenGroupDetailPage() {
   if (!bank) return <div className="p-4">잘못된 경로입니다.</div>;
 
   return (
-    <div className="relative flex h-full flex-col bg-gray-50">
+    <div className="flex h-full flex-col bg-gray-50">
       <Header
         title={`${bank} 상세`}
-        onBackClick={() => {navigate('/my/coin')}}
+        onBackClick={() => navigate("/my/coin")}
       />
 
-      <main
-        className={`flex-1 overflow-auto p-3 transition-all duration-500 ease-in-out sm:p-4 md:p-5`}
-      >
-        {/* 총 보유 금액 카드 */}
-        <div className="mb-4 rounded-xl border border-gray-200 bg-white p-4 shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-all duration-500 ease-in-out sm:mb-5 sm:p-8 md:mb-6 md:rounded-2xl md:border-2 md:p-12 md:shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              {tokenMeta?.bankImageUrl && (
-                <img
-                  src={tokenMeta.bankImageUrl}
-                  alt={tokenMeta.name}
-                  className="h-8 w-8 rounded-full"
-                />
-              )}
-              <p className="ml-3 text-lg font-semibold sm:text-xl md:text-2xl">
-                총 보유
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="text-lg font-bold sm:text-xl md:text-2xl">
-                {balance.toFixed(2)} {bank}
-              </p>
-              <p className="text-sm text-gray-500 sm:text-base">
-                {(tokenPrice * balance).toFixed(2)} KRW
-              </p>
+      <main className="flex-1 overflow-auto bg-gray-50">
+        <div className="px-4 py-6 max-w-2xl mx-auto space-y-6">
+          <div className="overflow-hidden rounded-2xl py-10 px-6 bg-white p-6 shadow-sm transition hover:shadow-xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                {tokenMeta?.bankImageUrl && (
+                  <img
+                    src={tokenMeta.bankImageUrl}
+                    alt={tokenMeta.name}
+                    className="h-8 w-8 rounded-full mr-2"
+                  />
+                )}
+                <p className="text-lg font-semibold sm:text-xl md:text-2xl">
+                  총 보유
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-lg font-bold sm:text-xl md:text-2xl">
+                  {balance.toFixed(2)} {bank}
+                </p>
+                <p className="text-sm text-gray-500 sm:text-base">
+                  {(tokenPrice * balance).toLocaleString()} KRW
+                </p>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* 환전 버튼 */}
-        <div className="mb-4 w-full sm:mb-5 md:mb-6">
-          <button
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#4B5EED] py-3 font-semibold text-white shadow transition-all hover:bg-[#4B5EED]"
-            onClick={() => {
-              setTimeout(() => {
-                navigate(`/token/exchange/${bank}`, { state: { bank, isUser } })
-              }, 200)
-            }}
-          >
-            <span className="text-base text-white">토큰 환전</span>
-          </button>
-        </div>
+          <div>
+            <button
+              className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#4B5EED] py-3 font-semibold text-white shadow hover:bg-[#3a4ed3] transition-all"
+              onClick={() =>
+                setTimeout(() => {
+                  navigate(`/token/exchange/${bank}`, { state: { bank, isUser } });
+                }, 200)
+              }
+            >
+              <span className="text-base">토큰 환전</span>
+            </button>
+          </div>
 
-        {/* 거래 내역 헤더 */}
-        <div className="mb-3 flex items-center justify-between sm:mb-4">
-          <h3 className="text-base font-bold text-gray-800 sm:text-lg">
-            거래 내역
-          </h3>
-        </div>
-
-        {/* 거래 내역 리스트 */}
-        <div className="space-y-4 pb-16 text-sm sm:space-y-5 sm:pb-10 sm:text-base md:space-y-6 md:text-lg lg:text-xl">
-          {Array.isArray(data?.pages) && data.pages.length > 0
-            ? data.pages.map((page, pageIndex) =>
+          {/* ✅ 거래 내역 헤더 */}
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-bold text-gray-800 sm:text-lg">
+              거래 내역
+            </h3>
+          </div>
+          {/* 거래 내역 리스트 */}
+          <div className="space-y-4 pb-16 text-sm sm:space-y-5 sm:pb-10 sm:text-base md:space-y-6 md:text-lg lg:text-xl">
+            {Array.isArray(data?.pages) && data.pages.length > 0
+              ? data.pages.map((page, pageIndex) =>
                 page.content.map((tx: Transaction, idx: number) => {
                   const tokenPrice = calculateTokenPrice(
                     tokenCapital,
@@ -228,26 +224,29 @@ export default function TokenGroupDetailPage() {
                   )
                 })
               )
-            : !isLoading && (
-                <div className="flex items-center justify-center py-10 text-gray-500">
-                  <p>거래 내역이 없습니다</p>
-                </div>
-              )}
+              : !isLoading && (
+              <div className="flex items-center justify-center py-10 text-gray-500">
+                <p>거래 내역이 없습니다</p>
+              </div>
+            )}
 
-          <div
-            ref={observerElemRef}
-            className="mt-4 flex h-10 items-center justify-center"
-          >
-            {isFetchingNextPage && (
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-200 border-t-[#0a2e64]" />
-            )}
-            {!hasNextPage && data?.pages[0]?.content.length > 0 && (
-              <p className="text-sm text-gray-500">
-                더 이상 거래 내역이 없습니다
-              </p>
-            )}
+            <div
+              ref={observerElemRef}
+              className="mt-4 flex h-10 items-center justify-center"
+            >
+              {isFetchingNextPage && (
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-200 border-t-[#0a2e64]" />
+              )}
+              {!hasNextPage && data?.pages[0]?.content.length > 0 && (
+                <p className="text-sm text-gray-500">
+                  더 이상 거래 내역이 없습니다
+                </p>
+              )}
+            </div>
           </div>
+
         </div>
+
       </main>
 
       <BottomNav />

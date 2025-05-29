@@ -52,7 +52,7 @@ export default function TransactionItem({
       <div className="flex justify-between items-start">
         <div>
           <p
-            className={`text-xl font-bold ${
+            className={`text-base font-bold ${
               isDeposit ? "text-indigo-800" : "text-red-500"
             } mb-2`}
           >
@@ -64,7 +64,7 @@ export default function TransactionItem({
         </div>
         <div className="text-right">
           <p>
-            <span  className={`text-lg font-bold ${
+            <span  className={`text-base font-bold ${
               isDeposit ? "text-indigo-800" : "text-red-500"
             } mb-2`}>{formattedAmount}</span>
           </p>

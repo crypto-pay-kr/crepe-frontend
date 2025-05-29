@@ -147,8 +147,13 @@ export default function OnSaleTokenProductDetail() {
       </div>
 
       {/* 가입 버튼 */}
-      <div className="p-4">
-        <Button text="토큰 상품 가입" onClick={handleSignupClick} fullWidth />
+      <div className="p-3">
+        <Button
+          text="토큰 상품 가입"
+          onClick={handleSignupClick}
+          fullWidth
+          className="text-sm font-medium"
+        />
       </div>
     </div>
   );

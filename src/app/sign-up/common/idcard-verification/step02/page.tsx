@@ -115,7 +115,7 @@ export default function IDVerificationStep2() {
       </div>
 
       {/* 하단 버튼 영역 */}
-      <div className="p-5 space-y-3 bg-white border-t border-gray-200 shadow-inner">
+      <div className="p-5 py-5 space-y-3 bg-white border-t border-gray-200 shadow-inner">
         <input
           type="file"
           ref={fileInputRef}
@@ -123,10 +123,10 @@ export default function IDVerificationStep2() {
           className="hidden"
           onChange={handleFileChange}
         />
-        <Button text="파일 업로드" fullWidth onClick={handleFileUpload} />
-        <Button text="다음" fullWidth onClick={handleNext} />
+        <Button text="파일 업로드" fullWidth onClick={handleFileUpload} className="text-sm font-medium py-2"/>
+        <Button text="다음" fullWidth onClick={handleNext} className="text-sm font-medium py-2"/>
         {capturedImage && (
-          <Button text="다시 촬영하기" fullWidth onClick={handleRetake} />
+          <Button text="다시 촬영하기" fullWidth onClick={handleRetake} className="text-sm font-medium py-2" />
         )}
       </div>
     </div>

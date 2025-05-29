@@ -95,8 +95,8 @@ export default function IDVerificationStep3() {
           onChange={(e) => handleChange("issueDate", e.target.value)}
         />
       </div>
-      <div className="p-4">
-        <Button text="다음" onClick={handleSubmit} fullWidth />
+      <div className="p-6">
+        <Button text="다음" onClick={handleSubmit} fullWidth className="text-sm font-medium" />
       </div>
     </div>
   );

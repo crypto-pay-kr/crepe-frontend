@@ -12,7 +12,7 @@ export default function BankProductInfo({
   return (
     <>
       <div className="mt-2 font-bold text-2xl">{productTitle}</div>
-      <div className="text-2xl font-bold mb-2">{interestRange}</div>
+      <div className="text-xl font-bold text-indigo-600 mb-2">{interestRange}</div>
     </>
   );
 }

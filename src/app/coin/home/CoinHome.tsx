@@ -162,7 +162,7 @@ export default function CoinHome() {
       <Header title="자산관리" />
       <main className="flex-1 overflow-auto bg-gray-50">
         <div className="px-4 py-6">
-          <div className="overflow-hidden rounded-2xl bg-white p-6 shadow-sm transition hover:shadow-xl">
+          <div className="overflow-hidden rounded-2xl bg-white px-6 py-8 shadow-sm transition hover:shadow-xl">
             <div className="mb-4 flex items-center">
               <Wallet className="mr-2 h-6 w-6 text-[#4B5EED] drop-shadow-sm" />
               <span className="text-base font-bold text-[#4B5EED]">총 자산</span>
@@ -174,7 +174,7 @@ export default function CoinHome() {
 
           <div className="mt-5 w-full">
             <button
-              className="w-full bg-[#4B5EED] text-white py-2 rounded-xl font-medium text-base shadow-sm"
+              className="w-full bg-[#4B5EED] text-white py-3 rounded-xl font-medium text-sm shadow-sm"
               onClick={handleExchangeClick}
             >
               K-토큰 상품 가입

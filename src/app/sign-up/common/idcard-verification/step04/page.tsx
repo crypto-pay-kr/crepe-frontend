@@ -96,7 +96,7 @@ export default function IDVerificationStep4() {
             <Header title="본인확인" />
             <main className="flex-1 px-5 flex flex-col">
                 <div className="rounded-lg p-3 mt-4">
-                    <h3 className="text-xl font-bold mb-4">약관에 동의해주세요.</h3>
+                    <h3 className="text-xl font-bold mb-4 text-gray-800">약관에 동의해주세요.</h3>
                     <div
                         className="flex items-center py-2 cursor-pointer hover:bg-gray-100 rounded-lg px-3 transition-colors"
                         onClick={handleToggleAll}
@@ -140,65 +140,56 @@ export default function IDVerificationStep4() {
                 </div>
 
                 {/* Personal Information Section */}
-                <div className="px-3 pt-5">
-                    <h3 className="text-xl font-bold mb-4">인증정보 입력</h3>
+              <div className="px-4 py-6 space-y-4">
+                <h3 className="text-xl font-bold">인증정보 입력</h3>
 
-                    {/* Carrier selection */}
-                    <div className="mb-3">
-                        <label className="block text-gray-500 text-sm mb-1">휴대폰</label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Phone number input */}
-                    <div className="flex mb-3">
-                        <div className="flex-1">
-                            <input
-                                type="text"
-                                placeholder="휴대폰번호 입력"
-                                value={phoneNumber}
-                                onChange={(e) => setPhoneNumber(e.target.value)}
-                                className="w-full p-2 border border-gray-300 rounded"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Request verification button */}
-                    <button
-                        onClick={handleRequestVerification}
-                        className="w-full py-2 bg-blue text-white rounded-lg mb-4"
-                    >
-                        인증번호 요청
-                    </button>
-
-                    {/* Verification number */}
-                    <div className="mb-5 mt-5">
-                        <label className="block text-gray-500 text-sm mb-1">인증번호</label>
-                        <input
-                            type="text"
-                            placeholder="숫자 6자리 입력"
-                            value={verificationCode}
-                            onChange={(e) => setVerificationCode(e.target.value)}
-                            className="w-full p-2 border border-gray-300 rounded"
-                        />
-                    </div>
-                    {/* Verify button */}
-                    <button
-                        onClick={handleVerify}
-                        className="w-full py-2 bg-blue text-white rounded-lg mb-4"
-                    >
-                        인증번호 확인
-                    </button>
+                {/* 휴대폰 번호 */}
+                <div className="space-y-1">
+                  <label className="block text-sm text-gray-600 mb-2">휴대폰</label>
+                  <input
+                    type="text"
+                    placeholder="휴대폰번호 입력"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    className="w-full p-2.5 text-sm border border-gray-300 rounded-lg"
+                  />
                 </div>
+
+                {/* 인증번호 요청 버튼 */}
+                <button
+                  onClick={handleRequestVerification}
+                  className="mt-2 w-full py-2.5 text-sm font-medium text-white bg-[#4B5EED] rounded-lg"
+                >
+                  인증번호 요청
+                </button>
+
+                {/* 인증번호 입력 */}
+                <div className="space-y-1 mb-2">
+                  <label className="block text-sm text-gray-600 mb-2">인증번호</label>
+                  <input
+                    type="text"
+                    placeholder="숫자 6자리 입력"
+                    value={verificationCode}
+                    onChange={(e) => setVerificationCode(e.target.value)}
+                    className="w-full p-2.5 text-sm border border-gray-300 rounded-lg"
+                  />
+                </div>
+
+                {/* 인증번호 확인 버튼 */}
+                <button
+                  onClick={handleVerify}
+                  className="mt-2 w-full py-2.5 text-sm font-medium text-white bg-[#4B5EED] rounded-lg"
+                >
+                  인증번호 확인
+                </button>
+              </div>
             </main >
 
-            <div className="p-5 bg-white">
+            <div className="p-6 bg-white">
                 <Button
                     text="본인 인증 완료"
                     onClick={handleComplete}
-                    className={`w-full py-3.5 rounded-lg font-medium text-white ${isButtonActive
+                    className={`w-full py-3.5 rounded-lg text-sm font-medium text-white ${isButtonActive
                         ? "bg-blue-600 hover:bg-blue-700"
                         : "bg-gray-300 cursor-not-allowed"
                         }`}
