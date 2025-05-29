@@ -109,7 +109,7 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
           <Route path="/store/menu/add" element={<MenuAddPage />} />
           <Route path="/store/menu/edit/:menuId" element={<MenuEditPage/>} />
           <Route path="/store" element={<OrderStatusPage />} />
-          <Route path="/settlement" element={<SettlementCoin />} />
+         
         </Route>
 
         {/* USER 전용 페이지 - /user 경로 */}
@@ -149,6 +149,7 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
           <Route path="/token/onsale/products" element={<OnSaleTokenProductListPage />} />
 
           {/* 기타 공통 페이지 */}
+          <Route path="/settlement" element={<SettlementCoin />} />
           <Route path="/my/coin" element={<CoinHome />} />
           <Route path="/under-development" element={<UnderDevelopment />} />
           <Route path="/otp/setup" element={<OtpSetup />} />
