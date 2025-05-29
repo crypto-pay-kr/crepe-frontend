@@ -166,7 +166,7 @@ export default function TokenGroupDetailPage() {
         {/* 환전 버튼 */}
         <div className="mb-4 w-full sm:mb-5 md:mb-6">
           <button
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a2e64] py-3 font-semibold text-white shadow transition-all hover:bg-[#081d40]"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#4B5EED] py-3 font-semibold text-white shadow transition-all hover:bg-[#4B5EED]"
             onClick={() => {
               setTimeout(() => {
                 navigate(`/token/exchange/${bank}`, { state: { bank, isUser } })

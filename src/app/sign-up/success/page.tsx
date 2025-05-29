@@ -74,8 +74,12 @@ export default function SignupCompletePage() {
       </div>
 
       {/* 하단 버튼 */}
-      <div className="pt-5 pb-10 px-5">
-        <Button text="다음" onClick={handleNext} />
+      <div className="p-12 pt-0">
+        <Button
+          text="다음"
+          onClick={handleNext}
+          className="w-full py-3.5 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700"
+        />
       </div>
     </div>
   );

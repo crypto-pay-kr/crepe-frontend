@@ -218,7 +218,7 @@ function MallDetailPage() {
                                                     image: item.menuImage,
                                                 })
                                             }
-                                            className="absolute -bottom-2 -right-2 bg-[#002169] rounded-full p-2 shadow-md hover:bg-[#001d5a]"
+                                            className="absolute -bottom-2 -right-2 bg-[#4B5EED] rounded-full p-2 shadow-md hover:bg-[#4B5EED]"
                                         >
                                             <svg
                                                 width="16"
@@ -255,7 +255,7 @@ function MallDetailPage() {
                             onClick={() => setCartExpanded(!cartExpanded)}
                         >
                             <div className="flex items-center">
-                                <div className="bg-[#002169] rounded-full p-2 mr-3">
+                                <div className="bg-[#4B5EED] rounded-full p-2 mr-3">
                                     <ShoppingCart className="h-5 w-5 text-white" />
                                 </div>
                                 <div>

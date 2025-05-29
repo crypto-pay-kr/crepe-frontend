@@ -102,7 +102,7 @@ export default function AdditionalUserInfoPage() {
       <Header title="회원가입" progress={4} />
       <div className="flex-1 flex flex-col p-6">
         <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-2 text-gray-900">추가 정보 입력</h2>
+          <h2 className="text-2xl font-bold mb-2 text-gray-800">추가 정보 입력</h2>
           <p className="text-gray-500">시작하기 위한 정보를 입력해주세요</p>
         </div>
 
@@ -126,7 +126,7 @@ export default function AdditionalUserInfoPage() {
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-center mt-auto mb-8">
+        <div className="flex flex-col items-center justify-center mt-10 mb-4">
           <div className="bg-gray-50 p-3 rounded-full shadow-sm mb-4">
             <img src="/lock.png" alt="Lock Icon" className="w-6 h-6 text-gray-400" />
           </div>
@@ -136,7 +136,7 @@ export default function AdditionalUserInfoPage() {
         </div>
       </div>
 
-      <div className="p-6 pt-0">
+      <div className="p-12 pt-0">
         <Button
           text={isFormValid ? "제출하기" : "계속하기"}
           onClick={handleSubmit}
