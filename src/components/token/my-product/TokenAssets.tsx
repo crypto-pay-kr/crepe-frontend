@@ -29,10 +29,10 @@ export default function TokenAssets({
         {tokens.map(token => (
           <div key={token.currency}>
             <div
-              onClick={() => toggle(token.currency)}
               className="flex cursor-pointer items-center justify-between rounded-lg p-3 hover:bg-gray-50"
             >
-              <div className="flex items-center">
+              <div className="flex items-center"
+                   onClick={() => navigate(`/token/detail/${token.currency}`)}>
                 <div className="flex h-10 w-10 items-center justify-center rounded-full">
                   <img
                     src={token.bankImageUrl}
@@ -47,7 +47,8 @@ export default function TokenAssets({
                   </h4>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2"
+                   onClick={() => toggle(token.currency)}>
                 <div className="text-right">
                   <div className="font-medium text-gray-900">
                     {token.balance.toLocaleString()} {token.currency}
