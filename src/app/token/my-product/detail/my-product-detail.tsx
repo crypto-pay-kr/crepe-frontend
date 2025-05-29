@@ -163,7 +163,7 @@ export default function TokenGroupDetailPage() {
 
           <div>
             <button
-              className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#4B5EED] py-3 font-semibold text-white shadow hover:bg-[#3a4ed3] transition-all"
+              className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#4B5EED] py-3 font-medium text-base text-white shadow hover:bg-[#3a4ed3] transition-all"
               onClick={() =>
                 setTimeout(() => {
                   navigate(`/token/exchange/${bank}`, { state: { bank, isUser } });

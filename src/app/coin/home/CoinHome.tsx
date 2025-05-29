@@ -174,7 +174,7 @@ export default function CoinHome() {
 
           <div className="mt-5 w-full">
             <button
-              className="w-full bg-[#4B5EED] text-white py-3 rounded-xl font-medium text-sm shadow-sm"
+              className="w-full bg-[#4B5EED] text-white py-3 rounded-xl font-medium text-base shadow-sm"
               onClick={handleExchangeClick}
             >
               K-토큰 상품 가입

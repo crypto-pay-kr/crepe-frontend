@@ -96,7 +96,7 @@ export default function IDVerificationStep3() {
         />
       </div>
       <div className="p-6">
-        <Button text="다음" onClick={handleSubmit} fullWidth className="text-sm font-medium" />
+        <Button text="다음" onClick={handleSubmit} fullWidth className="text-base font-medium" />
       </div>
     </div>
   );

@@ -338,7 +338,7 @@ export default function TokenProductSignup() {
                   <span>{pageNumber} / {numPages}</span>
                   <button
                     onClick={nextPage}
-                    className="px-3 py-1 bg-gray-200 rounded-md"
+                    className="px-3 py-1 bg-gray-200 text-base font-medium rounded-md"
                     disabled={pageNumber >= numPages}
                   >
                     다음
@@ -568,7 +568,7 @@ export default function TokenProductSignup() {
             text="다음"
             onClick={handleNextStep}
             fullWidth
-            className="text-sm font-medium"
+            className="text-base font-medium"
             disabled={numPages > 0 && pageNumber < numPages}
           />
         )}
@@ -584,7 +584,7 @@ export default function TokenProductSignup() {
             text="자격 확인하기"
             onClick={handleCheckEligibility}
             fullWidth
-            className="text-sm font-medium"
+            className="text-base font-medium"
             disabled={isCheckingEligibility}
           />
         )}
@@ -592,7 +592,7 @@ export default function TokenProductSignup() {
 
         {/* 4단계: 가입 폼 작성 */}
         {step === 5 && (
-          <Button text="제출하기" onClick={handleSubscribe} fullWidth className="text-sm font-medium" />
+          <Button text="제출하기" onClick={handleSubscribe} fullWidth className="text-base font-medium" />
         )}
 
       </div>

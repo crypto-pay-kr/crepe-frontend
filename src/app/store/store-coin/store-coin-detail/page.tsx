@@ -166,7 +166,7 @@ export default function CoinDetailPage() {
               </span>
               </button>
               <button
-                className={`flex flex-1 items-center justify-center gap-1 rounded-lg py-1.5 font-medium text-sm  shadow transition sm:gap-2 sm:rounded-xl sm:py-2 sm:text-lg ${
+                className={`flex flex-1 items-center justify-center gap-1 rounded-lg py-1.5 font-medium text-base  shadow transition sm:gap-2 sm:rounded-xl sm:py-2 sm:text-lg ${
                   addressStatus === 'ACTIVE'
                     ? 'bg-[#4B5EED] text-white'
                     : 'cursor-not-allowed bg-gray-300 text-gray-400'
@@ -208,7 +208,7 @@ export default function CoinDetailPage() {
                 }
               }}
             >
-            <span className="text-white font-medium text-sm ">
+            <span className="text-white font-medium text-base ">
               {addressStatus === 'ACTIVE' &&
                 '계좌 변경'}
               {addressStatus === 'REGISTERING' && '계좌가 등록중입니다.'}

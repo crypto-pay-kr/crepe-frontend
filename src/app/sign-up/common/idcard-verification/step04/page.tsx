@@ -189,7 +189,7 @@ export default function IDVerificationStep4() {
                 <Button
                     text="본인 인증 완료"
                     onClick={handleComplete}
-                    className={`w-full py-3.5 rounded-lg text-sm font-medium text-white ${isButtonActive
+                    className={`w-full py-3.5 rounded-lg text-base font-medium text-white ${isButtonActive
                         ? "bg-blue-600 hover:bg-blue-700"
                         : "bg-gray-300 cursor-not-allowed"
                         }`}

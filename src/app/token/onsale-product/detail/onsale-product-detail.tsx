@@ -152,7 +152,7 @@ export default function OnSaleTokenProductDetail() {
           text="토큰 상품 가입"
           onClick={handleSignupClick}
           fullWidth
-          className="text-sm font-medium"
+          className="text-base font-medium"
         />
       </div>
     </div>
