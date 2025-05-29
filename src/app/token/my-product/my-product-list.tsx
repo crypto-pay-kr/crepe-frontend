@@ -158,7 +158,7 @@ export default function TokenProductListPage() {
               </div>
               <div className="text-right">
                 <p className="text-2xl font-bold">
-                  {productState.amount} {tokenInfoState.currency}
+                  {products.balance} {tokenInfoState.currency}
                 </p>
                 <p className="text-lg mt-1 font-semibold text-indigo-800">연 <span className="text-lg font-semibold text-indigo-800">{productState.rate}</span></p>
               </div>

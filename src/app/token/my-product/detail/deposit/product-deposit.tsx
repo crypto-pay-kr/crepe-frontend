@@ -76,6 +76,7 @@ export default function TokenDepositPage() {
       alert("예치가 완료되었습니다.");
       navigate(`/token/product/detail/${subscribeId}`, {
         state: {
+          products,
           productState,
           tokenInfoState,
         },
