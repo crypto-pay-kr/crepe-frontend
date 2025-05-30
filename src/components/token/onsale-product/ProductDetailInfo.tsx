@@ -66,10 +66,12 @@ export default function ProductDetailInfo({
           <div className="text-gray-600">소득 조건</div> {/* 소득 조건 추가 */}
           <div>{incomeLevel}</div>
         </div>
-        <div className="flex justify-between">
-          <div className="text-gray-600">이자 지급</div>
-          <div>{interestPayment}</div>
-        </div>
+        {productType !== "상품권" && (
+          <div className="flex justify-between">
+            <div className="text-gray-600">이자 지급</div>
+            <div>{interestPayment}</div>
+          </div>
+        )}
         <div className="flex justify-between">
           <div className="text-gray-600">
             {productType === "상품권" ? "할인율" : "기본 금리"}
