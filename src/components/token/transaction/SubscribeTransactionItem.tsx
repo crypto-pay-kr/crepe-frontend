@@ -15,7 +15,7 @@ export default function SimpleTransactionItem({
                                                 totalBalance,
                                                 afterBalance
                                               }: SimpleTransactionItemProps) {
-  const isCancel = eventType === "TERMINATION";
+  const isCancel = eventType != "TERMINATION";
   const isDeposit = parseFloat(amount) > 0 && !isCancel;
 
   const formattedAmount = `${isDeposit ? "+" : "+"}${parseFloat(amount).toLocaleString()} ${currency}`;
@@ -57,7 +57,7 @@ export default function SimpleTransactionItem({
         </p>
       </div>
       {!isCancel || totalBalance === undefined ? (
-        <p className="text-sm text-gray-600">잔액: {afterBalance}</p>
+        <p className="text-sm text-gray-600">잔액: {afterBalance} {currency}</p>
       ) : null}
       {isCancel && totalBalance !== undefined && (
         <p className="text-sm font-medium text-gray-700">
