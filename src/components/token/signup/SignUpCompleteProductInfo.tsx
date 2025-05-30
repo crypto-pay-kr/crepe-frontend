@@ -8,7 +8,7 @@ export interface SignUpCompleteProductInfoProps {
   endDate: string;
   monthlyAmount: string;
   baseRate: string;
-  preferentialRate: string;
+  interestRate?: string; 
   finalRate: string;
 }
 
@@ -19,7 +19,7 @@ export default function SignUpCompleteProductInfo({
   endDate,
   monthlyAmount,
   baseRate,
-  preferentialRate,
+  interestRate,
   finalRate,
 }: SignUpCompleteProductInfoProps) {
   return (
@@ -64,7 +64,7 @@ export default function SignUpCompleteProductInfo({
         </div>
         <div className="flex justify-between">
           <div className="text-gray-600">우대금리</div>
-          <div>{preferentialRate}</div>
+          <div>{interestRate}</div>
         </div>
         <div className="flex justify-between">
           <div className="text-gray-600">최종금리</div>
