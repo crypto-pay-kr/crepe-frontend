@@ -10,7 +10,6 @@ import { getCoinBalance } from '@/api/coin'
 import { useTokenStore } from '@/constants/useToken'
 import { useCoinStore } from '@/constants/useCoin'
 import { useTickerData } from '@/hooks/useTickerData'
-import { calculateTokenPrice } from '@/utils/exchangeCalculator'
 import { getTokenInfo } from '@/api/token'
 import { BankProduct } from '@/types/token'
 import TokenAssets from '@/components/token/my-product/TokenAssets'
@@ -159,7 +158,7 @@ export default function CoinHome() {
 
   return (
     <div className="flex h-full flex-col bg-gray-50">
-      <Header title="자산관리" />
+      <Header title="자산관리" disableBack/>
       <main className="flex-1 overflow-auto bg-gray-50">
         <div className="px-4 py-6">
           <div className="overflow-hidden rounded-2xl bg-white px-6 py-8 shadow-sm transition hover:shadow-xl">

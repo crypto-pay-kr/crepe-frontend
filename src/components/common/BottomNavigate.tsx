@@ -18,6 +18,8 @@ const NavButton: React.FC<NavButtonProps> = ({ icon, label, isActive, onClick })
       flex flex-col items-center justify-center
       relative py-2 px-4 rounded-xl
       transition-all duration-200 ease-out
+      flex-1 min-w-0
+      focus:outline-none focus:ring-0
       ${isActive
       ? "bg-blue-50 shadow-sm transform scale-105"
       : "hover:bg-gray-50 active:scale-95"
@@ -33,6 +35,7 @@ const NavButton: React.FC<NavButtonProps> = ({ icon, label, isActive, onClick })
     <span className={`
       text-xs mt-1 font-medium transition-all duration-200
       ${isActive ? "text-blue-600" : "text-gray-500"}
+      whitespace-nowrap
     `}>
       {label}
     </span>
@@ -65,19 +68,20 @@ const BottomNav: React.FC = () => {
     {
       icon: <User className="w-6 h-6" />,
       label: "마이페이지",
-      isActive: location.pathname.includes("/my"),
+      // 수정된 부분: 정확한 마이페이지 경로만 체크
+      isActive: (isSeller && location.pathname === "/store/my") || 
+                (!isSeller && location.pathname === "/user/my"),
       onClick: () => navigate(isSeller ? "/store/my" : "/user/my"),
     },
   ];
 
   return (
     <nav className={`
-      bg-white/95 backdrop-blur-lg
-      border-t border-gray-100
-      shadow-lg shadow-gray-200/20
-      flex justify-around items-center
+      bg-white/95 
+      flex items-center
       py-3 px-4
       relative
+      focus:outline-none 
       before:absolute before:inset-0 before:bg-gradient-to-t before:from-gray-50/30 before:to-transparent before:pointer-events-none
     `}>
       {navItems.map((item, index) => (
