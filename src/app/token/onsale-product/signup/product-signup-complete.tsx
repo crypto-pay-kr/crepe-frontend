@@ -12,6 +12,14 @@ function formatDate(iso: string) {
   return `${d.getFullYear()}.${(d.getMonth() + 1).toString().padStart(2, "0")}.${d.getDate().toString().padStart(2, "0")}`;
 }
 
+// 숫자 변환을 위한 유틸
+function toNumber(value?: number | string) {
+  if (value === undefined || value === null) {
+    return 0;
+  }
+  return typeof value === "number" ? value : parseFloat(value);
+}
+
 export default function TokenProductSignupComplete() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,6 +32,23 @@ export default function TokenProductSignupComplete() {
 
   const { subscribeResponse } = state;
 
+
+  // baseRate, interestRate, potentialMaxRate를 숫자로 변환
+  const base = toNumber(subscribeResponse.baseRate);
+  const rate = toNumber(subscribeResponse.interestRate);
+  const potMax = toNumber(subscribeResponse.potentialMaxRate);
+
+  // 최종금리가 interestRate + potentialMaxRate인지 여부 확인
+  const finalRateValue = subscribeResponse.potentialMaxRate !== undefined
+    ? rate + potMax
+    : rate;
+
+  // interestRate는 (최종금리 - baseRate)로 표시
+  const additionalRate = finalRateValue - base;
+
+  console.log("subscribeResponse:", subscribeResponse);
+  console.log("subscribeResponse.baseRate:", subscribeResponse.baseRate);
+
   // 화면에 표시할 정보만 추려서 가공
   const signupInfo = {
     productName: subscribeResponse.productName,
@@ -32,9 +57,10 @@ export default function TokenProductSignupComplete() {
     bankName: subscribeResponse.bankName,
     startDate: formatDate(subscribeResponse.subscribeDate),
     endDate: formatDate(subscribeResponse.expiredDate),
-    monthlyAmount: `${subscribeResponse.balance.toLocaleString()}원`,         // balance
-    baseRate: `연 ${subscribeResponse.interestRate}%`,                         // interestRate
-    preferentialRate: subscribeResponse.additionalMessage || "-",             // additionalMessage
+    monthlyAmount: `${subscribeResponse.balance.toLocaleString()}`,         // balance
+    baseRate: ` ${subscribeResponse.baseRate}%`,                     // interestRate
+    interestRate: ` ${additionalRate.toFixed(1)}%` || "-",                         // interestRate      
+    additionalMessage: subscribeResponse.additionalMessage,   // additionalMessage
     finalRate:
       subscribeResponse.potentialMaxRate !== undefined
         ? `연 ${(subscribeResponse.interestRate + subscribeResponse.potentialMaxRate).toFixed(1)}%`
@@ -59,6 +85,15 @@ export default function TokenProductSignupComplete() {
         />
 
         <SignUpCompleteProductInfo {...signupInfo} />
+
+        {signupInfo.additionalMessage && (
+          <div className="text-center">
+            <p className="text-gray-700 font-medium mb-2">추가 안내</p>
+            <div className="bg-white rounded-xl shadow p-4">
+              <p className="text-gray-600 whitespace-pre-line">{signupInfo.additionalMessage}</p>
+            </div>
+          </div>
+        )}
 
         {signupInfo.voucherCode && (
           <div className="bg-white rounded-xl shadow p-4">

@@ -59,9 +59,20 @@ export default function OnSaleTokenProductDetail() {
   );
 
   // 이자 범위 문자열 생성
-  const interestRange = mergedProduct.minInterestRate && mergedProduct.maxInterestRate
-    ? `연 ${mergedProduct.minInterestRate}% ~ 연 ${mergedProduct.maxInterestRate}%`
-    : `기본금리 연 ${mergedProduct.baseInterestRate}%`;
+  let interestRange = "";
+  const frontType = mapProductTypeToFrontend(mergedProduct.type);
+
+  if (frontType === "상품권") {
+    // minInterestRate와 maxInterestRate가 있으면 할인율 범위, 없으면 단일 할인율
+      interestRange = `할인율 ${mergedProduct.baseInterestRate}%`;
+  } else {
+    // 상품권이 아닌 경우
+    if (mergedProduct.minInterestRate && mergedProduct.maxInterestRate) {
+      interestRange = `연 ${mergedProduct.minInterestRate}% ~ 연 ${mergedProduct.maxInterestRate}%`;
+    } else {
+      interestRange = `기본금리 연 ${mergedProduct.baseInterestRate}%`;
+    }
+  }
 
   // 가입 버튼 클릭 시, signup 페이지로 필요한 데이터 전달
   const handleSignupClick = () => {
@@ -119,7 +130,7 @@ export default function OnSaleTokenProductDetail() {
               condition={mappedOccupations || "-"}
               incomeLevel={mappedIncomeLevels || "-"}
               interestPayment="만기 일시 지급"
-              baseRate={`연 ${mergedProduct.baseInterestRate}%`}
+              baseRate={`${mergedProduct.baseInterestRate}%`}
               preferentialRate={
                 mergedProduct.rateConditions?.length
                   ? `최대 연 ${Math.max(...mergedProduct.rateConditions.map((c) => c.rate))}% 우대`
