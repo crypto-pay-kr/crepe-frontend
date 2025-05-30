@@ -60,7 +60,7 @@ export default function OnSaleTokenProductListPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <Header title="K-계좌" />
+      <Header title="K-토큰 상품" />
 
       <div className="flex-1 overflow-auto p-4">
         <div className="relative mb-6">
