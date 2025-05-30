@@ -49,7 +49,13 @@ export default function ProductDetailInfo({
           <div>{target}</div>
         </div>
         <div className="flex justify-between">
-          <div className="text-gray-600">가입 금액</div>
+          <div className="text-gray-600">
+            {productType === "예금"
+              ? "최대 예치금액"
+              : productType === "적금"
+                ? "월 최대 예치금액"
+                : "가입 금액"}
+          </div>
           <div>{amount}</div>
         </div>
         <div className="flex justify-between">
@@ -65,13 +71,17 @@ export default function ProductDetailInfo({
           <div>{interestPayment}</div>
         </div>
         <div className="flex justify-between">
-          <div className="text-gray-600">기본 금리</div>
+          <div className="text-gray-600">
+            {productType === "상품권" ? "할인율" : "기본 금리"}
+          </div>
           <div>{baseRate}</div>
         </div>
-        <div className="flex justify-between">
-          <div className="text-gray-600">우대 금리</div>
-          <div>{preferentialRate}</div>
-        </div>
+        {productType !== "상품권" && (
+          <div className="flex justify-between">
+            <div className="text-gray-600">우대 금리</div>
+            <div>{preferentialRate}</div>
+          </div>
+        )}
       </div>
       <div className="mt-4 bg-gray-100 p-3 rounded-md text-sm text-gray-600 flex items-start">
         <Info size={16} className="mr-2 mt-0.5" />

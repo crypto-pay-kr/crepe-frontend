@@ -119,7 +119,7 @@ export default function OnSaleTokenProductDetail() {
               condition={mappedOccupations || "-"}
               incomeLevel={mappedIncomeLevels || "-"}
               interestPayment="만기 일시 지급"
-              baseRate={`연 ${mergedProduct.baseInterestRate}%`}
+              baseRate={`${mergedProduct.baseInterestRate}%`}
               preferentialRate={
                 mergedProduct.rateConditions?.length
                   ? `최대 연 ${Math.max(...mergedProduct.rateConditions.map((c) => c.rate))}% 우대`
