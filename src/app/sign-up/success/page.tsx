@@ -10,6 +10,13 @@ const AnimationStyles = () => (
         50% { transform: translateY(-10px); }
         100% { transform: translateY(0px); }
       }
+      
+      .welcome-text {
+        font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+        letter-spacing: -0.01em;
+        color: #334155;
+        font-weight: 700;
+      }
     `}
   </style>
 );
@@ -45,7 +52,7 @@ export default function SignupCompletePage() {
         <div
           className={`transition-all duration-700 ${
             showGreeting ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          } flex flex-col items-center space-y-0.5`}
+          } flex flex-col items-center space-y-1`}
         >
           <div className="flex items-center gap-0">
             <img
@@ -55,7 +62,7 @@ export default function SignupCompletePage() {
             />
             <span className="text-2xl font-bold text-slate-700 leading-none pb-[3px]">에</span>
           </div>
-          <p className="text-2xl font-bold text-slate-700 leading-tight ml-4">
+          <p className="welcome-text text-3xl leading-tight ml-4">
             오신 것을 환영합니다
           </p>
         </div>

@@ -13,70 +13,50 @@ export function RoleProtectedRoute({
   redirectTo = '/login' 
 }: RoleProtectedRouteProps) {
   const { isAuthenticated, isLoading } = useAuthContext();
-  const [userRole, setUserRole] = useState<'USER' | 'SELLER' | null>(null);
   const [isRoleResolved, setIsRoleResolved] = useState(false);
   const accessToken = sessionStorage.getItem('accessToken');
   
-  // userRole 설정 및 해결
-  useEffect(() => {
-    const resolveUserRole = () => {
-      let role = sessionStorage.getItem('userRole') as 'USER' | 'SELLER' | null;
+  // sessionStorage에서 직접 userRole을 가져오는 함수
+  const getCurrentUserRole = (): 'USER' | 'SELLER' | null => {
+    let role = sessionStorage.getItem('userRole') as 'USER' | 'SELLER' | null;
+    
+    // userRole이 없다면 다른 방법으로 추론
+    if (!role) {
+      const isSeller = sessionStorage.getItem('isSeller');
+      const storeInfo = sessionStorage.getItem('storeInfo');
+      const currentPath = window.location.pathname;
       
-      // userRole이 없다면 다른 방법으로 추론
-      if (!role) {
-        const isSeller = sessionStorage.getItem('isSeller');
-        const storeInfo = sessionStorage.getItem('storeInfo');
-        
-        // 현재 접근하려는 경로를 기반으로 역할 추론
-        const currentPath = window.location.pathname;
-        
-        if (isSeller === 'true' || storeInfo || currentPath.startsWith('/store')) {
-          role = 'SELLER';
-          sessionStorage.setItem('userRole', 'SELLER');
-        } else if (isSeller === 'false' || currentPath.startsWith('/user') || currentPath.startsWith('/my')) {
-          role = 'USER';
-          sessionStorage.setItem('userRole', 'USER');
-        } else {
-          // 경로 기반으로도 알 수 없는 경우, API 호출로 확인 필요
-          // 임시로 USER로 설정하되, 추후 API로 확인
-          console.log('⚠️ 역할을 추론할 수 없습니다. 임시로 USER 설정');
-          role = 'USER';
-          sessionStorage.setItem('userRole', 'USER');
-        }
+      console.log('🔍 역할 추론 데이터:', {
+        isSeller,
+        storeInfo,
+        currentPath
+      });
+      
+      if (isSeller === 'true' || storeInfo || currentPath.startsWith('/store')) {
+        role = 'SELLER';
+        sessionStorage.setItem('userRole', 'SELLER');
+        console.log('✅ SELLER로 설정됨');
+      } else if (isSeller === 'false' || currentPath.startsWith('/user')) {
+        role = 'USER';
+        sessionStorage.setItem('userRole', 'USER');
+        console.log('✅ USER로 설정됨');
+      } else {
+        console.log('⚠️ 역할을 추론할 수 없습니다. 임시로 USER 설정');
+        role = 'USER';
+        sessionStorage.setItem('userRole', 'USER');
       }
-      
-      setUserRole(role);
-      setIsRoleResolved(true);
-      
-      console.log('🔍 Role resolved:', {
-        role,
-        isSeller: sessionStorage.getItem('isSeller'),
-        storeInfo: sessionStorage.getItem('storeInfo'),
-        currentPath: window.location.pathname
-      });
-    };
-
-    if (isAuthenticated && accessToken) {
-      resolveUserRole();
-    } else {
-      setIsRoleResolved(true);
     }
-  }, [isAuthenticated, accessToken]);
+    
+    return role;
+  };
   
-  // 디버깅용 로그 (한 번만 출력)
   useEffect(() => {
-    if (isRoleResolved) {
-      console.log('🔍 RoleProtectedRoute Final State:', {
-        isAuthenticated,
-        isLoading,
-        userRole,
-        allowedRoles,
-        hasAccessToken: !!accessToken,
-        redirectTo,
-        isRoleResolved
-      });
+    if (isAuthenticated && accessToken) {
+      // 역할 해결
+      getCurrentUserRole();
     }
-  }, [isRoleResolved, isAuthenticated, isLoading, userRole, allowedRoles, accessToken, redirectTo]);
+    setIsRoleResolved(true);
+  }, [isAuthenticated, accessToken]);
   
   // 로딩 중일 때는 로딩 표시
   if (isLoading || !isRoleResolved) {
@@ -97,27 +77,43 @@ export function RoleProtectedRoute({
     return <Navigate to="/login" replace />;
   }
   
+  // 현재 사용자 역할 가져오기 (sessionStorage에서 직접)
+  const currentUserRole = getCurrentUserRole();
+  
   // userRole이 여전히 없는 경우 - 로그인 페이지로 리다이렉트
-  if (!userRole) {
+  if (!currentUserRole) {
     console.log('⚠️ UserRole still null, redirecting to login');
+    console.log('📊 현재 상태:', {
+      currentUserRole,
+      isRoleResolved,
+      sessionStorageRole: sessionStorage.getItem('userRole'),
+      isAuthenticated,
+      accessToken: !!accessToken
+    });
     return <Navigate to="/login" replace />;
   }
   
   // 권한이 없는 경우 (잘못된 역할)
-  if (!allowedRoles.includes(userRole)) {
+  if (!allowedRoles.includes(currentUserRole)) {
     console.log('❌ Wrong role, redirecting to:', redirectTo);
+    console.log('📊 권한 체크:', {
+      currentUserRole,
+      allowedRoles,
+      redirectTo
+    });
+    
     // SELLER가 USER 페이지에 접근하려 할 때
-    if (userRole === 'SELLER' && redirectTo === '/mall') {
+    if (currentUserRole === 'SELLER' && redirectTo === '/mall') {
       return <Navigate to="/store/my" replace />;
     }
     // USER가 SELLER 페이지에 접근하려 할 때
-    if (userRole === 'USER' && redirectTo !== '/mall') {
-      return <Navigate to="/user/my" replace />;
+    if (currentUserRole === 'USER' && redirectTo !== '/mall') {
+      return <Navigate to="/store/my" replace />;
     }
     return <Navigate to={redirectTo} replace />;
   }
   
-  console.log('✅ Access granted');
+  console.log('✅ Access granted for role:', currentUserRole);
   return <Outlet />;
 }
 

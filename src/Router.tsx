@@ -3,7 +3,6 @@ import { useEffect } from "react"
 import SplashPage from "./app/splash/page";
 import MyPage from "./app/mypage/page";
 import EditInfo from "./app/mypage/edit-info/page";
-import SettlementReport from "./app/store/store-coin/store-coin-report/page";
 import WelcomePage from "./app/welcome/welcome";
 import TermsAgreementPage from "./app/sign-up/common/terms/page";
 import EmailPasswordPage from "./app/sign-up/common/email-input/page";
@@ -48,7 +47,6 @@ import IDVerificationStep4 from "./app/sign-up/common/idcard-verification/step04
 import UnderDevelopment from "./app/develop/page";
 import TokenProductSignupComplete from "./app/token/onsale-product/signup/product-signup-complete";
 import ProtectedRoute from '@/routes/ProtectedRoute'
-import PublicRoute from '@/routes/PublicRoute'
 import MyPaymentHistoryPage from "./app/mypage/pay-history/page";
 import StoreSettlementReportPage from "./app/mypage/settlement-report/page"
 import OtpSetup from "./app/mypage/otp/page";
@@ -73,7 +71,6 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
         <Route path="/" element={<SplashPage />} />
         
         {/* 로그인하지 않은 사용자만 접근 가능한 페이지 */}
-        <Route element={<PublicRoute />}>
           <Route path="/welcome" element={<WelcomePage />} />
           <Route path="/login" element={<LoginPage />} />
           
@@ -98,7 +95,7 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
           <Route path="/store/phone/verification" element={<PhoneVerificationPage />} />
           <Route path="/store/register" element={<BusinessCertificateVerifyPage/>} />
           <Route path="/store/register/info" element={<AdditionalStoreInfoPage />} />
-        </Route>
+  
 
         {/* SELLER 전용 페이지 - /store 경로 */}
         <Route element={<SellerOnlyRoute />}>

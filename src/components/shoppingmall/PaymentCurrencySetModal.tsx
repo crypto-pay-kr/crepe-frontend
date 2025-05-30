@@ -10,19 +10,31 @@ interface PaymentCurrencySetModalProps {
 }
 
 export default function PaymentCurrencySetModal({
-                                                  isOpen,
-                                                  onClose,
-                                                  title,
-                                                  coins = [],
-                                                }: PaymentCurrencySetModalProps): React.ReactElement | null {
+  isOpen,
+  onClose,
+  title,
+  coins = [],
+}: PaymentCurrencySetModalProps): React.ReactElement | null {
   if (!isOpen) return null;
 
-  // CryptocurrencyTags에서 사용한 색상 매핑
-  const cryptoColors: Record<string, string> = {
-    XRP: "bg-yellow-100 text-yellow-800 border-yellow-100",
-    USDT: "bg-green-100 text-green-800 border-green-100",
-    SOL: "bg-purple-100 text-purple-800 border-purple-100",
-    default: "bg-gray-500 text-gray-800 border-gray-100",
+  // 선택되지 않은 상태와 선택된 상태의 색상 매핑
+  const cryptoColors: Record<string, { selected: string; unselected: string }> = {
+    XRP: {
+      selected: "bg-yellow-500 text-white border-yellow-500 shadow-lg",
+      unselected: "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
+    },
+    USDT: {
+      selected: "bg-green-500 text-white border-green-500 shadow-lg",
+      unselected: "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
+    },
+    SOL: {
+      selected: "bg-purple-500 text-white border-purple-500 shadow-lg",
+      unselected: "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
+    },
+    default: {
+      selected: "bg-blue-500 text-white border-blue-500 shadow-lg",
+      unselected: "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
+    },
   };
 
   // 선택한 코인들을 상태로 관리
@@ -58,36 +70,50 @@ export default function PaymentCurrencySetModal({
       <div className="bg-white p-6 rounded-lg max-w-sm w-full">
         <h3 className="text-center text-lg font-medium mb-6">{title}</h3>
 
-        <div className="flex justify-around">
+        <div className="flex justify-around gap-2">
           {coins.map((coin, index) => {
             const coinName = typeof coin === "string" ? coin : coin.name || "";
             const isSelected = selectedCoins.includes(coinName);
+            const colorConfig = cryptoColors[coinName] || cryptoColors.default;
 
             return (
               <button
                 key={index}
                 onClick={() => coinName && toggleCoin(coinName)}
-                className={`px-4 py-2 rounded-full text-sm transition-colors border 
-                   ${cryptoColors[coinName] || cryptoColors.default}
-                   ${isSelected ? "font-semibold" : ""}
-                  `}
+                className={`px-4 py-3 rounded-full text-sm font-medium transition-all duration-200 border-2 transform active:scale-95
+                  ${isSelected 
+                    ? colorConfig.selected 
+                    : colorConfig.unselected
+                  }
+                `}
               >
                 {coinName}
+                {isSelected && (
+                  <span className="ml-1">✓</span>
+                )}
               </button>
             );
           })}
         </div>
 
+        {/* 선택된 코인 개수 표시 */}
+        <div className="text-center mt-4 text-sm text-gray-600">
+          {selectedCoins.length > 0 
+            ? `${selectedCoins.length}개의 코인이 선택되었습니다.`
+            : "결제 수단으로 지원할 코인을 선택해주세요."
+          }
+        </div>
+
         <div className="flex justify-center mt-6 space-x-3">
           <button
             onClick={handleUpdate}
-            className="bg-[#0a2e65] text-white px-8 py-2 rounded w-full"
+            className="bg-[#0a2e65] text-white px-8 py-2 rounded w-full hover:bg-[#0a2158] transition-colors"
           >
             변경하기
           </button>
           <button
             onClick={onClose}
-            className="bg-gray-300 text-black px-8 py-2 rounded w-full"
+            className="bg-gray-300 text-black px-8 py-2 rounded w-full hover:bg-gray-400 transition-colors"
           >
             취소
           </button>
