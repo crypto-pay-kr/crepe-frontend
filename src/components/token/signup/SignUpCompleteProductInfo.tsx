@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 
 export interface SignUpCompleteProductInfoProps {
@@ -8,7 +7,7 @@ export interface SignUpCompleteProductInfoProps {
   endDate: string;
   monthlyAmount: string;
   baseRate: string;
-  interestRate?: string; 
+  interestRate?: string;
   finalRate: string;
 }
 
@@ -46,7 +45,7 @@ export default function SignUpCompleteProductInfo({
 
         {productType === "INSTALLMENT" && (
           <div className="flex justify-between">
-            <div className="text-gray-600">납입액</div>
+            <div className="text-gray-600">납입금액</div>
             <div>예치 후 결정</div>
           </div>
         )}
@@ -59,17 +58,25 @@ export default function SignUpCompleteProductInfo({
         {/* VOUCHER는 월 납입금액 자체를 숨김 */}
 
         <div className="flex justify-between">
-          <div className="text-gray-600">기본금리</div>
+          <div className="text-gray-600">
+            {productType === "VOUCHER" ? "할인율" : "기본금리"}
+          </div>
           <div>{baseRate}</div>
         </div>
-        <div className="flex justify-between">
-          <div className="text-gray-600">우대금리</div>
-          <div>{interestRate}</div>
-        </div>
-        <div className="flex justify-between">
-          <div className="text-gray-600">최종금리</div>
-          <div className="font-medium">{finalRate}</div>
-        </div>
+
+        {/* VOUCHER가 아닐 때만 우대금리와 최종금리 노출 */}
+        {productType !== "VOUCHER" && (
+          <>
+            <div className="flex justify-between">
+              <div className="text-gray-600">우대금리</div>
+              <div>{interestRate}</div>
+            </div>
+            <div className="flex justify-between">
+              <div className="text-gray-600">최종금리</div>
+              <div className="font-medium">{finalRate}</div>
+            </div>
+          </>
+        )}
       </div>
     </motion.div>
   );
