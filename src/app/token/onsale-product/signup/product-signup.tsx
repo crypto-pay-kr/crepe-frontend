@@ -10,11 +10,13 @@ import ProductSignUpAgreementSection from "@/components/token/signup/ProductSign
 import ProductProtectionInfo from "@/components/token/signup/ProductProtectionInfo";
 import { ProductLogo } from "@/components/common/ProductLogo";
 import Input from "@/components/common/Input";
-import { subscribeProduct, SubscribeProductRequest } from "@/api/subscribe";
+import { subscribeProduct, SubscribeProductRequest, SubscribeProductResponse } from '@/api/subscribe'
 import { addOccupation, checkActorIncome, checkEligibility, fetchMyUserInfo } from "@/api/user";
 import { fetchMyStoreAllDetails } from "@/api/store";
 import { isSellerToken } from "@/utils/authUtils";
 import { FreeDepositCountPreferentialRate } from "@/types/FreeDepositCountPreferentialRate ";
+import { fetchProductDetail } from '@/api/product'
+import { useBankStore } from '@/stores/BankStore'
 
 // PDF.js 워커 설정
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -50,6 +52,7 @@ export default function TokenProductSignup() {
   const [initialDepositAmount, setInitialDepositAmount] = useState("");
   const [selectedFreeDepositRate, setSelectedFreeDepositRate] = useState<FreeDepositCountPreferentialRate>("NONE");
   const [voucherQuantity, setVoucherQuantity] = useState("1");
+  const [maxMonthlyPayment, setMaxMonthlyPayment] = useState<number | null>(null);
 
 
   const signupState = location.state?.signupState || location.state || {};
@@ -241,6 +244,20 @@ export default function TokenProductSignup() {
     }
   };
 
+  // 상품 정보 조회
+  useEffect(() => {
+    const fetchProductDetails = async () => {
+      try {
+        const productData = await fetchProductDetail(Number(productId));  // 상품 상세 정보 조회
+        setMaxMonthlyPayment(Number(productData.maxMonthlyPayment));  // maxMonthlyPayment 값 저장
+      } catch (error) {
+        console.error("상품 정보 조회 오류:", error);
+      }
+    };
+
+    fetchProductDetails();  // 상품 정보 가져오기
+  }, [productId]);
+
 
   // 전체 동의 토글
   const toggleAll = () => {
@@ -384,19 +401,21 @@ export default function TokenProductSignup() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <div className="mt-6 mb-4">
-                <h2 className="text-xl font-bold">상품 가입 자격 확인이 필요해요.</h2>
-                <h2 className="text-xl font-bold">{username}님의 직업과 소득을 조회할게요.</h2>
+              <div className="mt-6 mb-9">
+                <h2 className="text-xl text-gray-800 font-bold">상품 가입 자격 확인이 필요해요.</h2>
+                <h2 className="text-xl text-gray-800 font-bold">
+                  <span className="text-[#4B5EED]">{username}</span>님의 직업과 소득을 조회할게요.
+                </h2>
               </div>
 
               {/* 직업 입력 */}
               <div className="mb-3">
-                <label className="block text-gray-500 text-sm mb-1">직업 등록</label>
+                <label className="block text-gray-600 text-base font-semibold mb-2">직업 등록</label>
                 <div className="flex items-center space-x-2">
                   <select
                     value={occupation}
                     onChange={(e) => setOccupation(e.target.value)}
-                    className="flex-1 p-2 border border-gray-300 rounded"
+                    className="flex-1 p-2 border border-gray-300 rounded-md"
                   >
                     <option value="">직업 선택</option>
                     <option value="직장인">직장인</option>
@@ -461,15 +480,16 @@ export default function TokenProductSignup() {
               {/* 소득 데이터 표출 */}
               {isIncomeVisible && (
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 40 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
+                  className="mt-10"
                 >
-                  <div className="mb-5">
-                    <label className="block text-gray-500 text-sm mb-1">소득 데이터</label>
+                  <div className="mb-7">
+                    <label className="block text-gray-600 text-base font-semibold mb-1">소득 데이터</label>
                     {/* 연소득 */}
                     <div className="flex items-center mb-2">
-                      <label className="w-24 text-gray-700 text-sm font-medium">연소득</label>
+                      <label className="w-24 text-gray-700 text-sm font-semibold">연 소득</label>
                       <input
                         type="text"
                         placeholder="연소득"
@@ -480,7 +500,7 @@ export default function TokenProductSignup() {
                     </div>
                     {/* 총자산 */}
                     <div className="flex items-center">
-                      <label className="w-24 text-gray-700 text-sm font-medium">총자산</label>
+                      <label className="w-24 text-gray-700 text-sm font-semibold">총 자산</label>
                       <input
                         type="text"
                         placeholder="총자산"
@@ -497,17 +517,18 @@ export default function TokenProductSignup() {
 
 
           {step === 5 && (
-
             <div>
-              <div className="mt-6 mb-4">
-                <h2 className="text-xl font-bold">가입 전 필수 정보를 입력해주세요.</h2>
+              <div className="mt-8 mb-4">
+                <h2 className="text-xl text-gray-800 font-bold">가입 전 필수 정보를 입력해주세요.</h2>
               </div>
 
-              <div className="space-y-6 px-1">
+              <div className="space-y-6 px-2 mt-10">
                 {/* 상품권 수량 (고정) */}
                 {/* 가입목적 */}
                 <Input
-                  label="가입목적"
+                  label={<span className="flex items-center text-base text-gray-600 font-semibold gap-2 mt-4">
+                  <span>가입목적</span>
+                </span>}
                   value={subscribePurpose}
                   onChange={(e) => setSubscribePurpose(e.target.value)}
                   placeholder="가입목적을 작성해주세요"
@@ -527,24 +548,51 @@ export default function TokenProductSignup() {
                   </div>
                 )}
 
-                {/* 최초 납입액 (SAVING일 때만 표시) */}
                 {productType === "SAVING" && (
-                  <div>
-                    <label className="block text-gray-500 text-sm mb-1">최초 납입액</label>
-                    <input
-                      type="number"
-                      className="w-full p-2 border border-gray-300 rounded"
-                      value={initialDepositAmount}
-                      onChange={(e) => setInitialDepositAmount(e.target.value)}
-                      placeholder="최초 납입액을 입력해주세요"
-                    />
-                  </div>
+                  <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="mt-16"
+                  >
+                    <div className="bg-indigo-50 border border-indigo-50 rounded-lg p-4">
+                    {maxMonthlyPayment !== null && (
+                      <div className="bg-white rounded-lg p-3 mb-4 border border-indigo-100">
+                        <div className="flex justify-between items-center">
+                          <span className="text-base font-semibold text-[#4B5EED]">예치 가능 최대 납입액</span>
+                          <span className="text-lg font-bold text-[#4B5EED]">
+            {maxMonthlyPayment.toLocaleString()} 원
+          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="bg-white rounded-lg p-3 border border-indigo-100">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-base font-semibold text-[#4B5EED]">최초 납입액</span>
+                      </div>
+                      <input
+                        type="number"
+                        value={initialDepositAmount}
+                        onChange={(e) => setInitialDepositAmount(e.target.value)}
+                        placeholder="최초 납입액을 입력해주세요"
+                        className="w-full p-2 border border-gray-300 rounded"
+                      />
+                      {initialDepositAmount && (
+                        <div className="mt-2 text-sm text-[#4B5EED]">
+                          입력 금액: {Number(initialDepositAmount).toLocaleString()}
+                        </div>
+                      )}
+                    </div>
+                    </div>
+                  </motion.div>
                 )}
               </div>
             </div>
           )}
         </div>
       </div>
+
 
       {/* 하단 버튼 영역 */}
       <div className="p-4">
@@ -575,7 +623,7 @@ export default function TokenProductSignup() {
 
         {/* 3단계: 상품설명서 최종 확인 */}
         {step === 3 && (
-          <Button text="확인했습니다" onClick={handleNextStep} fullWidth className="text-sm font-medium" />
+          <Button text="확인했습니다" onClick={handleNextStep} fullWidth className="text-base font-medium" />
         )}
 
         {/* 4단계: 직업 및 소득 조회 */}

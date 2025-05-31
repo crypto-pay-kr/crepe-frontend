@@ -28,7 +28,8 @@ export const useBankStore = create<BankStoreState>((set) => ({
           status: product.status === 'ACTIVE' ? '진행 중' : '만료',
           rate: `${product.baseInterestRate.toFixed(2)}%`,
           maxMonthlyPayment: product.maxMonthlyPayment,
-          preTaxInterest: product.preTaxInterest
+          preTaxInterest: product.preTaxInterest,
+          type:product.productType
         }))
 
         return {

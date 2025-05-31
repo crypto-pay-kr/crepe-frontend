@@ -1,6 +1,6 @@
 import CheckCircle from "./CheckCircle"
 interface InputProps {
-  label: string;
+  label: string | React.ReactNode;
   type?: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
