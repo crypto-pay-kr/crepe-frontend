@@ -6,7 +6,7 @@ export interface SignUpCompleteProductInfoProps {
   startDate: string;
   endDate: string;
   monthlyAmount: string;
-  baseRate: string;
+  baseInterestRate: string;
   interestRate?: string;
   finalRate: string;
 }
@@ -17,7 +17,7 @@ export default function SignUpCompleteProductInfo({
   startDate,
   endDate,
   monthlyAmount,
-  baseRate,
+  baseInterestRate,
   interestRate,
   finalRate,
 }: SignUpCompleteProductInfoProps) {
@@ -61,7 +61,7 @@ export default function SignUpCompleteProductInfo({
           <div className="text-gray-600">
             {productType === "VOUCHER" ? "할인율" : "기본금리"}
           </div>
-          <div>{baseRate}</div>
+          <div>{baseInterestRate}</div>
         </div>
 
         {/* VOUCHER가 아닐 때만 우대금리와 최종금리 노출 */}

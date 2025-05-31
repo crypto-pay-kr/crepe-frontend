@@ -21,7 +21,7 @@ export interface SubscribeProductResponse {
   subscribeDate: string; 
   expiredDate: string;
   balance: number;
-  baseRate: number; 
+  baseInterestRate: number; 
   interestRate: number;
   message: string;
   voucherCode?: string;
