@@ -27,6 +27,7 @@ interface BusinessOcrData {
 interface StoreFormData {
   storeType: string;
   storeName: string;
+  ownerName: string; // 가게 주인 이름 추가
   businessNumber: string;
   address: string;
   imageBase64?: string;
@@ -51,6 +52,7 @@ export default function AdditionalStoreInfoPage() {
   const [formData, setFormData] = useState<StoreFormData>({
     storeType: "",
     storeName: "",
+    ownerName: "", // 가게 주인 이름 초기화
     businessNumber: "",
     address: "",
     imageBase64: "",
@@ -72,6 +74,7 @@ export default function AdditionalStoreInfoPage() {
       setFormData((prev) => ({
         ...prev,
         storeName: ocrData.corpName || "",
+        ownerName: ocrData.representativeName || "", 
         businessNumber: ocrData.registerNumber || "",
         address: ocrData.address || "",
       }));
@@ -104,9 +107,9 @@ export default function AdditionalStoreInfoPage() {
     }
   };
 
-  // 필수 필드 모두 채워졌는지 확인
+  // 필수 필드 모두 채워졌는지 확인 (ownerName 추가)
   const validateForm = (data: StoreFormData) => {
-    const isValid = data.storeType && data.storeName && data.businessNumber && data.address;
+    const isValid = data.storeType && data.storeName && data.ownerName && data.businessNumber && data.address;
     setIsButtonDisabled(!isValid);
   };
 
@@ -120,11 +123,13 @@ export default function AdditionalStoreInfoPage() {
       // 서버에서 요구하는 필드명으로 매핑
       const signUpPayload = {
         ...signUpData,
+        name: formData.ownerName, // 서버에서 요구하는 'name' 필드 (유저이름/가게 주인 이름)
         storeName: formData.storeName,
+        ownerName: formData.ownerName,
         businessNumber: formData.businessNumber,
         storeAddress: formData.address,
         storeType: formData.storeType,
-        representativeName: ocrData?.representativeName,
+        representativeName: formData.ownerName, // 대표자명으로도 전송
         businessType: ocrData?.businessType,
       };
 
@@ -150,9 +155,21 @@ export default function AdditionalStoreInfoPage() {
 
       // API 요청
       const response = await signUpStore(multipart);
+      
+      // 응답 상태 확인
       if (!response.ok) {
-        const errorData = await response.json();
-        alert(`회원가입 실패: ${errorData.message}`);
+        // 응답에 JSON 본문이 있는지 확인
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            const errorData = await response.json();
+            alert(`회원가입 실패: ${errorData.message || '알 수 없는 오류'}`);
+          } catch (jsonError) {
+            alert(`회원가입 실패: HTTP ${response.status} ${response.statusText}`);
+          }
+        } else {
+          alert(`회원가입 실패: HTTP ${response.status} ${response.statusText}`);
+        }
         return;
       }
 
@@ -199,6 +216,16 @@ export default function AdditionalStoreInfoPage() {
               placeholder="가게명을 입력하세요."
               className="border-t-0 border-x-0 border-b border-gray-300 rounded-none py-3 focus:ring-0 px-0"
               onChange={(e) => handleInputChange("storeName", e.target.value)}
+            />
+          </div>
+          <div>
+            <Input
+              name="ownerName"
+              label="가게 주인 이름"
+              value={formData.ownerName}
+              placeholder="가게 주인 이름을 입력하세요."
+              className="border-t-0 border-x-0 border-b border-gray-300 rounded-none py-3 focus:ring-0 px-0"
+              onChange={(e) => handleInputChange("ownerName", e.target.value)}
             />
           </div>
           <div>
