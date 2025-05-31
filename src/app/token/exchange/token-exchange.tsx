@@ -15,9 +15,9 @@ import {
 import { useTokenStore } from '@/constants/useToken';
 import { useCoinStore } from '@/constants/useCoin';
 import { useTickerData } from '@/hooks/useTickerData'
-import PercentageSelector from '@/components/coin/PercentageSelector'
-// 기존 코드에서 select 부분만 교체하면 됩니다
-import { ChevronDown } from 'lucide-react'; // 아이콘 import 추가
+import { ChevronDown } from 'lucide-react';
+import { ApiError } from '@/error/ApiError'
+import { toast } from 'react-toastify' // 아이콘 import 추가
 interface Portfolio {
   currency: string;
   amount: number;
@@ -37,13 +37,11 @@ export default function TokenExchangePage() {
   const selectedPortfolio = tokenInfo?.portfolios.find(
     (p: Portfolio) => p.currency === selectedCurrency
   );
-  const [selectedPercentage, setSelectedPercentage] = useState(70)
   const coinList = useCoinStore(state => state.coins);
   const tokenList = useTokenStore(state => state.tokens);
   const coinMeta = coinList.find(c => c.currency === selectedCurrency);
   const tokenMeta = tokenList.find(t => t.currency === bank);
   const tickerData = useTickerData();
-// 드롭다운이 필요하다면 추가 상태와 UI:
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleCurrencyClick = () => {
@@ -69,20 +67,6 @@ export default function TokenExchangePage() {
     };
     fetchAllData();
   }, [bank]);
-
-  const handlePercentageClick = (percentage: number) => {
-    setSelectedPercentage(percentage);
-    const availableAmount = isCoinToToken ? myCoinBalance : myTokenBalance;
-    const calculatedAmount = (availableAmount * (percentage / 100)).toFixed(2);
-    if (isCoinToToken) {
-      setCoinAmount(Number(calculatedAmount));
-    } else {
-      setTokenAmount(Number(calculatedAmount));
-    }
-  };
-
-
-
 
 
   // 환전 수량 계산 (코인 < - > 토큰 )
@@ -167,9 +151,12 @@ export default function TokenExchangePage() {
           isCoinToToken: isCoinToToken
         }
       });
-    } catch (error) {
-      console.error(error);
-      alert("환전 요청에 실패했습니다.");
+    } catch (e) {
+      if (e instanceof ApiError) {
+        toast(`${e.message}`);
+      } else {
+        toast('예기치 못한 오류가 발생했습니다.');
+      }
     }
   };
 
@@ -203,7 +190,6 @@ export default function TokenExchangePage() {
       <Header title="토큰 환전" />
       <main className="flex-1 overflow-scroll p-5">
         {/* 위 상단 입력 박스 */}
-        {/* 입력 박스 (코인/토큰 수량 입력) */}
         <div className="mb-6 mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-md">
           <div className="flex mt-3 items-start justify-between">
             {/* 좌측: 코인/토큰 이미지 + 이름 + 보유 */}
@@ -492,13 +478,11 @@ export default function TokenExchangePage() {
           })}
         </div>
 
-        {/*<div className="border-t border-gray-50 bg-gray-50 p-5 shadow-lg">*/}
         <Button
           text="환전 요청"
           onClick={handleExchangeClick}
           className="w-full rounded-lg py-3 text-lg font-semibold shadow-md"
         />
-        {/*</div>*/}
       </main>
       <BottomNav />
     </div>

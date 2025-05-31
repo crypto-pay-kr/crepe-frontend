@@ -1,3 +1,4 @@
+import { ApiError } from '@/error/ApiError'
 
 const API_BASE_URL = import.meta.env.VITE_API_SERVER_URL || "http://localhost:8080";
 
@@ -171,6 +172,8 @@ export const getTokenInfo = async (currency: string) => {
   return await res.json();
 };
 
+
+
 export const requestExchange = async (
   isCoinToToken: boolean,
   requestData: {
@@ -194,7 +197,8 @@ export const requestExchange = async (
   });
 
   if (!res.ok) {
-    throw new Error(`환전 요청 실패: ${res.status}`);
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(body.code || 'UNKNOWN', res.status, body.message || '요청 실패');
   }
 
   return await res.text(); // 문자열 응답 처리
@@ -232,7 +236,7 @@ export const fetchTokenExchangeHistory = async (
 export async function fetchTokenBalance(currency: string): Promise<number> {
   const token = sessionStorage.getItem('accessToken');
 
-  const response = await fetch(`/api/token/balance/${currency}`, {
+  const response = await fetch(`${BASE_URL}/api/token/balance/${currency}`, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${token}`,
