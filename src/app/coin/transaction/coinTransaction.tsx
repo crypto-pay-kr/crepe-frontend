@@ -5,7 +5,9 @@ import BottomNav from '@/components/common/BottomNavigate'
 import { useState } from 'react'
 import TransactionIdInput from '@/components/coin/TransactionIdInput'
 import InstructionGuide from '@/components/coin/InstructionGuide'
-import { requestDeposit } from '@/api/coin'
+import {requestDeposit } from '@/api/coin'
+import { ApiError } from '@/error/ApiError'
+import { toast } from 'react-toastify';
 
 type RouteParams = {
   symbol: string;
@@ -27,15 +29,14 @@ export default function CoinTransaction() {
 
   const handleNext = async () => {
     if (!symbol) {
-      alert("코인 심볼이 없습니다.");
+      toast("코인 심볼이 없습니다.");
       return;
     }
 
     if (!transactionId) {
-      alert("거래 ID를 입력해주세요.");
+      toast("거래 ID를 입력해주세요.");
       return;
     }
-console.log(symbol,transactionId);
     try {
       await requestDeposit(symbol, transactionId);
       navigate(`/coin-detail/${symbol}`, {
@@ -45,8 +46,12 @@ console.log(symbol,transactionId);
           transactionId,
         }
       });
-    } catch (error) {
-      alert("입금 요청 실패: " + (error as Error).message);
+    } catch (e: any) {
+      if (e instanceof ApiError) {
+        toast(`${e.message}`);
+      } else {
+        toast('예기치 못한 오류가 발생했습니다.');
+      }
     }
   };
 
