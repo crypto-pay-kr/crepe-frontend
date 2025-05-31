@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import Header from "@/components/common/Header";
 import { uploadBusinessLicense } from "@/api/store"; // 실제 OCR API 호출 함수 예시
 import { AlertCircle } from "lucide-react";
+import { ApiError } from "@/error/ApiError";
+import { toast } from "react-toastify";
 
 export default function BusinessCertificateVerifyPage() {
   const navigate = useNavigate();
@@ -44,30 +46,34 @@ export default function BusinessCertificateVerifyPage() {
   };
 
   // OCR 검증 요청
-  const handleVerify = async () => {
-    if (!image) return;
-    try {
-      setIsUploading(true);
-      // dataURL → Blob 변환
-      const res = await fetch(image);
-      const blob = await res.blob();
-      const fileToSend = new File([blob], fileName || "license.png", { type: blob.type });
+// OCR 검증 요청
+const handleVerify = async () => {
+  if (!image) return;
+  try {
+    setIsUploading(true);
+    // dataURL → Blob 변환
+    const res = await fetch(image);
+    const blob = await res.blob();
+    const fileToSend = new File([blob], fileName || "license.png", { type: blob.type });
 
-      // 실제 OCR API 호출 (예: uploadBusinessLicense)
-      const response = await uploadBusinessLicense(fileToSend);
+    // 실제 OCR API 호출 (예: uploadBusinessLicense)
+    const response = await uploadBusinessLicense(fileToSend);
 
-      // OCR 결과 저장
-      localStorage.setItem("businessOcrResult", JSON.stringify(response));
+    // OCR 결과 저장
+    localStorage.setItem("businessOcrResult", JSON.stringify(response));
 
-      // 성공 시 다음 단계 페이지 이동
-      navigate("/store/register/info");
-    } catch (error) {
-      console.error("OCR 업로드 오류:", error);
-      alert("OCR 처리 중 오류가 발생했습니다.");
-    } finally {
-      setIsUploading(false);
+    // 성공 시 다음 단계 페이지 이동
+    navigate("/store/register/info");
+  } catch (error) {
+    if (error instanceof ApiError) {
+      toast.error(`${error.message}`); // ApiError의 메시지를 toast로 표시
+    } else {
+      toast.error("예기치 못한 오류가 발생했습니다."); // 일반 오류 처리
     }
-  };
+  } finally {
+    setIsUploading(false);
+  }
+};
 
   // 파일 초기화
   const handleReset = () => {
@@ -104,8 +110,8 @@ export default function BusinessCertificateVerifyPage() {
                 <h3 className="text-sm font-medium text-blue-800">업로드 가이드</h3>
                 <ul className="mt-1 text-xs text-blue-700 list-disc pl-5 space-y-1">
                   <li>사업자등록증 전체가 명확하게 보이도록 업로드해주세요</li>
-                  <li>JPEG, PNG, PDF 파일 형식을 지원합니다</li>
-                  <li>최대 10MB 크기까지 업로드 가능합니다</li>
+                  <li>JPEG, JPG, PNG 파일 형식을 지원합니다</li>
+                  <li>최대 5MB 크기까지 업로드 가능합니다</li>
                 </ul>
               </div>
             </div>

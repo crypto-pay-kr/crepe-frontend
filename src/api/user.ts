@@ -3,6 +3,7 @@
 
 const API_BASE_URL = import.meta.env.VITE_API_SERVER_URL || "http://localhost:8080"
 import { occupationMapping } from "@/constants/occupationMapping"; 
+import { ApiError } from "@/error/ApiError";
 
 
 // 인증 문자 전송 (SMS)
@@ -13,6 +14,11 @@ export async function sendSMS(phone: string, smsType: string) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ phone, smsType }),
   });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || "UNKNOWN", response.status, body.message || "요청 실패");
+  }
+
   return response;
 }
 
@@ -24,6 +30,12 @@ export async function verifySMS(code: string, phone: string, smsType: string) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ code, phone, smsType }),
   });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || "UNKNOWN", response.status, body.message || "요청 실패");
+  }
+
   return response;
 }
 

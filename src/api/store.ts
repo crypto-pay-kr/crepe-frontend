@@ -1,3 +1,5 @@
+import { ApiError } from "@/error/ApiError";
+
 const API_BASE_URL = import.meta.env.VITE_API_SERVER_URL || "http://localhost:8080"
 
 export async function signUpStore(formData: FormData) {
@@ -17,7 +19,9 @@ export async function uploadBusinessLicense(file: File) {
     body: formData,
   });
   if (!response.ok) {
-    throw new Error("사업자등록증 업로드 중 오류가 발생했습니다.");
+
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || 'UNKNOWN', response.status, body.message || '요청 실패');
   }
   return await response.json();
 }
@@ -281,7 +285,7 @@ export async function getStorePayment() {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    });
+  });
   if (!response.ok) {
     throw new Error("월별 정산 내역 조회에 실패했습니다.");
   }
