@@ -34,10 +34,11 @@ export default function Header({
     <>
       <div className="bg-white/95 backdrop-blur-lg ">
         <div className="h-14 flex items-center px-6 relative">
+          {/* 뒤로가기 버튼 */}
           {!disableBack && (
             <button
               className="
-                mr-4 p-1 rounded-lg
+                absolute left-6 p-1 rounded-lg z-10
                 transition-all duration-200 ease-out
                 hover:bg-gray-100 active:scale-95 active:bg-gray-200
               "
@@ -59,10 +60,11 @@ export default function Header({
               </svg>
             </button>
           )}
+          
+          {/* 제목 - 항상 중앙 정렬 */}
           <h1 className="
-            text-lg font-semibold flex-1 text-center
+            text-lg font-semibold w-full text-center
             text-gray-800 tracking-tight
-            pr-8
           ">
             {title}
           </h1>

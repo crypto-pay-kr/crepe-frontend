@@ -28,7 +28,9 @@ export default function Input({
 }: InputProps) {
   return (
     <div className="mb-4">
-      <div className="text-sm text-gray-500 mb-1">{label}</div>
+      <div className={`text-sm mb-1 ${disabled ? "text-gray-400" : "text-gray-500"}`}>
+        {label}
+      </div>
       <div className="relative">
         <input
           type={type === "password" && showPassword ? "text" : type}
@@ -37,8 +39,11 @@ export default function Input({
           onBlur={onBlur} // Pass onBlur handler
           placeholder={placeholder}
           disabled={disabled} // Pass disabled property
-          className={`w-full border-b border-gray-300 py-2 focus:outline-none ${disabled ? "bg-gray-100 cursor-not-allowed" : "focus:border-blue-500"
-            }`}
+          className={`w-full border-b py-2 focus:outline-none transition-colors ${
+            disabled 
+              ? "border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed placeholder-gray-300" 
+              : "border-gray-300 focus:border-blue-500 text-gray-900 placeholder-gray-400"
+          }`}
         />
         {showValidation && (
           <div className="absolute right-8 top-2">
@@ -46,7 +51,16 @@ export default function Input({
           </div>
         )}
         {type === "password" && (
-          <button type="button" onClick={togglePasswordVisibility} className="absolute right-0 top-2 text-gray-400">
+          <button 
+            type="button" 
+            onClick={togglePasswordVisibility} 
+            disabled={disabled}
+            className={`absolute right-0 top-2 transition-colors ${
+              disabled 
+                ? "text-gray-300 cursor-not-allowed" 
+                : "text-gray-400 hover:text-gray-600"
+            }`}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="20"

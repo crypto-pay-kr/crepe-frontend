@@ -216,6 +216,20 @@ export default function TokenProductSignup() {
       setIsCheckingEligibility(false);
     }
   };
+
+  // 가입 전 필수 정보 검증 함수
+  const isFormValid = () => {
+    // 가입목적이 비어 있으면 false
+    if (!subscribePurpose.trim()) return false;
+
+    // SAVING 타입은 최초 납입액이 비어 있으면 false
+    if (productType === "SAVING" && !initialDepositAmount.trim()) return false;
+
+    return true;
+  };
+
+
+
   const handleSubscribe = async () => {
     try {
       // 상품 유형에 따라 request 객체에 필드 채우기
@@ -534,6 +548,7 @@ export default function TokenProductSignup() {
                   placeholder="가입목적을 작성해주세요"
                 />
 
+
                 {/* 상품권 수량 (VOUCHER일 때만 표시) */}
                 {productType === "VOUCHER" && (
                   <div>
@@ -548,6 +563,7 @@ export default function TokenProductSignup() {
                   </div>
                 )}
 
+                {/* 최초 납입액 (SAVING일 때만 표시) */}
                 {productType === "SAVING" && (
                   <motion.div
                     initial={{ opacity: 0, y: 30 }}
@@ -640,8 +656,15 @@ export default function TokenProductSignup() {
 
         {/* 4단계: 가입 폼 작성 */}
         {step === 5 && (
-          <Button text="제출하기" onClick={handleSubscribe} fullWidth className="text-base font-medium" />
+          <Button
+            text="제출하기"
+            onClick={handleSubscribe}
+            fullWidth
+            className="text-base font-medium"
+            disabled={!isFormValid()} // ← form이 유효하지 않으면 비활성화
+          />
         )}
+
 
       </div>
     </div>

@@ -72,7 +72,7 @@ export default function EmailPassword({
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => onPasswordChange(e.target.value)}
-              placeholder="비밀번호를 입력해주세요"
+              placeholder={!isEmailValid ? "이메일을 먼저 입력해주세요" : "비밀번호를 입력해주세요"}
               showPassword={showPassword}
               togglePasswordVisibility={togglePasswordVisibility}
               disabled={!isEmailValid} // 이메일 유효하지 않으면 비활성화

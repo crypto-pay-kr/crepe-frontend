@@ -46,7 +46,7 @@ export default function TermsAgreement({
     <div className="flex h-full flex-col bg-white">
       <Header title="시작하기" isStore={isStore} />
 
-      <main className="flex flex-1 flex-col overflow-auto px-5 pb-24">
+      <main className="flex flex-1 flex-col overflow-auto px-5 pb-24 pt-8">
         <div className="mb-8 flex flex-1 flex-col items-center justify-center">
           <div className=" text-center">
             <h2 className="mb-2 text-2xl font-bold text-gray-800">

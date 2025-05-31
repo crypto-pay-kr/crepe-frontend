@@ -21,10 +21,12 @@ export interface SubscribeProductResponse {
   subscribeDate: string; 
   expiredDate: string;
   balance: number;
+  baseRate: number; 
   interestRate: number;
   message: string;
   voucherCode?: string;
   additionalMessage?: string;
+  preferentialRate?: string;
   appliedRatesJson?: string;
   potentialMaxRate?: number;
 }

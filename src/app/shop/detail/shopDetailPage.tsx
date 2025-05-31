@@ -153,7 +153,9 @@ function MallDetailPage() {
         <div className="flex flex-col h-full bg-gray-50 relative">
             <Header title={storeDetail.storeName} isStore={true} />
 
-            <main className="flex-1 overflow-auto pb-16">
+            <main className={`flex-1 overflow-auto transition-all duration-300 ${
+                cartItems.length > 0 ? 'pb-48' : 'pb-16'
+            }`}>
                 {/* 가게 정보 */}
                 <div className="bg-white shadow-sm mb-4 min-h-[450px]">
                     <div className="relative">
@@ -247,7 +249,7 @@ function MallDetailPage() {
 
             {/* 장바구니 미리보기 */}
             {cartItems.length > 0 && (
-                <div className="fixed bottom-16 left-0 right-0 z-20 flex justify-center">
+                <div className="fixed bottom-24 left-0 right-0 z-20 flex justify-center">
                     <div className="bg-white border-t border-gray-200 shadow-lg rounded-t-lg w-full max-w-md mx-auto">
                         {/* 장바구니 헤더 */}
                         <div

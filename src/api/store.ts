@@ -1,6 +1,5 @@
 const API_BASE_URL = import.meta.env.VITE_API_SERVER_URL || "http://localhost:8080"
 
-
 export async function signUpStore(formData: FormData) {
   const response = await fetch(`${API_BASE_URL}/api/store/signup`, {
     method: "POST",
@@ -22,9 +21,6 @@ export async function uploadBusinessLicense(file: File) {
   }
   return await response.json();
 }
-
-
-
 
 export async function fetchMyStoreAllDetails() {
   const token = sessionStorage.getItem("accessToken");
@@ -135,7 +131,6 @@ export const unlikeStore = async (storeId: number) => {
   });
 };
 
-
 // 가맹점 메뉴 수정
 export async function patchStoreMenu(
   menuId: string,
@@ -154,8 +149,6 @@ export async function patchStoreMenu(
     throw new Error(errorText || "메뉴 수정에 실패했습니다.");
   }
 }
-
-
 
 // 가맹점 메뉴 삭제
 export async function deleteStoreMenu(menuId: string) {
@@ -190,16 +183,9 @@ export async function patchStoreCoin(supportedCoins: string[]) {
   return await response.json();
 }
 
-
-
-
-
-
-
 // ------------------------------------
 //   STORE ORDER MANAGE API
 // ------------------------------------
-
 
 // 주문상태  목록 조회
 export async function fetchOrders() {
@@ -218,7 +204,6 @@ export async function fetchOrders() {
   return data;
 }
 
-
 // 주문 수락
 export async function acceptOrder(orderId: string, preparationTime: string) {
   const token = sessionStorage.getItem("accessToken");
@@ -236,9 +221,6 @@ export async function acceptOrder(orderId: string, preparationTime: string) {
   return response;
 }
 
-
-
-
 // 주문 거절
 export async function rejectOrder(orderId: string, refusalReason: string) {
   const token = sessionStorage.getItem("accessToken");
@@ -251,6 +233,23 @@ export async function rejectOrder(orderId: string, refusalReason: string) {
     body: JSON.stringify({
       action: "refuse",
       refusalReason,
+    }),
+  });
+  return response;
+}
+
+// 준비 완료 취소
+export async function cancelPreparation(orderId: string, preparationTime: string) {
+  const token = sessionStorage.getItem("accessToken");
+  const response = await fetch(`${API_BASE_URL}/api/store/orders/${orderId}/action`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      action: "accept",
+      preparationTime
     }),
   });
   return response;
