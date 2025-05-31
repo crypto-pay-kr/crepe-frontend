@@ -9,6 +9,8 @@ import { useBankStore } from '@/stores/BankStore'
 import { SubscribeTransaction } from '@/types/BankTokenAccount';
 import { useTokenStore } from '@/constants/useToken'
 import { getCoinBalanceByCurrency } from '@/api/coin'
+import { toast } from 'react-toastify'
+import { ApiError } from '@/error/ApiError'
 
 
 export default function TokenDepositPage() {
@@ -66,14 +68,14 @@ export default function TokenDepositPage() {
 
   const handleDeposit = async () => {
     if (!subscribeId || amount <= 0) {
-      alert("예치할 금액을 입력해주세요.");
+      toast("예치할 금액을 입력해주세요.");
       return;
     }
     console.log("product",productState.maxMonthlyPayment);
 
     try {
       await depositToken(subscribeId, amount);
-      alert("예치가 완료되었습니다.");
+      toast("예치가 완료되었습니다.");
       navigate(`/token/product/detail/${subscribeId}`, {
         state: {
           products,
@@ -82,9 +84,12 @@ export default function TokenDepositPage() {
         },
         replace: true,
       });
-    } catch (error: any) {
-      alert(error.message); // 백에서 내려온 메시지 보여줌
-    }
+    }catch (e) {
+      if (e instanceof ApiError) {
+        toast(`${e.message}`);  }
+      else {
+        toast('예기치 못한 오류가 발생했습니다.');
+      }}
   };
   useEffect(() => {
     if (!tokenInfoState) return;

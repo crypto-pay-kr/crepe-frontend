@@ -1,4 +1,4 @@
-
+import { ApiError } from '@/error/ApiError'
 
 const BASE_URL = import.meta.env.VITE_API_SERVER_URL;
 const COIN_PRICE_URL = import.meta.env.VITE_COIN_PRICE_URL;
@@ -102,7 +102,7 @@ export const getCoinBalanceByCurrency = async (currency: string) => {
 export const requestDeposit = async (currency: string, txid: string) => {
   const token = sessionStorage.getItem("accessToken");
 
-  const response = await fetch(`${BASE_URL}/api/deposit`, {
+  const res = await fetch(`${BASE_URL}/api/deposit`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -111,11 +111,12 @@ export const requestDeposit = async (currency: string, txid: string) => {
     body: JSON.stringify({ txid, currency }),
   });
 
-  if (!response.ok) {
-    throw new Error("입금 요청 실패: " + response.status);
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(body.code || 'UNKNOWN', res.status, body.message || '요청 실패');
   }
 
-  return response.text(); // 응답 메시지
+  return res.text(); // 응답 메시지
 };
 
 
@@ -132,9 +133,9 @@ export const requestWithdraw = async (currency: string, amount: string) => {
   });
 
   if (!res.ok) {
-    throw new Error('정산 요청 실패');
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(body.code || 'UNKNOWN', res.status, body.message || '요청 실패');
   }
-
   return await res.text();
 };
 

@@ -6,9 +6,10 @@ import AmountInput from '@/components/coin/AmountInput'
 import PercentageSelector from '@/components/coin/PercentageSelector'
 import AvailableAmount from '@/components/coin/AvailableAmount'
 import Button from '@/components/common/Button'
-import {getCoinBalanceByCurrency, requestWithdraw } from '@/api/coin'
+import {  getCoinBalanceByCurrency, requestWithdraw } from '@/api/coin'
 import { useTickerData } from '@/hooks/useTickerData'
-
+import { toast } from "react-toastify";
+import { ApiError } from '@/error/ApiError'
 
 export default function SettlementCoin() {
   const [amount, setAmount] = useState("3.45")
@@ -59,17 +60,18 @@ export default function SettlementCoin() {
   const handleSubmit = async () => {
     try {
       await requestWithdraw(symbol, amount);
-      alert("정산 요청이 완료되었습니다.");
+      toast.success('정산 요청이 완료되었습니다.');
       navigate(`/coin-detail/${symbol}`, {
         state: { symbol }
       });
     } catch (e) {
-      if (e instanceof Error) {
-        alert("정산 요청 실패: " + e.message);
-        console.error(e);
+      if (e instanceof ApiError) {
+        toast(`${e.message}`);
+      } else {
+        toast('예기치 못한 오류가 발생했습니다.');
       }
     }
-  }
+  };
 
   return (
     <div className="h-full flex flex-col bg-gray-50">

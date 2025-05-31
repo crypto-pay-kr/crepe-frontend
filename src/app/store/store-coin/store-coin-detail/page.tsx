@@ -120,7 +120,7 @@ export default function CoinDetailPage() {
 
       <main className="flex-1 overflow-auto bg-gray-50">
         <div className="px-4 py-6 max-w-2xl mx-auto space-y-6">
-          <div className="overflow-hidden rounded-2xl py-10 px-6 bg-white shadow-sm transition hover:shadow-xl">
+          <div className="overflow-hidden rounded-2xl py-10 px-6 bg-white shadow-sm transition hover:shadow-md">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <img
@@ -147,7 +147,7 @@ export default function CoinDetailPage() {
             <div className="flex gap-2 sm:gap-3">
               {/* 코인 충전 버튼 */}
               <button
-                className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-[#4B5EED] py-1.5 font-medium text-sm  text-white shadow sm:gap-2 sm:rounded-xl sm:py-2 sm:text-lg"
+                className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-[#4B5EED] py-1.5 font-medium text-base  text-white shadow sm:gap-2 sm:rounded-xl sm:py-2 sm:text-lg"
                 onClick={() => {
                   // Add transition before navigation
                   setTimeout(() => {
@@ -185,7 +185,7 @@ export default function CoinDetailPage() {
                   className="h-4 w-4 sm:h-5 sm:w-5"
                   stroke={addressStatus === 'ACTIVE' ? 'white' : 'gray'}
                 />
-                <span className="text-sm text-white sm:text-base">코인 출금</span>
+                <span className="text-sm text-white">코인 출금</span>
               </button>
             </div>
 

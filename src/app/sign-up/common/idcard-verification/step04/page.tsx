@@ -145,7 +145,7 @@ export default function IDVerificationStep4() {
 
                 {/* 휴대폰 번호 */}
                 <div className="space-y-1">
-                  <label className="block text-sm text-gray-600 mb-2">휴대폰</label>
+                  <label className="block text-base font-semibold text-gray-600 mb-2">휴대폰</label>
                   <input
                     type="text"
                     placeholder="휴대폰번호 입력"
@@ -165,7 +165,7 @@ export default function IDVerificationStep4() {
 
                 {/* 인증번호 입력 */}
                 <div className="space-y-1 mb-2">
-                  <label className="block text-sm text-gray-600 mb-2">인증번호</label>
+                  <label className="block text-base font-semibold text-gray-600 mb-2">인증번호</label>
                   <input
                     type="text"
                     placeholder="숫자 6자리 입력"
