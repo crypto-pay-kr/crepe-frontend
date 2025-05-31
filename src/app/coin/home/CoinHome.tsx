@@ -161,7 +161,7 @@ export default function CoinHome() {
       <Header title="자산관리" disableBack/>
       <main className="flex-1 overflow-auto bg-gray-50">
         <div className="px-4 py-6">
-          <div className="overflow-hidden rounded-2xl bg-white px-6 py-8 shadow-sm transition hover:shadow-xl">
+          <div className="overflow-hidden rounded-2xl bg-white px-6 py-8 shadow-sm transition hover:shadow-md">
             <div className="mb-4 flex items-center">
               <Wallet className="mr-2 h-6 w-6 text-[#4B5EED] drop-shadow-sm" />
               <span className="text-base font-bold text-[#4B5EED]">총 자산</span>
