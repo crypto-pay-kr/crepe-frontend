@@ -5,9 +5,18 @@ import Header from "@/components/common/Header";
 import Button from "@/components/common/Button";
 import PaymentOptionsList from "@/components/order/PaymentOptionList";
 import { getCoinBalance} from "@/api/coin";
-import { createOrder } from "@/api/order";
+import { createOrder, getMyVouchers } from '@/api/order'
 import { useTickerData } from '@/hooks/useTickerData'
+import { OrderRequest } from '@/types/order'
 
+interface SubscribeVoucherDto {
+  id: number;                 // 바우처 ID
+  productName: string;        // 상품 이름
+  balance: number;            // 잔액
+  expiredDate: string;        // 만기일
+  storeType: string;          // 가게 종류
+  bankTokenSymbol: string;
+}
 
 export default function SelectPaymentPage() {
     const navigate = useNavigate();
@@ -16,6 +25,8 @@ export default function SelectPaymentPage() {
     const tickerData = useTickerData();
     const [balances, setBalances] = useState<{ [key: string]: number }>({});
     const [totalPrice, setTotalPrice] = useState<number>(0);
+    const [vouchers, setVouchers] = useState<SubscribeVoucherDto[]>([]);
+    const [paymentOptions, setPaymentOptions] = useState<any[]>([]);
 
     // 1. 로컬 스토리지에서 총 금액 가져오기
     useEffect(() => {
@@ -45,51 +56,58 @@ export default function SelectPaymentPage() {
         fetchBalances();
     }, []);
 
-    // 4. 결제 옵션 생성
-    const paymentOptions = [
-        {
-            id: "XRP",
-            label: "XRP",
-            amount: tickerData["KRW-XRP"]?.trade_price
-                ? `${(totalPrice / tickerData["KRW-XRP"].trade_price).toFixed(2)} XRP`
-                : "Loading...",
-            insufficientBalance:
-                !tickerData["KRW-XRP"]?.trade_price ||
-                (balances["XRP"] === undefined ||
-                    balances["XRP"] < totalPrice /tickerData["KRW-XRP"].trade_price),
-        },
-        {
-            id: "SOL",
-            label: "SOL",
-            amount:tickerData["KRW-SOL"]?.trade_price
-                ? `${(totalPrice / tickerData["KRW-SOL"]?.trade_price).toFixed(2)} SOL`
-                : "Loading...",
-            insufficientBalance:
-                !tickerData["KRW-SOL"]?.trade_price ||
-                (balances["SOL"] === undefined ||
-                    balances["SOL"] < totalPrice / tickerData["KRW-SOL"]?.trade_price),
-        },
-        {
-            id: "USDT",
-            label: "USDT",
-            amount: tickerData["KRW-USDT"]?.trade_price
-                ? `${(totalPrice / tickerData["KRW-USDT"]?.trade_price).toFixed(2)} USDT`
-                : "Loading...",
-            insufficientBalance:
-                !tickerData["KRW-USDT"]?.trade_price ||
-                (balances["USDT"] === undefined ||
-                    balances["USDT"] < totalPrice / tickerData["KRW-USDT"]?.trade_price),
-        }
-    ];
 
-    // 5. 결제 수단 선택 핸들러
+    // 내가 가진 바우처 목록 가져오기
+    useEffect(() => {
+      const loadVouchers = async () => {
+        const voucherList = await getMyVouchers();
+        console.log("바우처 불러오기 성공:", voucherList);
+        setVouchers(voucherList);
+      };
+
+      loadVouchers();
+    }, []);
+
+
+
+    // 4. 결제 옵션 생성
+  useEffect(() => {
+    const coinOptions = ["XRP", "SOL", "USDT"].map((symbol) => {
+      const tradePrice = tickerData[`KRW-${symbol}`]?.trade_price;
+      return {
+        id: symbol,
+        label: symbol,
+        amount: tradePrice ? `${(totalPrice / tradePrice).toFixed(2)} ${symbol}` : "Loading...",
+        insufficientBalance: !tradePrice || (balances[symbol] ?? 0) < totalPrice / tradePrice,
+        type: "COIN",
+      };
+    });
+
+    const voucherOptions = vouchers.map((v) => ({
+      id: `VOUCHER-${v.id}`,
+      label: `${v.productName}`,
+      amount: `${v.balance.toFixed(2)} ${v.bankTokenSymbol} `,
+      insufficientBalance: v.balance < totalPrice,
+      type: "VOUCHER",
+      voucherId: v.id,
+    }));
+
+    setPaymentOptions([...coinOptions, ...voucherOptions]);
+  }, [balances, tickerData, totalPrice, vouchers]);
+
+
+
+
+  // 5. 결제 수단 선택 핸들러
     const handlePaymentSelect = (method: string) => {
         setSelectedPayment(method);
     };
 
     // 6. 주문 생성을 위한 orderRequest 생성 및 결제 요청 핸들러
     const handlePayment = async () => {
-        if (!selectedPayment) return;
+        if (!selectedPayment) {
+          return;
+        }
 
         const selectedOption = paymentOptions.find(
             (option) => option.id === selectedPayment
@@ -125,27 +143,45 @@ export default function SelectPaymentPage() {
             menuCount: item.quantity,
         }));
 
-        const selectedPrice = tickerData[`KRW-${selectedPayment}`].trade_price;
-        if (!selectedPrice) {
-            alert("시세 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
-            return;
-        }
-        // orderRequest 객체 생성
-        const orderRequest = {
-            storeId,
-            orderDetails,
-            currency: selectedPayment,
-            exchangeRate: selectedPrice,
-        };
+      const baseRequest = { storeId, orderDetails };
 
-        try {
-            const orderId = await createOrder(orderRequest);
-            // 주문 생성 후 로딩 페이지로 이동
-            navigate("/mall/store/order-pending", { state: { orderId } });
-        } catch (error: any) {
-            console.error("Order creation failed:", error);
-            alert("주문 생성에 실패했습니다.");
+      let orderRequest: OrderRequest;
+
+      if (selectedOption.type === "COIN") {
+        const selectedPrice = tickerData[`KRW-${selectedOption.id}`]?.trade_price;
+        if (!selectedPrice) {
+          alert("시세 정보를 불러오지 못했습니다.");
+          return;
         }
+        orderRequest = {
+          ...baseRequest,
+          paymentType: "COIN",
+          currency: selectedOption.id,
+          exchangeRate: selectedPrice,
+        };
+      } else if (selectedOption.type === "VOUCHER" && selectedOption.voucherId != null) {
+        orderRequest = {
+          ...baseRequest,
+          paymentType: "VOUCHER",
+          voucherSubscribeId: selectedOption.voucherId,
+        };
+      } else {
+        alert("유효한 결제 방식이 아닙니다.");
+        return;
+      }
+
+
+      try {
+        if (!orderRequest) {
+          alert("유효한 결제 요청이 생성되지 않았습니다.");
+          return;
+        }
+        const orderId = await createOrder(orderRequest);
+        navigate("/mall/store/order-pending", { state: { orderId } });
+      } catch (error: any) {
+        console.error("Order creation failed:", error);
+        alert("주문 생성에 실패했습니다.");
+      }
     };
 
 

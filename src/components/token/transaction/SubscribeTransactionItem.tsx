@@ -16,9 +16,10 @@ export default function SimpleTransactionItem({
                                                 afterBalance
                                               }: SimpleTransactionItemProps) {
   const isCancel = eventType != "TERMINATION";
-  const isDeposit = parseFloat(amount) > 0 && !isCancel;
+  const isPayment = eventType === "PAYMENT";
+  const isDeposit = parseFloat(amount) > 0 && !isCancel && !isPayment;
 
-  const formattedAmount = `${isDeposit ? "+" : "+"}${parseFloat(amount).toLocaleString()} ${currency}`;
+  const formattedAmount = `${isDeposit ? "+" : "-"}${parseFloat(amount).toLocaleString()} ${currency}`;
   const formattedDate = new Date(date).toLocaleString('ko-KR', {
     timeZone: 'Asia/Seoul',
     year: 'numeric',
@@ -33,7 +34,8 @@ export default function SimpleTransactionItem({
   const EVENT_TYPE_KO: Record<string, string> = {
     INTEREST: "이자 지급",
     DEPOSIT: "예치 완료",
-    TERMINATION : "해지 완료"
+    TERMINATION : "해지 완료",
+    PAYMENT: "결제 완료"
   };
 
   return (

@@ -17,6 +17,8 @@ import { isSellerToken } from "@/utils/authUtils";
 import { FreeDepositCountPreferentialRate } from "@/types/FreeDepositCountPreferentialRate ";
 import { fetchProductDetail } from '@/api/product'
 import { useBankStore } from '@/stores/BankStore'
+import { ApiError } from '@/error/ApiError'
+import { toast } from "react-toastify";
 
 // PDF.js 워커 설정
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -181,41 +183,55 @@ export default function TokenProductSignup() {
   // 소득 조회
   const handleVerifyIncome = async () => {
     try {
-      setIsLoadingIncome(true); // 로딩 상태 활성화
-      const res = await checkActorIncome(); // 소득 조회 API 호출
-      setAnnualIncome(res.annualIncome); // 연소득 설정
-      setTotalAsset(res.totalAsset); // 총자산 설정
-      setIsIncomeVisible(true); // 소득 데이터 표시 활성화
-    } catch (error: any) {
-      console.error("소득 조회 오류:", error.message);
-      alert(error.message);
+      setIsLoadingIncome(true);
+      const res = await checkActorIncome();
+      setAnnualIncome(res.annualIncome);
+      setTotalAsset(res.totalAsset);
+      setIsIncomeVisible(true);
+    } catch (error: unknown) {
+      console.error("소득 조회 오류:", error);
+      if (error instanceof ApiError) {
+        toast(error.message || "소득 조회 중 API 오류가 발생했습니다.");
+      } else if (error instanceof Error) {
+        toast(error.message);
+      } else {
+        toast("소득 조회 중 알 수 없는 오류가 발생했습니다.");
+      }
     } finally {
-      setIsLoadingIncome(false); // 로딩 상태 비활성화
+      setIsLoadingIncome(false);
     }
   };
+
 
   // 4단계 자격 확인 처리
   const handleCheckEligibility = async () => {
     if (!productId) {
-      alert("상품 정보가 없습니다.");
+      toast("상품 정보가 없습니다.");
       return;
     }
     try {
       setIsCheckingEligibility(true);
       const eligible = await checkEligibility(productId);
       if (eligible) {
-        alert("상품 가입 자격이 확인되었습니다.");
+        toast("상품 가입 자격이 확인되었습니다.");
         setStep(5);
       } else {
-        alert("상품 가입 자격이 없습니다.");
+        toast("상품 가입 자격이 없습니다.");
       }
-    } catch (error: any) {
-      console.error("자격 확인 오류:", error.message);
-      alert(error.message);
+    } catch (error: unknown) {
+      console.error("자격 확인 오류:", error);
+      if (error instanceof ApiError) {
+        toast(error.message || "자격 확인 중 API 오류가 발생했습니다.");
+      } else if (error instanceof Error) {
+        toast(error.message);
+      } else {
+        toast("자격 확인 중 알 수 없는 오류가 발생했습니다.");
+      }
     } finally {
       setIsCheckingEligibility(false);
     }
   };
+
 
   // 가입 전 필수 정보 검증 함수
   const isFormValid = () => {
@@ -248,13 +264,20 @@ export default function TokenProductSignup() {
       // 구독 API 호출
       const response = await subscribeProduct(req);
 
-      alert("상품 가입이 완료되었습니다!");
+      toast("상품 가입이 완료되었습니다!");
       navigate(`/token/onsale/products/${productId}/signup-complete`, {
         state: { subscribeResponse: response },
       });
-    } catch (error: any) {
+    }  catch (error: unknown) {
       console.error("상품 가입 실패:", error);
-      alert(error.message || "상품 가입 중 오류가 발생했습니다.");
+
+      if (error instanceof ApiError) {
+        toast(error.message || "API 오류가 발생했습니다.");
+      } else if (error instanceof Error) {
+        toast(error.message);
+      } else {
+        toast("예기치 못한 오류가 발생했습니다.");
+      }
     }
   };
 

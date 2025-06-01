@@ -20,7 +20,7 @@ export default function PaymentOptionCard({
   return (
     <motion.div
       className={`p-4 rounded-lg border ${
-        isSelected ? "border-[#002169]" : "border-gray-200"
+        isSelected ? "border-[#4B5EED]" : "border-gray-200"
       } ${option.insufficientBalance ? "opacity-50 cursor-not-allowed" : ""}`}
       onClick={() => {
         if (!option.insufficientBalance) {

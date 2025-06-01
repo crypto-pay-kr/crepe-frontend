@@ -44,9 +44,9 @@ const OrderStatusMessage: React.FC<OrderStatusMessageProps> = ({ orderStatus }) 
     default:
       title = "주문이 접수되었습니다";
       subtitle = "곧 매장에서 주문을 확인할 예정입니다.";
-      bgColor = "bg-green-100";
+      bgColor = "bg-indigo-100";
       icon = (
-        <svg className="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-12 h-12 text-[#4B5EED]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
         </svg>
       );

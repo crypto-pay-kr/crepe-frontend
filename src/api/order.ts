@@ -1,25 +1,28 @@
+import { ApiError } from '@/error/ApiError'
+
 const API_BASE_URL = import.meta.env.VITE_API_SERVER_URL || "http://localhost:8080";
 
-export async function createOrder(orderRequest: {
-  storeId: number | string;
-  orderDetails: { menuId: number; menuCount: number }[];
-  currency: string;
-}): Promise<string> {
+import { OrderRequest } from "@/types/order";
+
+export const createOrder = async (orderRequest: OrderRequest) => {
   const token = sessionStorage.getItem("accessToken");
-  const response = await fetch(`${API_BASE_URL}/api/orders/create`, {
-    method: "POST",
+  const res = await fetch(`${API_BASE_URL}/api/orders/create`, {
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(orderRequest),
   });
 
-  if (!response.ok) {
-    throw new Error(`Order creation failed with status ${response.status}`);
+  if (!res.ok) {
+    const body = await res.text(); // JSON 아님 대비
+    console.error("주문 실패 응답 (text):", res.status, body);
+    throw new ApiError('UNKNOWN', res.status, '요청 실패');
   }
-  return response.text();
-}
+
+  return res.text();
+};
 
 
 export async function getOrderDetails(orderId: string): Promise<any> {
@@ -51,3 +54,28 @@ export async function getOrderDetails(orderId: string): Promise<any> {
     }
     return response.json();
   }
+
+
+// 가입 바우처 조회 API 호출
+export async function getMyVouchers() {
+  const token = sessionStorage.getItem("accessToken");
+  if (!token) throw new Error("인증 토큰이 없습니다.");
+
+  const res = await fetch(`${API_BASE_URL}/api/subscribe/vouchers`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!res.ok)
+  {
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(body.code || 'UNKNOWN', res.status, body.message || '요청 실패');
+  }
+
+
+  return res.json();
+}
+
