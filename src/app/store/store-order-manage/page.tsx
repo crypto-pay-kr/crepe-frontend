@@ -5,7 +5,9 @@ import BottomNav from "@/components/common/BottomNavigate"
 import { TimeSelectionModal } from "@/components/order/time-selection-modal"
 import { RejectionReasonModal } from "@/components/order/reject-reason-modal"
 import Button from '@/components/common/Button'
-import { fetchOrders, acceptOrder, rejectOrder, completeOrder, cancelPreparation } from "@/api/store";
+import { toast } from "react-toastify";
+import { ApiError } from "@/error/ApiError";
+import { fetchOrders, handleOrderAction } from "@/api/store";
 
 interface OrderItem {
   name: string
@@ -98,7 +100,7 @@ export default function OrderStatusPage() {
       }
     `;
     document.head.appendChild(style);
-    
+
     return () => {
       document.head.removeChild(style);
     };
@@ -115,9 +117,9 @@ export default function OrderStatusPage() {
   // 새 주문 알림 사운드 재생 (WAITING 상태의 신규 주문만, 주문당 최대 3번)
   const playNewOrderSound = (orderId: string) => {
     if (!audioEnabled || !audioRef.current) return;
-    
+
     const currentCount = audioPlayCount.get(orderId) || 0;
-    
+
     if (currentCount < 3) {
       audioRef.current.play().catch(e => console.log('Audio play failed:', e));
       setAudioPlayCount(prev => new Map(prev).set(orderId, currentCount + 1));
@@ -127,12 +129,12 @@ export default function OrderStatusPage() {
   // 남은 시간 계산 함수
   const calculateTimeRemaining = (readyAt?: string) => {
     if (!readyAt) return null;
-    
+
     const now = new Date();
     const readyTime = new Date(readyAt);
     const diffInMs = readyTime.getTime() - now.getTime();
     const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-    
+
     if (diffInMinutes > 0) {
       return `${diffInMinutes}분 남음`;
     } else if (diffInMinutes < 0) {
@@ -145,11 +147,11 @@ export default function OrderStatusPage() {
   // 신규 주문 판별 함수 (5분 이내 + WAITING 상태만) - 프론트엔드에서 계산
   const isNewOrder = (order: any) => {
     if (!order.createdAt) return false;
-    
+
     const now = new Date();
     const orderTime = new Date(order.createdAt);
     const timeDiff = (now.getTime() - orderTime.getTime()) / 1000 / 60; // 분 단위
-    
+
     // 5분 이내이고 "주문 접수"(WAITING) 상태인 경우만 신규 주문으로 표시
     return timeDiff <= 5 && order.status === "주문 접수";
   };
@@ -157,18 +159,18 @@ export default function OrderStatusPage() {
   // 준비완료 상태에서 5분 경과 시 종료 처리 함수
   const shouldExpireOrder = (order: any) => {
     if (order.status !== "준비 완료" || !order.updatedAt) return false;
-    
+
     const now = new Date();
     const updatedAt = new Date(order.updatedAt);
     const timeDiff = (now.getTime() - updatedAt.getTime()) / 1000 / 60; // 분 단위
-    
+
     return timeDiff >= 10;
   };
 
   const statusMap = {
     "WAITING": "주문 접수",
-    "PAID": "수락 완료", 
-    "CANCELLED": "주문 거절",
+    "PAID": "수락 완료",
+    "REFUSED": "주문 거절",
     "COMPLETED": "준비 완료",
     "EXPIRED": "종료",
   };
@@ -195,7 +197,7 @@ export default function OrderStatusPage() {
       }));
 
       // 최신순으로 정렬 (createdAt 기준)
-      const sortedOrders = mappedOrders.sort((a, b) => 
+      const sortedOrders = mappedOrders.sort((a, b) =>
         new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
       );
 
@@ -209,7 +211,7 @@ export default function OrderStatusPage() {
             isNew: false
           };
         }
-        
+
         return {
           ...order,
           isNew: isNewOrder(order)
@@ -222,19 +224,19 @@ export default function OrderStatusPage() {
         const order = ordersWithNewFlag.find(o => o.id === id);
         return !previousOrderIds.has(id) && order?.status === "주문 접수";
       });
-      
+
       if (newWaitingOrderIds.length > 0 && previousOrderIds.size > 0) {
         // WAITING 상태의 신규 주문이 있고, 처음 로드가 아닌 경우
         newWaitingOrderIds.forEach(orderId => playNewOrderSound(orderId));
-        
+
         // 방금 추가된 WAITING 주문만 애니메이션 적용
         const ordersWithAnimation = ordersWithNewFlag.map(order => ({
           ...order,
           isJustAdded: newWaitingOrderIds.includes(order.id)
         }));
-        
+
         setOrders(ordersWithAnimation);
-        
+
         // 애니메이션 완료 후 isJustAdded 제거
         setTimeout(() => {
           setOrders(prev => prev.map(order => ({ ...order, isJustAdded: false })));
@@ -242,9 +244,9 @@ export default function OrderStatusPage() {
       } else {
         setOrders(ordersWithNewFlag);
       }
-      
+
       setPreviousOrderIds(currentOrderIds);
-      
+
     } catch (error) {
       console.error("Failed to fetch orders:", error);
     }
@@ -253,7 +255,7 @@ export default function OrderStatusPage() {
   // 초기 로드 및 5초마다 자동 새로고침
   useEffect(() => {
     loadOrders(); // 초기 로드
-    
+
     // 5초마다 주문 새로고침
     intervalRef.current = setInterval(() => {
       loadOrders();
@@ -291,26 +293,25 @@ export default function OrderStatusPage() {
   const handleAccept = async (time: string) => {
     if (!selectedOrderId) return;
     try {
-
-      const response = await acceptOrder(selectedOrderId, time);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      // 예상 마감 시간 계산 (현재 시간 + 입력된 시간)
       const readyAt = new Date(Date.now() + parseInt(time) * 60 * 1000).toISOString();
 
-      // 주문 상태 업데이트 (즉시 신규 표시 제거)
+      await handleOrderAction(selectedOrderId, "accept", { preparationTime: time });
+
+      // 주문 상태 업데이트
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
-          order.id === selectedOrderId 
-            ? { ...order, status: "수락 완료", readyAt: readyAt, isNew: false } 
-            : order,
-        ),
+          order.id === selectedOrderId
+            ? { ...order, status: "수락 완료", readyAt, isNew: false }
+            : order
+        )
       );
-    } catch (error) {
-      console.error("Failed to accept order:", error);
+      toast.success("주문이 수락되었습니다.");
+    } catch (e) {
+      if (e instanceof ApiError) {
+        toast.error(`${e.message}`);
+      } else {
+        toast.error("예기치 못한 오류가 발생했습니다.");
+      }
     } finally {
       setTimeModalOpen(false);
     }
@@ -320,76 +321,82 @@ export default function OrderStatusPage() {
   const handleReject = async (reason: string) => {
     if (!selectedOrderId) return;
     try {
+      await handleOrderAction(selectedOrderId, "refuse", { refusalReason: reason });
 
-      const response = await rejectOrder(selectedOrderId, reason);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      //  상태 업데이트
+      // 주문 상태 업데이트
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
-          order.id === selectedOrderId 
-            ? { ...order, status: "주문 거절", rejectionReason: reason, isNew: false } 
-            : order,
-        ),
+          order.id === selectedOrderId
+            ? { ...order, status: "주문 거절", rejectionReason: reason, isNew: false }
+            : order
+        )
       );
-    } catch (error) {
-      console.error("Failed to refuse order:", error);
+
+      toast.success("주문이 거절되었습니다.");
+    } catch (e) {
+      if (e instanceof ApiError) {
+        toast.error(`${e.message}`);
+      } else {
+        toast.error("예기치 못한 오류가 발생했습니다.");
+      }
     } finally {
       setRejectionModalOpen(false);
     }
   };
 
-  // 주문 완료
+  // 준비 완료
   const handlePrepareComplete = async (id: string) => {
     try {
+      await handleOrderAction(id, "complete");
 
-      const response = await completeOrder(id);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      // Update local state
+      // 주문 상태 업데이트
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
-          order.id === id ? { 
-            ...order, 
-            status: "준비 완료", 
-            readyAt: undefined,
-          } : order,
-        ),
+          order.id === id
+            ? { ...order, status: "준비 완료", readyAt: undefined }
+            : order
+        )
       );
-    } catch (error) {
-      console.error("Failed to complete order:", error);
+
+      toast.success("준비가 완료되었습니다.");
+    } catch (e) {
+      if (e instanceof ApiError) {
+        toast.error(`${e.message}`);
+      } else {
+        toast.error("예기치 못한 오류가 발생했습니다.");
+      }
     }
   };
 
+  // 준비 완료 취소
   const handleCancelPrepareComplete = async (id: string, readyAt: string) => {
-
     const now = new Date();
     const readyTime = new Date(readyAt);
     const diffInMs = readyTime.getTime() - now.getTime();
     const diffInMinutes = Math.ceil(Math.floor(diffInMs / (1000 * 60)) / 10) * 10;
-    const finalMinutes = diffInMinutes >= 0 ? (diffInMinutes.toString() + "분") : "10분"; 
+    const finalMinutes = diffInMinutes >= 0 ? `${diffInMinutes}분` : "10분";
 
     try {
-      const response = await cancelPreparation(id, finalMinutes);
+      await handleOrderAction(id, "cancel", { preparationTime: finalMinutes });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      // 주문 상태 업데이트
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === id
+            ? { ...order, status: "수락 완료", readyAt: finalMinutes } 
+            : order
+        )
+      );
+      toast.success("준비 완료가 취소되었습니다.");
+    } catch (e) {
+      if (e instanceof ApiError) {
+        toast.error(`${e.message}`);
+      } else {
+        toast.error("예기치 못한 오류가 발생했습니다.");
       }
-
-      // 15분 후로 다시 설정
-      setOrders(orders.map((order) => (
-        order.id === id ? { ...order, status: "수락 완료", readyAt: finalMinutes } : order
-      )));
-    } catch (error) {
-      console.error("Failed to cancel preparation:", error);
     }
-  }
+  };
+
 
   const handleStoreSettings = () => {
     navigate("/store/manage")
@@ -422,17 +429,15 @@ export default function OrderStatusPage() {
 
       <main className="flex-1 bg-gray-100 overflow-auto">
         {orders.map((order, index) => (
-          <div 
-            key={order.id} 
-            className={`bg-white mb-2 border-b border-gray-200 mt-2 transition-all duration-300 ease-out ${
-              order.isJustAdded 
-                ? 'animate-slide-down' 
-                : ''
-            } ${
-              order.isNew 
-                ? 'new-order-indicator animate-pulse-border border-2' 
+          <div
+            key={order.id}
+            className={`bg-white mb-2 border-b border-gray-200 mt-2 transition-all duration-300 ease-out ${order.isJustAdded
+              ? 'animate-slide-down'
+              : ''
+              } ${order.isNew
+                ? 'new-order-indicator animate-pulse-border border-2'
                 : 'border'
-            }`}
+              }`}
             style={{
               animationDelay: order.isJustAdded ? `${index * 100}ms` : '0ms'
             }}
@@ -511,13 +516,12 @@ export default function OrderStatusPage() {
                   </>
                 )}
 
-                {order.status === "수락 완료" && (
+                {(order.status === "수락 완료" || order.status === "준비 완료 취소") && (
                   <>
-                    <div className={`px-4 py-2 rounded-md ${
-                      order.readyAt && new Date(order.readyAt) < new Date() 
-                        ? 'bg-red-100 text-red-600' 
-                        : 'bg-yellow-100 text-yellow-600'
-                    }`}>
+                    <div className={`px-4 py-2 rounded-md ${order.readyAt && new Date(order.readyAt) < new Date()
+                      ? 'bg-red-100 text-red-600'
+                      : 'bg-yellow-100 text-yellow-600'
+                      }`}>
                       {calculateTimeRemaining(order.readyAt) || "시간 정보 없음"}
                     </div>
                     <button
@@ -550,7 +554,7 @@ export default function OrderStatusPage() {
             </div>
           </div>
         ))}
-        
+
         {orders.length === 0 && (
           <div className="flex items-center justify-center h-64">
             <p className="text-gray-500">주문이 없습니다.</p>
