@@ -21,15 +21,15 @@ export default function IDVerificationStep2() {
   // 주민등록번호 마스킹 처리 함수
   const maskPersonalNum = (personalNum: string) => {
     if (!personalNum) return "";
-    
+
     const cleanNum = personalNum.replace(/-/g, "");
     if (cleanNum.length < 7) return personalNum;
-    
+
     // 앞 6자리 + 성별(7번째 자리) + 나머지는 *
     const front = cleanNum.substring(0, 6);
     const gender = cleanNum.substring(6, 7);
     const masked = "*".repeat(6);
-    
+
     return `${front}-${gender}${masked}`;
   };
 
@@ -68,16 +68,16 @@ export default function IDVerificationStep2() {
         if (!fileToSend) {
           throw new Error("No file to send for OCR processing.");
         }
-        
+
         const ocrResponse = await processIdentityCard(fileToSend);
-        
+
         // OCR 데이터 처리: 주민등록번호는 원본과 마스킹된 버전 모두 저장
         const processedOcrData = {
           ...ocrResponse,
           originalPersonalNum: ocrResponse.personalNum, // 원본 저장 (백엔드 전송용)
           displayPersonalNum: maskPersonalNum(ocrResponse.personalNum), // 마스킹된 버전 (화면 표시용)
         };
-        
+
         // Step03로 이동하며 처리된 OCR 데이터를 state로 전달
         navigate("/id/verification/step3", {
           state: {
@@ -86,19 +86,19 @@ export default function IDVerificationStep2() {
               ...signupState,
               ocrData: processedOcrData,
             },
-          });
-        } catch (e: any) {
-          if (e instanceof ApiError) {
-            toast.error(`${e.message}`); 
-          } else {
-            toast.error("예기치 못한 오류가 발생했습니다."); 
-          }
+          },
+        });
+      } catch (e: any) {
+        if (e instanceof ApiError) {
+          toast.error(`${e.message}`);
+        } else {
+          toast.error("예기치 못한 오류가 발생했습니다.");
         }
-      } else {
-        toast.error("신분증 이미지가 필요합니다."); 
       }
-    };
-  }
+    } else {
+      toast.error("신분증 이미지가 필요합니다.");
+    }
+  };
 
   return (
     <div className="flex flex-col h-full bg-gray-50">
@@ -153,10 +153,25 @@ export default function IDVerificationStep2() {
           className="hidden"
           onChange={handleFileChange}
         />
-        <Button text="파일 업로드" fullWidth onClick={handleFileUpload} className="text-base font-medium py-2" />
-        <Button text="다음" fullWidth onClick={handleNext} className="text-base font-medium py-2" />
+        <Button
+          text="파일 업로드"
+          fullWidth
+          onClick={handleFileUpload}
+          className="text-base font-medium py-2"
+        />
+        <Button
+          text="다음"
+          fullWidth
+          onClick={handleNext}
+          className="text-base font-medium py-2"
+        />
         {capturedImage && (
-          <Button text="다시 촬영하기" fullWidth onClick={handleRetake} className="text-base font-medium py-2" />
+          <Button
+            text="다시 촬영하기"
+            fullWidth
+            onClick={handleRetake}
+            className="text-base font-medium py-2"
+          />
         )}
       </div>
     </div>
