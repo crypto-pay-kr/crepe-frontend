@@ -1,4 +1,5 @@
 import { FreeDepositCountPreferentialRate } from "@/types/FreeDepositCountPreferentialRate ";
+import { ApiError } from '@/error/ApiError'
 
 const API_BASE_URL = import.meta.env.VITE_API_SERVER_URL || "http://localhost:8080"
 
@@ -36,7 +37,7 @@ export async function subscribeProduct(request: SubscribeProductRequest): Promis
   const token = sessionStorage.getItem("accessToken");
   if (!token) throw new Error("인증 토큰이 없습니다.");
 
-  const response = await fetch(`${API_BASE_URL}/api/product/subscribe`, {  
+  const res = await fetch(`${API_BASE_URL}/api/product/subscribe`, {
     method: "POST", 
     headers: {
       Authorization: `Bearer ${token}`,
@@ -45,10 +46,12 @@ export async function subscribeProduct(request: SubscribeProductRequest): Promis
     body: JSON.stringify(request),
   });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(errorText || "상품 가입(구독) 요청 실패");
+  if (!res.ok)
+  {
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(body.code || 'UNKNOWN', res.status, body.message || '요청 실패');
   }
 
-  return response.json();
+
+  return res.json();
 }

@@ -19,7 +19,7 @@ const OrderProgressBar: React.FC<OrderProgressBarProps> = ({ currentStep }) => {
             <div 
               className={`w-8 h-8 rounded-full ${
                 step.number <= currentStep 
-                  ? "bg-[#002169] text-white" 
+                  ? "bg-[#4B5EED] text-white" 
                   : "bg-gray-300 text-gray-500"
               } flex items-center justify-center mb-2`}
             >
@@ -39,7 +39,7 @@ const OrderProgressBar: React.FC<OrderProgressBarProps> = ({ currentStep }) => {
             </div>
             <div 
               className={`text-xs ${
-                step.number <= currentStep ? "text-[#002169] font-medium" : "text-gray-500"
+                step.number <= currentStep ? "text-[#4B5EED] font-medium" : "text-gray-500"
               }`}
             >
               {step.label}

@@ -1,3 +1,5 @@
+import { ApiError } from '@/error/ApiError'
+
 const API_BASE_URL = import.meta.env.VITE_API_SERVER_URL || "http://localhost:8080"
 
 import { GetOnsaleProductListResponse } from "@/types/product";
@@ -7,7 +9,7 @@ export async function fetchOnSaleTokenProducts(): Promise<GetOnsaleProductListRe
   if (!token) throw new Error("인증 토큰이 없습니다.");
 
   console.log("Access token:", sessionStorage.getItem("accessToken"));
-  const response = await fetch(`${API_BASE_URL}/api/product`, {
+  const res = await fetch(`${API_BASE_URL}/api/product`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -15,12 +17,14 @@ export async function fetchOnSaleTokenProducts(): Promise<GetOnsaleProductListRe
     },
   });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(errorText || "상품 목록 조회 실패");
+  if (!res.ok)
+  {
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(body.code || 'UNKNOWN', res.status, body.message || '요청 실패');
   }
 
-  return await response.json();
+
+  return await res.json();
 }
 
 import { GetProductDetailResponse } from "@/types/product";
@@ -28,7 +32,7 @@ import { GetProductDetailResponse } from "@/types/product";
 export async function fetchProductDetail(productId: number): Promise<GetProductDetailResponse> {
   const token = sessionStorage.getItem("accessToken");
   if (!token) throw new Error("인증 토큰이 없습니다.");
-  const response = await fetch(`${API_BASE_URL}/api/product/${productId}`, {
+  const res = await fetch(`${API_BASE_URL}/api/product/${productId}`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -36,10 +40,11 @@ export async function fetchProductDetail(productId: number): Promise<GetProductD
     },
   });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(errorText || "상품 상세 조회 실패");
+  if (!res.ok)
+  {
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(body.code || 'UNKNOWN', res.status, body.message || '요청 실패');
   }
 
-  return await response.json();
+  return await res.json();
 }

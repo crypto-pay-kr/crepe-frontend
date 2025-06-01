@@ -6,6 +6,8 @@ import React, { useEffect, useState } from 'react'
 import Button from '@/components/common/Button'
 import { GetTerminatePreview, terminateSubscription } from '@/api/token'
 import { useBankStore } from '@/stores/BankStore'
+import { ApiError } from '@/error/ApiError'
+import { toast } from "react-toastify";
 
 interface TerminatePreview {
   subscribeId: number,
@@ -42,27 +44,30 @@ export default function TokenCancelPage() {
       try {
         const result = await GetTerminatePreview(subscribeId);
         setTerminatePreview(result);
-      } catch (error) {
-        console.error("해지 예상 정보 조회 실패", error);
-        alert("예상 정보를 불러오는 데 실패했습니다.");
+      } catch (e) {
+        if (e instanceof ApiError) {
+          toast(`${e.message}`);
+          console.log("🔥 API ERROR", e);
+        } else {
+          toast("예기치 못한 오류가 발생했습니다.");
+        }
       }
     };
 
     fetchPreview();
   }, [subscribeId]);
+
   console.log("productState:", productState);
 
   const handleTerminate = async () => {
     if (!subscribeId) {
-      alert("해지할 상품을 찾을 수 없습니다.");
+      toast("해지할 상품을 찾을 수 없습니다.");
       return;
     }
 
     try {
-      const result = await terminateSubscription(subscribeId);
-      alert("상품이 해지되었습니다.");
-      //await fetchBankTokens();
-      console.log("해지 결과:", result);
+      await terminateSubscription(subscribeId);
+      toast("상품이 해지되었습니다.");
       navigate(`/token/product/detail/${subscribeId}`, {
         state: {
           productState,
@@ -70,11 +75,16 @@ export default function TokenCancelPage() {
         },
         replace: true,
       });
-    } catch (error) {
-      console.error(error);
-      alert("해지 중 오류가 발생했습니다.");
+    } catch (e) {
+      if (e instanceof ApiError) {
+        toast(`${e.message}`);
+      } else {
+        toast("예기치 못한 오류가 발생했습니다.");
+      }
     }
   };
+
+
 
 
   const formattedTotalPay = terminatePreview?.totalPayout.toLocaleString() ?? "-";
