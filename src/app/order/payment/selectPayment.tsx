@@ -8,6 +8,8 @@ import { getCoinBalance} from "@/api/coin";
 import { createOrder, getMyVouchers } from '@/api/order'
 import { useTickerData } from '@/hooks/useTickerData'
 import { OrderRequest } from '@/types/order'
+import { toast } from 'react-toastify'
+import { ApiError } from '@/error/ApiError'
 
 interface SubscribeVoucherDto {
   id: number;                 // 바우처 ID
@@ -178,9 +180,13 @@ export default function SelectPaymentPage() {
         }
         const orderId = await createOrder(orderRequest);
         navigate("/mall/store/order-pending", { state: { orderId } });
-      } catch (error: any) {
-        console.error("Order creation failed:", error);
-        alert("주문 생성에 실패했습니다.");
+      }catch (e: any) {
+        console.error("Order creation failed:", e);
+        if (e instanceof ApiError) {
+          toast(`${e.message}`);
+        } else {
+          toast("예기치 못한 오류가 발생했습니다.");
+        }
       }
     };
 
