@@ -13,6 +13,7 @@ interface TerminatePreview {
   preTaxInterest: number, // 세전 이자
   postTaxInterest: number, // 세후 이자
   totalPayout: number // 원금 + 세후 이자
+  interestRate: number
 }
 
 
@@ -86,6 +87,10 @@ export default function TokenCancelPage() {
   const formattedOnePointFourPercent = onePointFourPercent.toLocaleString();
   const totalTax = fourteenPercent + onePointFourPercent;
   const formattedTotalTax = totalTax.toLocaleString();
+  const formattedInterestRate =
+    terminatePreview?.interestRate != null
+      ? (terminatePreview.interestRate * 100).toLocaleString(undefined, { maximumFractionDigits: 2 }) + "%"
+      : "-";
 
   return (
     <div className="flex h-full flex-col bg-gray-50">
@@ -101,7 +106,7 @@ export default function TokenCancelPage() {
 
         {/* Amount Section */}
         <div className="p-4 pb-0">
-          <div className="text-center mb-2 text-base text-gray-500">받으실 금액</div>
+          <div className="text-center mb-2 text-base font-semibold text-gray-600">받으실 금액</div>
           <div className="text-center text-3xl font-bold mb-2 text-blue-900">
             <span className="text-xl">{formattedTotalPay} {tokenInfoState.currency}</span>
           </div>
@@ -118,11 +123,15 @@ export default function TokenCancelPage() {
               <div className="font-medium text-gray-700">원금</div>
               <div className="font-bold text-blue-900">{productState.amount}{tokenInfoState.currency} </div>
             </div>
+            <div className="flex justify-between py-4 px-4 bg-blue-50/50 border-b border-gray-200">
+              <div className="font-bold text-[#4B5EED]">금리</div>
+              <div className="font-bold text-[#4B5EED]">{formattedInterestRate} </div>
+            </div>
 
             {/* Interest - Highlighted */}
             <div className="flex justify-between py-4 px-4 bg-blue-50/30 border-b border-gray-200">
               <div className="font-medium text-gray-700">이자(세전)</div>
-              <div className="font-bold text-indigo-500"> {formattedPreTaxInterest} {tokenInfoState.currency}</div>
+              <div className="font-semibold text-gray-700"> {formattedPreTaxInterest} {tokenInfoState.currency}</div>
             </div>
 
             {/* Tax Section */}
@@ -132,7 +141,7 @@ export default function TokenCancelPage() {
 
             <div className="flex justify-between py-3 px-4 border-b border-gray-100">
               <div className="text-gray-600">세금</div>
-              <div className="font-medium text-gray-800">{formattedTotalTax} {tokenInfoState.currency}</div>
+              <div className="font-semibold text-gray-800">{formattedTotalTax} {tokenInfoState.currency}</div>
             </div>
 
             <div className="flex justify-between py-3 px-4 border-b border-gray-100 bg-gray-50/50">
@@ -152,7 +161,7 @@ export default function TokenCancelPage() {
 
             {/* Total Amount - Highlighted */}
             <div className="flex justify-between py-4 px-4 bg-blue-100/50 border-b border-gray-200">
-              <div className="font-semibold text-blue-900">받으실 금액</div>
+              <div className="font-bold text-indigo-700">받으실 금액</div>
               <div className="font-bold text-indigo-700">{formattedTotalPay} {tokenInfoState.currency}</div>
             </div>
 
@@ -164,7 +173,7 @@ export default function TokenCancelPage() {
           </div>
 
           {/* Notice */}
-          <div className="mt-1 mb-1 text-base font-semibold text-center text-gray-200">
+          <div className="mt-1 mb-1 text-base font-bold text-center text-red-500">
             <p>⚠️ 중도 해지시 우대금리, 세제혜택 등이 ⚠️</p>
             <p>적용되지 않습니다️</p>
           </div>
@@ -172,7 +181,7 @@ export default function TokenCancelPage() {
         {/* 가입 상품 */}
         <div
           key={productState.subscribeId}
-          className="mb-6 mt-8 rounded-2xl border-2 border-gray-200 bg-white p-9 shadow-[0_4px_20px_rgba(0,0,0,0.06)]"
+          className="mb-6 mt-8 rounded-2xl bg-white p-9 transition shadow-sm"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center">
@@ -185,7 +194,6 @@ export default function TokenCancelPage() {
             </div>
             <div className="text-right">
               <p className="text-xl font-bold">{productState.amount} {tokenInfoState.currency}</p>
-              <p className="text-sm text-gray-500">= {productState.amount}</p>
             </div>
           </div>
         </div>
@@ -195,7 +203,7 @@ export default function TokenCancelPage() {
         <div className="flex justify-center my-1">
           <div className="w-10 h-12 bg-navy-800 flex items-center justify-center rounded-full -mt-3">
             <svg
-              className="w-6 h-10 text-white"
+              className="w-6 h-10 text-[#4B5EED]"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -211,7 +219,7 @@ export default function TokenCancelPage() {
         </div>
 
         {/* 은행 토큰 계좌 */}
-        <div className="mb-6 rounded-2xl border-2 border-gray-200 bg-white p-9 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
+        <div className="mb-6 rounded-2xl  bg-white p-9  transition shadow-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div className="mr-3">
@@ -222,9 +230,6 @@ export default function TokenCancelPage() {
             <div className="text-right">
               <p className="text-xl font-bold">
                 {productState.amount} {tokenInfoState.currency}
-              </p>
-              <p className="text-sm text-gray-500">
-               = {tokenInfoState.totalBalance}
               </p>
             </div>
           </div>
@@ -238,7 +243,7 @@ export default function TokenCancelPage() {
         <Button
           text="상품 해지"
           onClick={handleTerminate}
-          className="w-full rounded-lg py-3 font-semibold text-lg shadow-md"
+          className="w-full rounded-lg py-3 font-medium text-base shadow-md"
         />
       </div>
       <BottomNav />

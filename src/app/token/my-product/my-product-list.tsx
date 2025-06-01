@@ -25,7 +25,7 @@ export default function TokenProductListPage() {
   const [hasFetchedOnce, setHasFetchedOnce] =  useState(false);
   const [productState, setProductState] = useState<any>(null);
   const [tokenInfoState, setTokenInfoState] = useState<any>(null);
-  const { products, } = (location.state as any) || {};
+  const { products, tokenInfo } = location.state as any;
 
   const handleCancelClick = () => {
     navigate(`/token/product/cancel/${subscribeId}`, {
@@ -110,6 +110,8 @@ export default function TokenProductListPage() {
   }, [isInitialized, hasFetchedOnce, fetchTransactions]);
 
 
+
+
   useEffect(() => {
     if (loading) return;
 
@@ -144,7 +146,7 @@ export default function TokenProductListPage() {
 
         <main className="flex-1 overflow-auto p-5">
           {/* 보유 자산 카드 */}
-          <div className="mb-6 rounded-2xl border-2 border-gray-200 bg-white p-9 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
+          <div className="mb-6 rounded-2xl overflow-hidden bg-white p-9 shadow-sm transition hover:shadow-md">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <div className="mr-3">
@@ -157,19 +159,23 @@ export default function TokenProductListPage() {
                 <p className="text-2xl font-semibold">총 보유</p>
               </div>
               <div className="text-right">
-                <p className="text-2xl font-bold">
+                <p className="text-xl mt-1 font-bold">
                   {products.balance} {tokenInfoState.currency}
                 </p>
-                <p className="text-lg mt-1 font-semibold text-indigo-800">연 <span className="text-lg font-semibold text-indigo-800">{productState.rate}</span></p>
+                <p className="text-lg mt-2 font-semibold text-indigo-800">연 <span className="text-lg font-semibold text-indigo-800">{productState.rate}</span></p>
               </div>
             </div>
           </div>
-          <div className="-mt-2 mb-4 w-full">
-            <button className="w-full bg-[#0a2e64] text-white py-3 rounded-lg font-semibold text-base shadow-sm"
-            onClick={handleExchangeClick}>
-              토큰 예치
-            </button>
-          </div>
+          {productState.type !== "SAVING" && (
+            <div className="-mt-2 mb-4 w-full">
+              <button
+                className="w-full bg-[#4B5EED] text-white py-3 rounded-lg font-semibold text-base shadow-sm"
+                onClick={handleExchangeClick}
+              >
+                토큰 예치
+              </button>
+            </div>
+          )}
 
 
         {/* 거래 내역 헤더 */}
@@ -192,7 +198,7 @@ export default function TokenProductListPage() {
         <Button
           text="해지하기"
           onClick={handleCancelClick}
-          className="w-full rounded-lg py-3 font-semibold text-base shadow-md"
+          className="w-full rounded-lg py-3 font-medium text-base shadow-md"
         />
       </div>
       <BottomNav />

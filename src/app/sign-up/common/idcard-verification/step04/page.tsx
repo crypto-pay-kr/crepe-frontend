@@ -140,40 +140,40 @@ export default function IDVerificationStep4() {
                 </div>
 
                 {/* Personal Information Section */}
-                <div className="px-4 py-6 space-y-4">
-                    <h3 className="text-xl font-bold">인증정보 입력</h3>
+              <div className="px-4 py-6 space-y-4">
+                <h3 className="text-xl font-bold">인증정보 입력</h3>
 
-                    {/* 휴대폰 번호 */}
-                    <div className="space-y-1">
-                        <label className="block text-sm text-gray-600 mb-2">휴대폰</label>
-                        <input
-                            type="text"
-                            placeholder="휴대폰번호 입력"
-                            value={phoneNumber}
-                            onChange={(e) => setPhoneNumber(e.target.value)}
-                            className="w-full p-2.5 text-sm border border-gray-300 rounded-lg"
-                        />
-                    </div>
+                {/* 휴대폰 번호 */}
+                <div className="space-y-1">
+                  <label className="block text-base font-semibold text-gray-600 mb-2">휴대폰</label>
+                  <input
+                    type="text"
+                    placeholder="휴대폰번호 입력"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    className="w-full p-2.5 text-sm border border-gray-300 rounded-lg"
+                  />
+                </div>
 
-                    {/* 인증번호 요청 버튼 */}
-                    <button
-                        onClick={handleRequestVerification}
-                        className="mt-2 w-full py-2.5 text-sm font-medium text-white bg-[#4B5EED] rounded-lg"
-                    >
-                        인증번호 요청
-                    </button>
+                {/* 인증번호 요청 버튼 */}
+                <button
+                  onClick={handleRequestVerification}
+                  className="mt-2 w-full py-2.5 text-sm font-medium text-white bg-[#4B5EED] rounded-lg"
+                >
+                  인증번호 요청
+                </button>
 
-                    {/* 인증번호 입력 */}
-                    <div className="space-y-1 mb-2">
-                        <label className="block text-sm text-gray-600 mb-2">인증번호</label>
-                        <input
-                            type="text"
-                            placeholder="숫자 6자리 입력"
-                            value={verificationCode}
-                            onChange={(e) => setVerificationCode(e.target.value)}
-                            className="w-full p-2.5 text-sm border border-gray-300 rounded-lg"
-                        />
-                    </div>
+                {/* 인증번호 입력 */}
+                <div className="space-y-1 mb-2">
+                  <label className="block text-base font-semibold text-gray-600 mb-2">인증번호</label>
+                  <input
+                    type="text"
+                    placeholder="숫자 6자리 입력"
+                    value={verificationCode}
+                    onChange={(e) => setVerificationCode(e.target.value)}
+                    className="w-full p-2.5 text-sm border border-gray-300 rounded-lg"
+                  />
+                </div>
 
                     {/* 인증번호 확인 버튼 */}
                     <button
