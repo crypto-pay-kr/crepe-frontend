@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import Header from "../common/Header";
-import { Home, ShoppingBag, User } from "lucide-react";
-import BottomNav from "../common/BottomNavigate";
-import { menuItems } from "@/mocks/stores"; // Import menuItems from stores.ts
+import { CartItem, MenuItem } from "@/types/cart";
 
 export default function ShoppingMallDetail() {
   const navigate = useNavigate();
   const { id } = useParams(); // Retrieve the store ID from the route parameters
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]); // 메뉴 아이템 상태
   const [cartItems, setCartItems] = useState<
     { id: number; name: string; price: number; quantity: number; storeId: number }[]
   >([]);

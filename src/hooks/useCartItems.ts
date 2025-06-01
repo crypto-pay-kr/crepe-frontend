@@ -1,16 +1,12 @@
 import { useState } from "react";
-import { cartItems } from "@/mocks/stores";
-
-export interface CartItem {
-    id: number;
-    name: string;
-    price: number;
-    quantity: number;
-    image: string;
-}
+import { CartItem } from "@/types/cart"; 
 
 export function useCartItems() {
-    const [items, setItems] = useState<CartItem[]>(cartItems);
+    const [items, setItems] = useState<CartItem[]>(() => {
+        // 초기 상태를 localStorage에서 가져오거나 빈 배열로 설정
+        const storedItems = localStorage.getItem("cartItems");
+        return storedItems ? JSON.parse(storedItems) : [];
+    });
     
     const increaseQuantity = (id: number) => {
         setItems((prevItems) =>

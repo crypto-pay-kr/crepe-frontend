@@ -1,7 +1,6 @@
 import { ApiError } from '@/error/ApiError'
 
 const BASE_URL = import.meta.env.VITE_API_SERVER_URL;
-const COIN_PRICE_URL = import.meta.env.VITE_COIN_PRICE_URL;
 
 // 출금 계좌 등록 요청
 export const registerAccountAddress = async ({ currency, address, tag, }: {
@@ -20,8 +19,8 @@ export const registerAccountAddress = async ({ currency, address, tag, }: {
   });
 
   if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`계좌 등록 실패: ${res.status} - ${text}`);
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(body.code || "UNKNOWN", res.status, body.message || "계좌 등록 실패");
   }
 };
 
@@ -38,7 +37,8 @@ export const isAccountAddressRegistered = async (currency: string) => {
   });
 
   if (!res.ok) {
-    throw new Error('코인 주소 확인 실패');
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(body.code || "UNKNOWN", res.status, body.message || "코인 주소 확인 실패");
   }
 
   return res.json();
@@ -51,14 +51,19 @@ export const reRegisterAccountAddress = async (payload: {
   tag?: string;
 }) => {
   const token = sessionStorage.getItem("accessToken");
-  return await fetch(`${BASE_URL}/api/resave/address`, {
-    method: 'PATCH',
+  const res = await fetch(`${BASE_URL}/api/resave/address`, {
+    method: "PATCH",
     headers: {
       Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify(payload),
   });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(body.code || "UNKNOWN", res.status, body.message || "계좌 재등록 실패");
+  }
 };
 
 
@@ -74,7 +79,8 @@ export const getCoinBalance = async () => {
   });
 
   if (!response.ok) {
-    throw new Error('잔액 조회 실패: ' + response.status);
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || "UNKNOWN", response.status, body.message || "잔액 조회 실패");
   }
   return await response.json();
 };
@@ -92,7 +98,8 @@ export const getCoinBalanceByCurrency = async (currency: string) => {
   });
 
   if (!response.ok) {
-    throw new Error('특정 코인 잔액 조회 실패: ' + response.status);
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || "UNKNOWN", response.status, body.message || "특정 코인 잔액 조회 실패");
   }
 
   return await response.json();
@@ -151,7 +158,11 @@ export const getCoinHistory = async ({ pageParam = 0, queryKey }: { pageParam?: 
     },
   });
 
-  if (!res.ok) throw new Error('입금 내역 조회 실패');
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(body.code || "UNKNOWN", res.status, body.message || "내역 조회 실패");
+  }
+
   return res.json();
 };
 
@@ -168,11 +179,12 @@ export async function unRegisterAccountAddress(currency: string): Promise<void> 
   });
 
   if (!response.ok) {
-    throw new Error("계좌 등록 해제 실패: " + response.status);
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || "UNKNOWN", response.status, body.message || "계좌 등록 해제 실패");
   }
 }
 
-export const getCoinInfo= async ( currency: string)=> {
+export const getCoinInfo = async (currency: string) => {
   const token = sessionStorage.getItem("accessToken");
 
   const response = await fetch(`${BASE_URL}/api/coin/info/${currency}`, {
@@ -183,9 +195,9 @@ export const getCoinInfo= async ( currency: string)=> {
     }
   });
   if (!response.ok) {
-    throw new Error("코인 정보 조회 실패" + response.status);
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || "UNKNOWN", response.status, body.message || "코인 정보 조회 실패");
   }
-
   return await response.json();
 }
 

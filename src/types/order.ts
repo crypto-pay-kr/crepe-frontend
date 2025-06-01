@@ -1,3 +1,17 @@
+
+export interface Order {
+  id: string;
+  status: string;
+  reason?: string;
+  storeName: string;
+  orderItems: string;
+  orderDate: string;
+  orderNumber: string;
+  storeLocation: string;
+  totalPrice: string;
+}
+
+
 type CoinOrderRequest = {
   storeId: number;
   orderDetails: { menuId: number; menuCount: number }[];

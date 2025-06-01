@@ -7,6 +7,10 @@ export async function signUpStore(formData: FormData) {
     method: "POST",
     body: formData,
   });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || 'UNKNOWN', response.status, body.message || '요청 실패');
+  }
   return response;
 }
 
@@ -34,11 +38,10 @@ export async function fetchMyStoreAllDetails() {
       Authorization: `Bearer ${token}`,
     },
   });
-
   if (!response.ok) {
-    throw new Error("내 가게 정보를 불러올 수 없습니다.");
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || "UNKNOWN", response.status, body.message || "요청 실패");
   }
-
   return await response.json();
 }
 
@@ -54,6 +57,10 @@ export async function updateStoreName(newStoreName: string) {
     },
     body: JSON.stringify({ newStoreName }),
   });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || 'UNKNOWN', response.status, body.message || '요청 실패');
+  }
   return response;
 }
 
@@ -69,6 +76,10 @@ export async function updateStoreAddress(newAddress: string) {
     },
     body: JSON.stringify({ newAddress }),
   });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || 'UNKNOWN', response.status, body.message || '요청 실패');
+  }
   return response;
 }
 
@@ -80,7 +91,8 @@ export async function fetchStoreMenuDetail(menuId: string) {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!response.ok) {
-    throw new Error("메뉴 상세 조회에 실패했습니다.");
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || "UNKNOWN", response.status, body.message || "요청 실패");
   }
   return await response.json();
 }
@@ -96,13 +108,17 @@ export async function storeMenuAdd(formData: FormData) {
     },
     body: formData,
   });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || 'UNKNOWN', response.status, body.message || '요청 실패');
+  }
   return response;
 }
 
 // 가게 영업상태 변경
 export const changeStoreStatus = async (newStatus: "OPEN" | "CLOSED") => {
   const token = sessionStorage.getItem("accessToken");
-  const res = await fetch(`${API_BASE_URL}/api/store/change/status`, {
+  const response = await fetch(`${API_BASE_URL}/api/store/change/status`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -110,29 +126,42 @@ export const changeStoreStatus = async (newStatus: "OPEN" | "CLOSED") => {
     },
     body: JSON.stringify({ storeStatus: newStatus }),
   });
-  if (!res.ok) throw new Error("상태 변경 실패");
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || "UNKNOWN", response.status, body.message || "요청 실패");
+  }
 };
 
 // 가게 좋아요
 export const likeStore = async (storeId: number) => {
   const token = sessionStorage.getItem("accessToken");
-  return await fetch(`${API_BASE_URL}/api/like/${storeId}`, {
+  const response = await fetch(`${API_BASE_URL}/api/like/${storeId}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || 'UNKNOWN', response.status, body.message || '요청 실패');
+  }
+  return response;
 };
 
 // 가게 좋아요 취소
 export const unlikeStore = async (storeId: number) => {
   const token = sessionStorage.getItem("accessToken");
-  return await fetch(`${API_BASE_URL}/api/like/${storeId}`, {
+  const response = await fetch(`${API_BASE_URL}/api/like/${storeId}`, {
     method: "PATCH",
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || 'UNKNOWN', response.status, body.message || '요청 실패');
+  }
+  return response;
 };
 
 // 가맹점 메뉴 수정
@@ -149,8 +178,8 @@ export async function patchStoreMenu(
     body: formData,
   });
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(errorText || "메뉴 수정에 실패했습니다.");
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || "UNKNOWN", response.status, body.message || "요청 실패");
   }
 }
 
@@ -162,8 +191,8 @@ export async function deleteStoreMenu(menuId: string) {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(errorText || "메뉴 삭제에 실패했습니다.");
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || "UNKNOWN", response.status, body.message || "요청 실패");
   }
 }
 
@@ -181,8 +210,8 @@ export async function patchStoreCoin(supportedCoins: string[]) {
     }),
   });
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(errorText || "코인 지원 설정 업데이트 실패");
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || "UNKNOWN", response.status, body.message || "요청 실패");
   }
   return await response.json();
 }
@@ -199,11 +228,10 @@ export async function fetchOrders() {
       Authorization: `Bearer ${token}`,
     },
   });
-
   if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || "UNKNOWN", response.status, body.message || "요청 실패");
   }
-
   const data = await response.json();
   return data;
 }
@@ -246,74 +274,6 @@ export async function handleOrderAction(
   return await response.json(); // 성공 시 JSON 응답 반환
 }
 
-// // 주문 수락
-// export async function acceptOrder(orderId: string, preparationTime: string) {
-//   const token = sessionStorage.getItem("accessToken");
-//   const response = await fetch(`${API_BASE_URL}/api/store/orders/${orderId}/action`, {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//       Authorization: `Bearer ${token}`,
-//     },
-//     body: JSON.stringify({
-//       action: "accept",
-//       preparationTime,
-//     }),
-//   });
-//   return response;
-// }
-
-// // 주문 거절
-// export async function rejectOrder(orderId: string, refusalReason: string) {
-//   const token = sessionStorage.getItem("accessToken");
-//   const response = await fetch(`${API_BASE_URL}/api/store/orders/${orderId}/action`, {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//       Authorization: `Bearer ${token}`,
-//     },
-//     body: JSON.stringify({
-//       action: "refuse",
-//       refusalReason,
-//     }),
-//   });
-//   return response;
-// }
-
-// // 준비 완료 취소
-// export async function cancelPreparation(orderId: string, preparationTime: string) {
-//   const token = sessionStorage.getItem("accessToken");
-//   const response = await fetch(`${API_BASE_URL}/api/store/orders/${orderId}/action`, {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//       Authorization: `Bearer ${token}`,
-//     },
-//     body: JSON.stringify({
-//       action: "accept",
-//       preparationTime
-//     }),
-//   });
-//   return response;
-// }
-
-
-// // 준비 완료
-// export async function completeOrder(orderId: string) {
-//   const token = sessionStorage.getItem("accessToken");
-//   const response = await fetch(`${API_BASE_URL}/api/store/orders/${orderId}/action`, {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//       Authorization: `Bearer ${token}`,
-//     },
-//     body: JSON.stringify({
-//       action: "complete",
-//     }),
-//   });
-//   return response;
-// }
-
 // 내 가게 월별 결제 내역 총합 조회
 export async function getStorePayment() {
   const token = sessionStorage.getItem("accessToken");
@@ -325,7 +285,8 @@ export async function getStorePayment() {
     },
   });
   if (!response.ok) {
-    throw new Error("월별 정산 내역 조회에 실패했습니다.");
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || "UNKNOWN", response.status, body.message || "요청 실패");
   }
   return await response.json();
 }
@@ -341,7 +302,8 @@ export async function getStatusCount() {
     },
   });
   if (!response.ok) {
-    throw new Error("상태 건수 조회에 실패했습니다.");
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || "UNKNOWN", response.status, body.message || "요청 실패");
   }
   return await response.json();
 }

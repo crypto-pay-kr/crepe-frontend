@@ -5,6 +5,8 @@ import Button from "@/components/common/Button";
 import BottomNav from "@/components/common/BottomNavigate";
 import ImageUploader from "@/components/common/ImageUploader";
 import Input from "@/components/common/Input";
+import { toast } from "react-toastify";
+import { ApiError } from "@/error/ApiError";
 import {
   fetchStoreMenuDetail,
   patchStoreMenu,
@@ -36,7 +38,7 @@ export default function MenuEditPage(): React.ReactElement {
     try {
       const token = sessionStorage.getItem("accessToken");
       if (!token) {
-        alert("로그인이 필요합니다.");
+        toast.error("로그인이 필요합니다.");
         navigate("/login");
         return;
       }
@@ -49,14 +51,15 @@ export default function MenuEditPage(): React.ReactElement {
         imageFile: null,
       });
     } catch (err) {
-      console.error("메뉴 조회 실패:", err);
-      alert("메뉴 조회 중 오류가 발생했습니다.");
+      if (err instanceof ApiError) {
+        toast.error(`${err.message}`);
+      } else {
+        toast.error("메뉴 조회 중 오류가 발생했습니다.");
+      }
     }
   };
-
   useEffect(() => {
     fetchMenuDetails();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [menuId]);
 
   // 입력 값 핸들러
@@ -74,18 +77,18 @@ export default function MenuEditPage(): React.ReactElement {
   // 메뉴 수정
   const handleUpdate = async () => {
     if (!menuId) {
-      alert("메뉴 혹은 가게 ID가 유효하지 않습니다.");
+      toast.error("메뉴 혹은 가게 ID가 유효하지 않습니다.");
       return;
     }
     if (!menuItem.name.trim() || !menuItem.price.trim()) {
-      alert("이름과 가격을 입력해주세요.");
+      toast.error("이름과 가격을 입력해주세요.");
       return;
     }
 
     try {
       const token = sessionStorage.getItem("accessToken");
       if (!token) {
-        alert("로그인이 필요합니다.");
+        toast.error("로그인이 필요합니다.");
         navigate("/login");
         return;
       }
@@ -103,45 +106,51 @@ export default function MenuEditPage(): React.ReactElement {
         )
       );
 
-      // 새로 업로드된 파일이 없는 경우, 기존 imageUrl을 그대로 업로드(Blob 변환)
       if (menuItem.imageFile) {
         formData.append("menuImage", menuItem.imageFile);
       } else if (menuItem.imageUrl) {
-        // 서버가 항상 "menuImage" 파트를 요구한다면 아래처럼 기존 URL을 파일로 만들어 전송
         const res = await fetch(menuItem.imageUrl);
         const blob = await res.blob();
         formData.append("menuImage", blob, "existing_image.jpg");
       }
 
       await patchStoreMenu(menuId, formData);
-      alert("메뉴가 수정되었습니다.");
+      toast.success("메뉴가 수정되었습니다.");
       navigate(-1);
     } catch (err) {
-      console.error("메뉴 수정 실패:", err);
-      alert("메뉴 수정 중 오류가 발생했습니다.");
+      if (err instanceof ApiError) {
+        toast.error(`${err.message}`); // ApiError의 메시지를 toast로 표시
+      } else {
+        toast.error("메뉴 수정 중 오류가 발생했습니다."); // 일반 오류 처리
+      }
     }
   };
+
 
   // 메뉴 삭제
   const handleDelete = async () => {
     if (!menuId) {
-      alert("메뉴 ID가 없습니다.");
+      toast.error("메뉴 ID가 없습니다.");
       return;
     }
     if (!window.confirm("정말 이 메뉴를 삭제하시겠습니까?")) return;
+
     try {
       const token = sessionStorage.getItem("accessToken");
       if (!token) {
-        alert("로그인이 필요합니다.");
+        toast.error("로그인이 필요합니다.");
         navigate("/login");
         return;
       }
       await deleteStoreMenu(menuId);
-      alert("메뉴가 삭제되었습니다.");
+      toast.success("메뉴가 삭제되었습니다.");
       navigate(-1);
     } catch (err) {
-      console.error("메뉴 삭제 실패:", err);
-      alert("메뉴 삭제 중 오류가 발생했습니다.");
+      if (err instanceof ApiError) {
+        toast.error(`${err.message}`); // ApiError의 메시지를 toast로 표시
+      } else {
+        toast.error("메뉴 삭제 중 오류가 발생했습니다."); // 일반 오류 처리
+      }
     }
   };
 

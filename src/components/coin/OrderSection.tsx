@@ -1,5 +1,5 @@
 import { OrderItem } from "./OrderItem";
-import { Order } from '@/constants/coinData'
+import { Order } from "@/types/order";
 
 interface OrderSectionProps {
   orders: Order[];

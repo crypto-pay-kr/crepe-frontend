@@ -24,7 +24,7 @@ const getOrderStatusLabel = (status: string, reason?: string) => {
       return <div className="text-xs text-green-500">주문 수락</div>;
     case "COMPLETED":
       return <div className="text-xs text-green-500">준비 완료</div>;
-    case "CANCELLED":
+    case "REFUSED":
       return <div className="text-xs text-red-500">주문 거절{reason ? " - " + reason : ""}</div>;
     default:
       return <div className="text-xs text-gray-500">알 수 없는 상태</div>;
