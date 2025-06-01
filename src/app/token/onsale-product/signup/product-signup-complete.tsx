@@ -34,7 +34,7 @@ export default function TokenProductSignupComplete() {
 
 
   // baseRate, interestRate, potentialMaxRate를 숫자로 변환
-  const base = toNumber(subscribeResponse.baseRate);
+  const base = toNumber(subscribeResponse.baseInterestRate);
   const rate = toNumber(subscribeResponse.interestRate);
   const potMax = toNumber(subscribeResponse.potentialMaxRate);
 
@@ -47,7 +47,7 @@ export default function TokenProductSignupComplete() {
   const additionalRate = finalRateValue - base;
 
   console.log("subscribeResponse:", subscribeResponse);
-  console.log("subscribeResponse.baseRate:", subscribeResponse.baseRate);
+  console.log("subscribeResponse.baseRate:", subscribeResponse.baseInterestRate);
 
   // 화면에 표시할 정보만 추려서 가공
   const signupInfo = {
@@ -58,7 +58,7 @@ export default function TokenProductSignupComplete() {
     startDate: formatDate(subscribeResponse.subscribeDate),
     endDate: formatDate(subscribeResponse.expiredDate),
     monthlyAmount: `${subscribeResponse.balance.toLocaleString()}`,         // balance
-    baseRate: ` ${subscribeResponse.baseRate}%`,                     // interestRate
+    baseInterestRate: ` ${subscribeResponse.baseInterestRate}%`,                     // interestRate
     interestRate: ` ${additionalRate.toFixed(1)}%` || "-",                         // interestRate      
     additionalMessage: subscribeResponse.additionalMessage,   // additionalMessage
     finalRate:

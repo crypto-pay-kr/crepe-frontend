@@ -18,6 +18,21 @@ export default function IDVerificationStep2() {
 
   const signupState = location.state?.signupState || {};
 
+  // 주민등록번호 마스킹 처리 함수
+  const maskPersonalNum = (personalNum: string) => {
+    if (!personalNum) return "";
+    
+    const cleanNum = personalNum.replace(/-/g, "");
+    if (cleanNum.length < 7) return personalNum;
+    
+    // 앞 6자리 + 성별(7번째 자리) + 나머지는 *
+    const front = cleanNum.substring(0, 6);
+    const gender = cleanNum.substring(6, 7);
+    const masked = "*".repeat(6);
+    
+    return `${front}-${gender}${masked}`;
+  };
+
   // 파일 업로드 버튼 클릭
   const handleFileUpload = () => {
     fileInputRef.current?.click();
@@ -41,28 +56,35 @@ export default function IDVerificationStep2() {
   // "다음" 버튼 클릭 시 OCR API를 호출한 후 Step03 페이지로 이동
   const handleNext = async () => {
     if (uploadedFile || capturedImage) {
-      if (uploadedFile || capturedImage) {
-        try {
-          let fileToSend: File | null = null;
-          if (uploadedFile) {
-            fileToSend = uploadedFile;
-          } else if (capturedImage) {
-            const res = await fetch(capturedImage);
-            const blob = await res.blob();
-            fileToSend = new File([blob], "captured.png", { type: "image/png" });
-          }
-          if (!fileToSend) {
-            throw new Error("No file to send for OCR processing.");
-          }
-          const ocrResponse = await processIdentityCard(fileToSend);
-          // Step03로 이동하며 OCR 데이터를 state로 전달
-          navigate("/id/verification/step3", {
-            state: {
-              from: location.pathname,
-              signupState: {
-                ...signupState,
-                ocrData: ocrResponse,
-              },
+      try {
+        let fileToSend: File | null = null;
+        if (uploadedFile) {
+          fileToSend = uploadedFile;
+        } else if (capturedImage) {
+          const res = await fetch(capturedImage);
+          const blob = await res.blob();
+          fileToSend = new File([blob], "captured.png", { type: "image/png" });
+        }
+        if (!fileToSend) {
+          throw new Error("No file to send for OCR processing.");
+        }
+        
+        const ocrResponse = await processIdentityCard(fileToSend);
+        
+        // OCR 데이터 처리: 주민등록번호는 원본과 마스킹된 버전 모두 저장
+        const processedOcrData = {
+          ...ocrResponse,
+          originalPersonalNum: ocrResponse.personalNum, // 원본 저장 (백엔드 전송용)
+          displayPersonalNum: maskPersonalNum(ocrResponse.personalNum), // 마스킹된 버전 (화면 표시용)
+        };
+        
+        // Step03로 이동하며 처리된 OCR 데이터를 state로 전달
+        navigate("/id/verification/step3", {
+          state: {
+            from: location.pathname,
+            signupState: {
+              ...signupState,
+              ocrData: processedOcrData,
             },
           });
         } catch (e: any) {
@@ -77,7 +99,6 @@ export default function IDVerificationStep2() {
       }
     };
   }
-
 
   return (
     <div className="flex flex-col h-full bg-gray-50">

@@ -6,7 +6,9 @@ import Input from "@/components/common/Input";
 
 interface OCRData {
   name: string;
-  personalNum: string; // 반드시 string
+  personalNum: string; // 전체 주민등록번호 (백엔드 전송용)
+  originalPersonalNum: string; // 원본 주민등록번호
+  displayPersonalNum: string; // 마스킹된 주민등록번호 (화면 표시용)
   address: string;
   issueDate: string;
   authority: string;
@@ -16,20 +18,38 @@ export default function IDVerificationStep3() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // 주민등록번호 마스킹 처리 함수 - 성별까지만 보여주고 나머지는 *
+  const maskPersonalNum = (personalNum: string) => {
+    if (!personalNum) return "";
+    
+    // 모든 하이픈을 제거하고 깔끔하게 처리
+    const cleanNum = personalNum.replace(/-/g, "");
+    if (cleanNum.length >= 7) {
+      // 앞 6자리 + 하이픈 + 성별 1자리 + * 6개
+      return `${cleanNum.substring(0, 6)}-${cleanNum[6]}${"*".repeat(6)}`;
+    }
+    
+    return personalNum;
+  };
+
   // 안전하게 signupState에서 ocrData를 가져오거나 빈 객체로 기본값을 설정
   const signupState = location.state?.signupState || {};
-  const defaultOcrData: OCRData = signupState.ocrData || {
-    name: "",
-    personalNum: "",
-    address: "",
-    issueDate: "",
-    authority: "",
+  const rawOcrData = signupState.ocrData || {};
+  
+  const defaultOcrData: OCRData = {
+    name: rawOcrData.name || "",
+    personalNum: rawOcrData.personalNum || rawOcrData.originalPersonalNum || "",
+    originalPersonalNum: rawOcrData.originalPersonalNum || rawOcrData.personalNum || "",
+    displayPersonalNum: rawOcrData.displayPersonalNum || maskPersonalNum(rawOcrData.personalNum || ""),
+    address: rawOcrData.address || "",
+    issueDate: rawOcrData.issueDate || "",
+    authority: rawOcrData.authority || "",
   };
 
   const [formData, setFormData] = React.useState<OCRData>(defaultOcrData);
 
-  // 값 변경 시에도 문자열로 설정
-  const handleChange = (field: keyof OCRData, value: string) => {
+  // 값 변경 시에도 문자열로 설정 (주민등록번호는 읽기 전용이므로 제외)
+  const handleChange = (field: keyof Omit<OCRData, 'personalNum' | 'originalPersonalNum' | 'displayPersonalNum'>, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -45,11 +65,6 @@ export default function IDVerificationStep3() {
     });
   };
 
-  // personalNum 안전 처리
-  const personalNumSplit = formData.personalNum?.split("-") ?? [];
-  const frontNum = personalNumSplit[0] || "";
-  const backNum = personalNumSplit[1] || "";
-
   return (
     <div className="flex flex-col h-full">
       <Header title="본인확인" />
@@ -63,27 +78,17 @@ export default function IDVerificationStep3() {
           value={formData.name}
           onChange={(e) => handleChange("name", e.target.value)}
         />
-        <div className="mb-6">
-          <label className="block text-gray-500 mb-2">주민등록번호</label>
-          <div className="flex items-center">
-            <input
-              type="text"
-              value={frontNum}
-              onChange={(e) =>
-                handleChange("personalNum", e.target.value + "-" + backNum)
-              }
-              className="w-full py-3 px-0 border-0 border-b border-gray-300 focus:outline-none focus:border-[#0a2d6b] text-xl"
-              maxLength={6}
-            />
-            <span className="mx-4 text-xl">-</span>
-            <input
-              type="text"
-              value={formData.personalNum.split("-")[1] || ""}
-              readOnly
-              className="w-full py-3 px-0 border-0 border-b border-gray-300 focus:outline-none text-xl"
-            />
+        
+        {/* 주민등록번호 읽기 전용 필드 */}
+        <div className="mb-4">
+          <div className="text-sm mb-1 text-gray-500">주민등록번호</div>
+          <div className="relative">
+            <div className="w-full border-b py-2 border-gray-300 text-gray-900 bg-gray-50">
+              {formData.displayPersonalNum || maskPersonalNum(formData.personalNum)}
+            </div>
           </div>
         </div>
+        
         <Input
           label="발급일"
           value={formData.issueDate}
@@ -92,7 +97,7 @@ export default function IDVerificationStep3() {
         <Input
           label="발급지역"
           value={formData.authority}
-          onChange={(e) => handleChange("issueDate", e.target.value)}
+          onChange={(e) => handleChange("authority", e.target.value)}
         />
       </div>
       <div className="p-6">

@@ -7,7 +7,7 @@ const BASE_URL = import.meta.env.VITE_API_SERVER_URL;
 // 상품 구독 중도 해지
 export const terminateSubscription = async (subscribeId: string) => {
   const token = sessionStorage.getItem("accessToken");
-  const response = await fetch(`${API_BASE_URL}/api/expired/terminate/${subscribeId}`, {
+  const res = await fetch(`${API_BASE_URL}/api/expired/terminate/${subscribeId}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -15,21 +15,14 @@ export const terminateSubscription = async (subscribeId: string) => {
     },
   });
 
-  if (!response.ok) {
-    let errorMessage = "알 수 없는 오류가 발생했습니다.";
-
-    try {
-      const errorData = await response.json();
-      errorMessage = errorData.message || errorMessage;
-    } catch (e) {
-      console.warn("상품 목록 조회 실패:", e);
-    }
-
-    throw new Error(errorMessage);
+  if (!res.ok)
+  {
+    const body = await res.json().catch(() => ({}));
+    console.warn("API 오류 응답 본문:", body);
+    throw new ApiError(body.code || 'UNKNOWN', res.status, body.message || '요청 실패');
   }
 
-
-  return await response.text();
+  return await res.text();
 };
 
 
@@ -37,7 +30,7 @@ export const terminateSubscription = async (subscribeId: string) => {
 export const depositToken = async (subscribeId: string, amount: number) => {
   const accessToken = sessionStorage.getItem("accessToken");
 
-  const response = await fetch(`${API_BASE_URL}/api/deposit/token`, {
+  const res = await fetch(`${API_BASE_URL}/api/deposit/token`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -49,27 +42,20 @@ export const depositToken = async (subscribeId: string, amount: number) => {
     }),
   });
 
-  if (!response.ok) {
-    let errorMessage = "알 수 없는 오류가 발생했습니다.";
-
-    try {
-      const errorData = await response.json();
-      errorMessage = errorData.message || errorMessage;
-    } catch (e) {
-      console.warn("상품 목록 조회 실패:", e);
-    }
-
-    throw new Error(errorMessage);
+  if (!res.ok)
+  {
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(body.code || 'UNKNOWN', res.status, body.message || '요청 실패');
   }
 
 
-  return await response.text();
+  return await res.text();
 };
 
 // 내 가입 상품 목록 조회
 export const GetMyTokenList = async () => {
   const token = sessionStorage.getItem("accessToken");
-  const response = await fetch(`${API_BASE_URL}/api/account`, {
+  const res = await fetch(`${API_BASE_URL}/api/account`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -77,27 +63,20 @@ export const GetMyTokenList = async () => {
     },
   });
 
-  if (!response.ok) {
-    let errorMessage = "알 수 없는 오류가 발생했습니다.";
-
-    try {
-      const errorData = await response.json();
-      errorMessage = errorData.message || errorMessage;
-    } catch (e) {
-      console.warn("상품 목록 조회 실패:", e);
-    }
-
-    throw new Error(errorMessage);
+  if (!res.ok)
+  {
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(body.code || 'UNKNOWN', res.status, body.message || '요청 실패');
   }
 
-  return await response.json();
+  return await res.json();
 };
 
 // 중도해지시 잔액 정보 조회
 export  const GetTerminatePreview = async (subscribeId: string) => {
   const token = sessionStorage.getItem('accessToken');
 
-  const response = await fetch(`${API_BASE_URL}/api/subscribe/preview/${subscribeId}`, {
+  const res = await fetch(`${API_BASE_URL}/api/subscribe/preview/${subscribeId}`, {
     method: 'GET',
     headers: {
       "Content-Type": "application/json",
@@ -105,20 +84,14 @@ export  const GetTerminatePreview = async (subscribeId: string) => {
     },
   });
 
-  if (!response.ok) {
-    let errorMessage = "알 수 없는 오류가 발생했습니다.";
-
-    try {
-      const errorData = await response.json();
-      errorMessage = errorData.message || errorMessage;
-    } catch (e) {
-      console.warn("내역 조회 실패:", e);
-    }
-
-    throw new Error(errorMessage);
+  if (!res.ok)
+  {
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(body.code || 'UNKNOWN', res.status, body.message || '요청 실패');
   }
 
-  return await response.json();
+
+  return await res.json();
 };
 
 // 내 가입 상품 거래내역 조회
@@ -129,7 +102,7 @@ export const GetMySubscribeTransactionList = async (subscribeId: number, page:nu
     throw new Error("로그인 토큰이 없습니다. 다시 로그인해주세요.");
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/subscribe/history/${subscribeId}?page=${page}&size=${size}`, {
+  const res = await fetch(`${API_BASE_URL}/api/subscribe/history/${subscribeId}?page=${page}&size=${size}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -137,21 +110,14 @@ export const GetMySubscribeTransactionList = async (subscribeId: number, page:nu
     },
   });
 
-  if (!response.ok) {
-    let errorMessage = "알 수 없는 오류가 발생했습니다.";
-
-    try {
-      const errorData = await response.json();
-      errorMessage = errorData.message || errorMessage;
-    } catch (e) {
-      console.warn("상품 목록 조회 실패:", e);
-    }
-
-    throw new Error(errorMessage);
+  if (!res.ok)
+  {
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(body.code || 'UNKNOWN', res.status, body.message || '요청 실패');
   }
 
 
-  return await response.json();
+  return await res.json();
 };
 
 export const getTokenInfo = async (currency: string) => {
@@ -165,9 +131,12 @@ export const getTokenInfo = async (currency: string) => {
     }
   });
 
-  if (!res.ok) {
-    throw new Error(`토큰 정보 조회 실패: ${res.status}`);
+  if (!res.ok)
+  {
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(body.code || 'UNKNOWN', res.status, body.message || '요청 실패');
   }
+
 
   return await res.json();
 };
@@ -226,9 +195,12 @@ export const fetchTokenExchangeHistory = async (
     },
   });
 
-  if (!res.ok) {
-    throw new Error(`환전 내역 조회 실패: ${res.status}`);
+  if (!res.ok)
+  {
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(body.code || 'UNKNOWN', res.status, body.message || '요청 실패');
   }
+
 
   return await res.json();
 };
@@ -236,26 +208,20 @@ export const fetchTokenExchangeHistory = async (
 export async function fetchTokenBalance(currency: string): Promise<number> {
   const token = sessionStorage.getItem('accessToken');
 
-  const response = await fetch(`${BASE_URL}/api/token/balance/${currency}`, {
+  const res = await fetch(`${BASE_URL}/api/token/balance/${currency}`, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 
-  if (!response.ok) {
-    let errorMessage = "알 수 없는 오류가 발생했습니다.";
-
-    try {
-      const errorData = await response.json();
-      errorMessage = errorData.message || errorMessage;
-    } catch (e) {
-      console.warn("잔액 조회 실패:", e);
-    }
-
-    throw new Error(errorMessage);
+  if (!res.ok)
+  {
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(body.code || 'UNKNOWN', res.status, body.message || '요청 실패');
   }
 
-  return await response.json(); // Promise<number>를 반환해야 하므로 응답값이 숫자인지 확인 필요
+
+  return await res.json();
 };
 

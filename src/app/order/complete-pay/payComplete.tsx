@@ -109,7 +109,7 @@ export default function PayCompletePage() {
               text="홈으로 돌아가기"
               onClick={() => navigate("/mall")}
               color="primary"
-              className="py-4 rounded-xl shadow-lg"
+              className="py-4 rounded-xl text-base font-medium shadow-lg"
               fullWidth={true}
             />
           </motion.div>

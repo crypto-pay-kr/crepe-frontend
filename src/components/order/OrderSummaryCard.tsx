@@ -53,13 +53,13 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({
 
       <div className="text-sm text-gray-700 mb-2">
         <p>주문 유형: {orderType}</p>
-        <p>총 금액: {totalPrice.toLocaleString()} 원</p>
+        <p>총 금액: {totalPrice.toLocaleString()}</p>
       </div>
       <div className="mt-4">
         {orderDetails.map((item, index) => (
-          <div key={index} className="flex justify-between text-sm py-1 border-b last:border-0">
+          <div key={index} className="flex justify-between text-base font-semibold py-1 border-b last:border-0">
             <span>{item.menuName} x {item.menuCount}</span>
-            <span>{(item.menuPrice * item.menuCount).toLocaleString()} 원</span>
+            <span>{(item.menuPrice * item.menuCount).toLocaleString()} </span>
           </div>
         ))}
       </div>

@@ -29,7 +29,7 @@ export default function LoadingPage() {
           {/* 심플하고 세련된 로딩 스피너 */}
           <div className="relative w-20 h-20 mb-8">
             <div className="absolute inset-0 border-4 border-gray-100 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-[#0a2e64] border-t-transparent rounded-full animate-spin"></div>
+            <div className="absolute inset-0 border-4 border-[#4B5EED] border-t-transparent rounded-full animate-spin"></div>
           </div>
           
           <p className="text-xl font-semibold text-gray-800 mb-2">결제 처리 중</p>
@@ -37,7 +37,7 @@ export default function LoadingPage() {
           
           {/* 향상된 프로그레스 바 */}
           <div className="mt-6 w-64 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-            <div className="h-full bg-[#0a2e64] rounded-full animate-progressForward"></div>
+            <div className="h-full bg-[#4B5EED] rounded-full animate-progressForward"></div>
           </div>
         </div>
       </div>
