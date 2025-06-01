@@ -8,8 +8,6 @@ interface CryptocurrencyTagsProps {
 }
 
 const CryptocurrencyTags: React.FC<CryptocurrencyTagsProps> = ({ coins }) => {
-  // coinStatus 데이터 구조 디버깅
-  console.log('CoinStatus 데이터:', coins);
 
   // 암호화폐 아이콘 매핑
   const cryptoIcons: Record<string, string> = {
@@ -48,7 +46,6 @@ const CryptocurrencyTags: React.FC<CryptocurrencyTagsProps> = ({ coins }) => {
 
   // CoinStatus 객체에서 코인 코드 추출
   const getCoinCode = (coin: CoinLike): string => {
-    console.log('코인 데이터:', coin);
 
     // CoinStatus가 단순히 문자열이라면
     if (typeof coin === 'string') {

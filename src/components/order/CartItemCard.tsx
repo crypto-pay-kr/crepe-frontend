@@ -1,4 +1,4 @@
-import { CartItem } from "@/hooks/useCartItems";
+import { CartItem } from "@/types/cart"; 
 import React from "react";
 import QuantityControl from "./QuantityControl";
 

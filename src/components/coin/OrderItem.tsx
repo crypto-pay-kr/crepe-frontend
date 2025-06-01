@@ -1,6 +1,6 @@
 import { Check, ShoppingBag, X } from "lucide-react";
 import ChevronRight from "../common/ChevronRight";
-import { Order } from "@/constants/coinData";
+import { Order } from "@/types/order";
 import { useNavigate } from "react-router-dom"; 
 
 interface OrderItemProps {

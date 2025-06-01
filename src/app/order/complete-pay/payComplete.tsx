@@ -87,7 +87,9 @@ export default function PayCompletePage() {
 
           {/* 주문 상태에 따라 currentStep 업데이트 */}
           <motion.div variants={itemVariants}>
-            <OrderProgressBar currentStep={orderDetails ? getCurrentStep(orderDetails.orderStatus) : 1} />
+            {orderDetails && orderDetails.orderStatus !== "REFUSED" && (
+              <OrderProgressBar currentStep={getCurrentStep(orderDetails.orderStatus)} />
+            )}
           </motion.div>
 
           <motion.div variants={itemVariants} className="my-8 transition-all duration-300 hover:shadow-lg rounded-xl">

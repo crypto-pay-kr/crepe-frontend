@@ -31,13 +31,23 @@ const OrderStatusMessage: React.FC<OrderStatusMessageProps> = ({ orderStatus }) 
         </svg>
       );
       break;
-    case "CANCELLED":
+    case "REFUSED":
       title = "주문이 취소되었습니다";
       subtitle = "취소된 주문입니다.";
       bgColor = "bg-red-100";
       icon = (
-        <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+        <svg
+          className="w-12 h-12 text-red-500"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
       );
       break;

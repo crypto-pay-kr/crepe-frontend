@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import Button from '@/components/common/Button';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { ApiError } from '@/error/ApiError';
 import Header from '@/components/common/Header';
 import BottomNav from '@/components/common/BottomNavigate';
 import AddressInput from "@/components/coin/AddressInput";
@@ -30,7 +32,7 @@ export default function AddCoinAddress() {
   const [address, setAddress] = useState<string>();
   const [tagAddress, setTagAddress] = useState<string>();
   const [existingAddress, setExistingAddress] = useState<boolean>();
-  const [addressStatus, setAddressStatus] = useState<'ACTIVE' | 'REGISTERING' | 'NOT_REGISTERED' |'UNREGISTERED'|'UNREGISTERED_AND_REGISTERING' | null>(null);
+  const [addressStatus, setAddressStatus] = useState<'ACTIVE' | 'REGISTERING' | 'NOT_REGISTERED' | 'UNREGISTERED' | 'UNREGISTERED_AND_REGISTERING' | null>(null);
   const [addressInfo, setAddressInfo] = useState<{
     address: string;
     tag?: string;
@@ -44,16 +46,19 @@ export default function AddCoinAddress() {
       isAccountAddressRegistered(symbol)
         .then((res) => {
           setAddressStatus(res.addressRegistryStatus);
-          setAddressInfo({ address: res.address, tag: res.tag ,addressStatus: res.addressRegistryStatus });
+          setAddressInfo({ address: res.address, tag: res.tag, addressStatus: res.addressRegistryStatus });
 
-          if(res.address!){
+          if (res.address) {
             setExistingAddress(true);
           }
-
         })
         .catch((err) => {
-          console.error("등록된 주소없음", err);
-          setAddressStatus('NOT_REGISTERED');
+          if (err instanceof ApiError) {
+            toast.error(`${err.message}`); // ApiError의 메시지를 toast로 표시
+          } else {
+            toast.error("등록된 주소를 불러오는 중 오류가 발생했습니다."); // 일반 오류 처리
+          }
+          setAddressStatus("NOT_REGISTERED");
           setAddressInfo(null);
         });
     }
@@ -76,13 +81,17 @@ export default function AddCoinAddress() {
           addressStatus: res.addressRegistryStatus,
         });
       } else {
-        throw new Error('계좌 상태를 불러오지 못했습니다.');
+        throw new Error("계좌 상태를 불러오지 못했습니다.");
       }
     } catch (e) {
-      alert("등록 해제 요청 실패");
-      console.error(e);
+      if (e instanceof ApiError) {
+        toast.error(`${e.message}`); // ApiError의 메시지를 toast로 표시
+      } else {
+        toast.error("등록 해제 요청 중 오류가 발생했습니다."); // 일반 오류 처리
+      }
     }
   };
+
 
   const renderDeactivateButtonText = () => {
     if (addressStatus === 'UNREGISTERED_AND_REGISTERING') return '등록 해제 후 변경 중..';
@@ -92,29 +101,32 @@ export default function AddCoinAddress() {
 
   const handleNext = async () => {
     if (!symbol) {
-      alert("코인 심볼이 없습니다.");
+      toast.error("코인 심볼이 없습니다.");
       return;
     }
 
     try {
       const payload = {
         currency: symbol,
-        address:address!,
+        address: address!,
         tag: symbol === "XRP" ? tagAddress : undefined,
       };
 
       if (existingAddress) {
         await reRegisterAccountAddress(payload);
-        alert("계좌가 재등록되었습니다.");
+        toast.success("계좌가 재등록되었습니다.");
       } else {
         await registerAccountAddress(payload);
-        alert("계좌 등록이 완료되었습니다.");
+        toast.success("계좌 등록이 완료되었습니다.");
       }
 
       navigate(`/coin-detail/${symbol}`, { state: { isUser: false } });
     } catch (e: any) {
-      alert(e.message || "계좌 등록 중 오류 발생");
-      console.error(e);
+      if (e instanceof ApiError) {
+        toast.error(`${e.message}`); // ApiError의 메시지를 toast로 표시
+      } else {
+        toast.error("계좌 등록 중 오류가 발생했습니다."); // 일반 오류 처리
+      }
     }
   };
 
@@ -154,14 +166,14 @@ export default function AddCoinAddress() {
                 {(addressStatus === 'ACTIVE' ||
                   addressStatus === 'UNREGISTERED_AND_REGISTERING' ||
                   addressStatus === 'UNREGISTERED') && (
-                  <button
-                    onClick={handleDeactivateClick}
-                    disabled={addressStatus === 'UNREGISTERED'}
-                    className="ml-32 mt-1.5 min-w-[140px] whitespace-nowrap rounded px-4 py-1 text-sm font-bold text-red-600 hover:bg-red-200 disabled:opacity-50"
-                  >
-                    {renderDeactivateButtonText()}
-                  </button>
-                )}
+                    <button
+                      onClick={handleDeactivateClick}
+                      disabled={addressStatus === 'UNREGISTERED'}
+                      className="ml-32 mt-1.5 min-w-[140px] whitespace-nowrap rounded px-4 py-1 text-sm font-bold text-red-600 hover:bg-red-200 disabled:opacity-50"
+                    >
+                      {renderDeactivateButtonText()}
+                    </button>
+                  )}
               </div>
             </div>
           </div>

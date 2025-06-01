@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import CryptocurrencyTags from "../common/CryptocurrencyTags";
 import { changeStoreStatus, fetchMyStoreAllDetails, likeStore, unlikeStore } from '@/api/store'
 import { Check, Heart } from 'lucide-react'
+import { toast } from "react-toastify"; 
+import { ApiError } from "@/error/ApiError";
 
 interface ShopInfoDTO {
   storeId: number;
@@ -22,39 +24,38 @@ function ShopInfo() {
   useEffect(() => {
     const fetchStoreInfo = async () => {
       try {
-        const token = sessionStorage.getItem("accessToken");
-        if (!token) throw new Error("로그인이 필요합니다.");
-
         const data = await fetchMyStoreAllDetails();
         setShopInfo(data);
       } catch (err) {
-        console.error(err);
-        setError("가게 정보를 불러오는 데 실패했습니다.");
+        if (err instanceof ApiError) {
+          toast.error(`${err.message}`); 
+        } else {
+          toast.error("가게 정보를 불러오는 데 실패했습니다."); 
+        }
       } finally {
         setLoading(false);
       }
     };
-
     fetchStoreInfo();
   }, []);
 
 
   const toggleStoreStatus = async () => {
     if (!shopInfo) return;
-    const token = sessionStorage.getItem("accessToken");
-    if (!token) return;
-
     const newStatus = shopInfo.storeStatus === "OPEN" ? "CLOSED" : "OPEN";
-
+  
     try {
       await changeStoreStatus(newStatus);
       setShopInfo({ ...shopInfo, storeStatus: newStatus });
+      toast.success(`가게 상태가 "${newStatus === "OPEN" ? "영업 중" : "영업 종료"}"로 변경되었습니다.`);
     } catch (err) {
-      console.error("상태 변경 실패:", err);
+      if (err instanceof ApiError) {
+        toast.error(`${err.message}`);
+      } else {
+        toast.error("가게 상태 변경 중 오류가 발생했습니다."); 
+      }
     }
   };
-
-
 
   if (loading) return <div className="p-4">로딩 중...</div>;
   if (error) return <div className="p-4 text-red-500">{error}</div>;
@@ -73,8 +74,8 @@ function ShopInfo() {
         >
           <div
             className={`w-5 h-5 rounded-full flex items-center justify-center mr-2 border ${shopInfo.storeStatus === "OPEN"
-                ? "border-green-700 bg-green-100"
-                : "border-gray-300 bg-gray-300"
+              ? "border-green-700 bg-green-100"
+              : "border-gray-300 bg-gray-300"
               }`}
           >
 

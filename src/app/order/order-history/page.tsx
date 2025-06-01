@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "@/components/common/Header";
 import BottomNav from "@/components/common/BottomNavigate";
 import { OrderSection } from "@/components/coin/OrderSection";
-import { Order } from "@/constants/coinData";
+import { Order } from "@/types/order";
 import { getOrderHistory } from "@/api/order";
 
 export default function MyOrderHistoryPage() {

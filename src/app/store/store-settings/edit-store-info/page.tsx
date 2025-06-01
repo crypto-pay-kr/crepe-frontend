@@ -11,6 +11,9 @@ import {
   updateStoreAddress,
   fetchMyStoreAllDetails
 } from "@/api/store";
+import { toast } from "react-toastify";
+import { ApiError } from "@/error/ApiError";
+
 
 interface MenuItem {
   menuId: number;
@@ -36,39 +39,40 @@ export default function StoreEditInfoPage() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [isModalOpen, setModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // 로딩 상태 추가
-  const token = sessionStorage.getItem("accessToken");
 
   const handleStoreNameUpdate = async () => {
     if (!newStoreName.trim()) {
-      alert("가게명을 입력해주세요!");
+      toast.error("가게명을 입력해주세요!");
       return;
     }
-    
+
     // 기존 이름과 같으면 업데이트하지 않음
     if (newStoreName === originalStoreName) {
-      alert("변경된 내용이 없습니다.");
+      toast.info("변경된 내용이 없습니다.");
       return;
     }
 
     try {
       const response = await updateStoreName(newStoreName);
-      alert(`가게명이 "${newStoreName}"(으)로 변경되었습니다.`);
-      setOriginalStoreName(newStoreName); // 성공시 원본 데이터 업데이트
-    } catch (err) {
-      console.error("가게명 변경 실패:", err);
-      alert("가게명 변경 중 오류가 발생했습니다.");
+      toast.success(`가게명이 "${newStoreName}"(으)로 변경되었습니다.`);
+      setOriginalStoreName(newStoreName); // 성공 시 원본 데이터 업데이트
+    } catch (e) {
+      if (e instanceof ApiError) {
+        toast.error(`${e.message}`); // ApiError의 메시지를 toast로 표시
+      } else {
+        toast.error("가게명 변경 중 오류가 발생했습니다."); // 일반 오류 처리
+      }
     }
   };
-
   const handleAddressUpdate = async () => {
     if (!newAddress.trim()) {
-      alert("주소를 입력해주세요!");
+      toast.error("주소를 입력해주세요!");
       return;
     }
 
     // 기존 주소와 같으면 업데이트하지 않음
     if (newAddress === originalAddress) {
-      alert("변경된 내용이 없습니다.");
+      toast.info("변경된 내용이 없습니다.");
       return;
     }
 
@@ -78,11 +82,14 @@ export default function StoreEditInfoPage() {
         const errorText = await response.text();
         throw new Error(errorText || "주소 변경에 실패했습니다.");
       }
-      alert(`주소가 "${newAddress}"(으)로 변경되었습니다.`);
-      setOriginalAddress(newAddress); // 성공시 원본 데이터 업데이트
-    } catch (err) {
-      console.error("주소 변경 실패:", err);
-      alert("주소 변경 중 오류가 발생했습니다.");
+      toast.success(`주소가 "${newAddress}"(으)로 변경되었습니다.`);
+      setOriginalAddress(newAddress); // 성공 시 원본 데이터 업데이트
+    } catch (e) {
+      if (e instanceof ApiError) {
+        toast.error(`${e.message}`); // ApiError의 메시지를 toast로 표시
+      } else {
+        toast.error("주소 변경 중 오류가 발생했습니다."); // 일반 오류 처리
+      }
     }
   };
 
@@ -101,21 +108,24 @@ export default function StoreEditInfoPage() {
         const token = sessionStorage.getItem("accessToken")!;
         const data: StoreData = await fetchMyStoreAllDetails();
         console.log("API 응답:", data);
-        
+
         // 기존 데이터를 state에 설정
         setStoreName(data.storeName || "");
         setAddress(data.storeAddress || "");
         setOriginalStoreName(data.storeName || "");
         setOriginalAddress(data.storeAddress || "");
         setMenuItems(data.menuList ?? []);
-      } catch (err) {
-        console.error("가게 정보 불러오기 실패:", err);
-        alert("가게 정보를 불러오는 데 실패했습니다.");
+      } catch (e) {
+        if (e instanceof ApiError) {
+          toast.error(`${e.message}`); // ApiError의 메시지를 toast로 표시
+        } else {
+          toast.error("가게 정보를 불러오는 데 실패했습니다."); // 일반 오류 처리
+        }
       } finally {
         setIsLoading(false);
       }
     };
-    
+
     loadStoreData();
   }, []);
 
@@ -149,7 +159,7 @@ export default function StoreEditInfoPage() {
             onChange={(e) => setStoreName(e.target.value)}
             placeholder="가게명을 입력해주세요."
           />
-          <Button 
+          <Button
             text="변경하기"
             onClick={handleStoreNameUpdate}
             className="mt-3 w-full bg-[#0a2158] text-white py-3 rounded-lg font-medium"
@@ -164,7 +174,7 @@ export default function StoreEditInfoPage() {
             onChange={(e) => setAddress(e.target.value)}
             placeholder="주소를 입력해주세요."
           />
-          <Button 
+          <Button
             text="변경하기"
             onClick={handleAddressUpdate}
             className="mt-3 w-full bg-[#0a2158] text-white py-3 rounded-lg font-medium"
@@ -198,11 +208,11 @@ export default function StoreEditInfoPage() {
 
           {/* 메뉴 추가 버튼 */}
           <div className="p-3">
-            <Button 
-              text="메뉴 추가하기" 
-              onClick={onNext} 
+            <Button
+              text="메뉴 추가하기"
+              onClick={onNext}
               color={isButtonDisabled ? "gray" : "blue"}
-              className="mt-3 w-full bg-[#0a2158] text-white py-3 rounded-lg font-medium" 
+              className="mt-3 w-full bg-[#0a2158] text-white py-3 rounded-lg font-medium"
             />
           </div>
         </div>

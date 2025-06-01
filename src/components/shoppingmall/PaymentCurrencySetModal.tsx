@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { toast } from "react-toastify";
+import { ApiError } from "@/error/ApiError";
 import { CoinList } from "@/types/store";
 import { patchStoreCoin } from "@/api/store";
 
@@ -52,16 +54,19 @@ export default function PaymentCurrencySetModal({
   const handleUpdate = async () => {
     const token = sessionStorage.getItem("accessToken");
     if (!token) {
-      alert("로그인이 필요합니다.");
+      toast.error("로그인이 필요합니다.");
       return;
     }
     try {
       await patchStoreCoin(selectedCoins);
-      alert("결제 수단 지원 설정이 업데이트되었습니다.");
+      toast.success("결제 수단 지원 설정이 업데이트되었습니다.");
       onClose();
     } catch (err) {
-      console.error("코인 업데이트 실패:", err);
-      alert("코인 업데이트 중 오류가 발생했습니다.");
+      if (err instanceof ApiError) {
+        toast.error(`${err.message}`); // ApiError의 메시지를 toast로 표시
+      } else {
+        toast.error("코인 업데이트 중 오류가 발생했습니다."); // 일반 오류 처리
+      }
     }
   };
 
@@ -81,8 +86,8 @@ export default function PaymentCurrencySetModal({
                 key={index}
                 onClick={() => coinName && toggleCoin(coinName)}
                 className={`px-4 py-3 rounded-full text-sm font-medium transition-all duration-200 border-2 transform active:scale-95
-                  ${isSelected 
-                    ? colorConfig.selected 
+                  ${isSelected
+                    ? colorConfig.selected
                     : colorConfig.unselected
                   }
                 `}
@@ -98,7 +103,7 @@ export default function PaymentCurrencySetModal({
 
         {/* 선택된 코인 개수 표시 */}
         <div className="text-center mt-4 text-sm text-gray-600">
-          {selectedCoins.length > 0 
+          {selectedCoins.length > 0
             ? `${selectedCoins.length}개의 코인이 선택되었습니다.`
             : "결제 수단으로 지원할 코인을 선택해주세요."
           }
@@ -107,7 +112,7 @@ export default function PaymentCurrencySetModal({
         <div className="flex justify-center mt-6 space-x-3">
           <button
             onClick={handleUpdate}
-            className="bg-[#0a2e65] text-white px-8 py-2 rounded w-full hover:bg-[#0a2158] transition-colors"
+            className="bg-[#4B5EED]  text-white px-8 py-2 rounded w-full hover:bg-[#0a2158] transition-colors"
           >
             변경하기
           </button>

@@ -34,9 +34,10 @@ export async function getOrderDetails(orderId: string): Promise<any> {
       },
     });
   
-    if (!response.ok) {
-      throw new Error(`Failed to fetch order details with status ${response.status}`);
-    }
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || "UNKNOWN", response.status, body.message || "요청 실패");
+  }
     return response.json();
   }
 

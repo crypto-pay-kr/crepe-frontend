@@ -13,6 +13,8 @@ import {
 } from "@/components/common/select";
 import { fileToBase64 } from "@/utils/fileToBase64";
 import { signUpStore } from "@/api/store";
+import { toast } from "react-toastify"; 
+import { ApiError } from "@/error/ApiError";
 
 interface BusinessOcrData {
   registerNumber: string;
@@ -74,7 +76,7 @@ export default function AdditionalStoreInfoPage() {
       setFormData((prev) => ({
         ...prev,
         storeName: ocrData.corpName || "",
-        ownerName: ocrData.representativeName || "", 
+        ownerName: ocrData.representativeName || "",
         businessNumber: ocrData.registerNumber || "",
         address: ocrData.address || "",
       }));
@@ -155,35 +157,39 @@ export default function AdditionalStoreInfoPage() {
 
       // API 요청
       const response = await signUpStore(multipart);
-      
+
       // 응답 상태 확인
       if (!response.ok) {
         // 응답에 JSON 본문이 있는지 확인
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
           try {
             const errorData = await response.json();
-            alert(`회원가입 실패: ${errorData.message || '알 수 없는 오류'}`);
+            toast.error(`회원가입 실패: ${errorData.message || "알 수 없는 오류"}`);
           } catch (jsonError) {
-            alert(`회원가입 실패: HTTP ${response.status} ${response.statusText}`);
+            toast.error(`회원가입 실패: HTTP ${response.status} ${response.statusText}`);
           }
         } else {
-          alert(`회원가입 실패: HTTP ${response.status} ${response.statusText}`);
+          toast.error(`회원가입 실패: HTTP ${response.status} ${response.statusText}`);
         }
         return;
       }
+
 
       // 로컬/세션 정리 후 완료 페이지로 이동
       localStorage.removeItem("businessOcrResult");
       localStorage.removeItem("businessImageBase64");
 
       sessionStorage.clear();
-      
-      alert("회원가입이 완료되었습니다.");
+
+      toast.success("회원가입이 완료되었습니다.");
       navigate("/signup-complete");
     } catch (error) {
-      console.error("회원가입 중 오류:", error);
-      alert("회원가입 중 오류가 발생했습니다.");
+      if (error instanceof ApiError) {
+        toast.error(`${error.message}`); // ApiError의 메시지를 toast로 표시
+      } else {
+        toast.error("회원가입 중 오류가 발생했습니다."); // 일반 오류 처리
+      }
     }
   };
 
@@ -204,7 +210,6 @@ export default function AdditionalStoreInfoPage() {
               <SelectContent>
                 <SelectItem value="음식점">음식점</SelectItem>
                 <SelectItem value="카페">카페</SelectItem>
-                <SelectItem value="베이커리">베이커리</SelectItem>
               </SelectContent>
             </Select>
           </div>
