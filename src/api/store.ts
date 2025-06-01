@@ -1,3 +1,5 @@
+import { ApiError } from "@/error/ApiError";
+
 const API_BASE_URL = import.meta.env.VITE_API_SERVER_URL || "http://localhost:8080"
 
 export async function signUpStore(formData: FormData) {
@@ -17,7 +19,9 @@ export async function uploadBusinessLicense(file: File) {
     body: formData,
   });
   if (!response.ok) {
-    throw new Error("사업자등록증 업로드 중 오류가 발생했습니다.");
+
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || 'UNKNOWN', response.status, body.message || '요청 실패');
   }
   return await response.json();
 }
@@ -204,73 +208,111 @@ export async function fetchOrders() {
   return data;
 }
 
-// 주문 수락
-export async function acceptOrder(orderId: string, preparationTime: string) {
+export async function handleOrderAction(
+
+  orderId: string,
+  action: "accept" | "refuse" | "complete" | "cancel",
+  additionalData?: Record<string, any> 
+): Promise<any> {
   const token = sessionStorage.getItem("accessToken");
+
+  if (!token) {
+    throw new Error("인증 토큰이 없습니다. 다시 로그인해주세요.");
+  }
+
+  const body = {
+    action,
+    ...additionalData, // 추가 데이터 병합
+  };
+
   const response = await fetch(`${API_BASE_URL}/api/store/orders/${orderId}/action`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({
-      action: "accept",
-      preparationTime,
-    }),
+    body: JSON.stringify(body),
   });
-  return response;
+
+  if (!response.ok) {
+    const responseBody = await response.json().catch(() => ({}));
+    throw new ApiError(
+      responseBody.code || "UNKNOWN",
+      response.status,
+      responseBody.message || "요청 실패"
+    );
+  }
+
+  return await response.json(); // 성공 시 JSON 응답 반환
 }
 
-// 주문 거절
-export async function rejectOrder(orderId: string, refusalReason: string) {
-  const token = sessionStorage.getItem("accessToken");
-  const response = await fetch(`${API_BASE_URL}/api/store/orders/${orderId}/action`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      action: "refuse",
-      refusalReason,
-    }),
-  });
-  return response;
-}
+// // 주문 수락
+// export async function acceptOrder(orderId: string, preparationTime: string) {
+//   const token = sessionStorage.getItem("accessToken");
+//   const response = await fetch(`${API_BASE_URL}/api/store/orders/${orderId}/action`, {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//       Authorization: `Bearer ${token}`,
+//     },
+//     body: JSON.stringify({
+//       action: "accept",
+//       preparationTime,
+//     }),
+//   });
+//   return response;
+// }
 
-// 준비 완료 취소
-export async function cancelPreparation(orderId: string, preparationTime: string) {
-  const token = sessionStorage.getItem("accessToken");
-  const response = await fetch(`${API_BASE_URL}/api/store/orders/${orderId}/action`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      action: "accept",
-      preparationTime
-    }),
-  });
-  return response;
-}
+// // 주문 거절
+// export async function rejectOrder(orderId: string, refusalReason: string) {
+//   const token = sessionStorage.getItem("accessToken");
+//   const response = await fetch(`${API_BASE_URL}/api/store/orders/${orderId}/action`, {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//       Authorization: `Bearer ${token}`,
+//     },
+//     body: JSON.stringify({
+//       action: "refuse",
+//       refusalReason,
+//     }),
+//   });
+//   return response;
+// }
+
+// // 준비 완료 취소
+// export async function cancelPreparation(orderId: string, preparationTime: string) {
+//   const token = sessionStorage.getItem("accessToken");
+//   const response = await fetch(`${API_BASE_URL}/api/store/orders/${orderId}/action`, {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//       Authorization: `Bearer ${token}`,
+//     },
+//     body: JSON.stringify({
+//       action: "accept",
+//       preparationTime
+//     }),
+//   });
+//   return response;
+// }
 
 
-// 준비 완료
-export async function completeOrder(orderId: string) {
-  const token = sessionStorage.getItem("accessToken");
-  const response = await fetch(`${API_BASE_URL}/api/store/orders/${orderId}/action`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      action: "complete",
-    }),
-  });
-  return response;
-}
+// // 준비 완료
+// export async function completeOrder(orderId: string) {
+//   const token = sessionStorage.getItem("accessToken");
+//   const response = await fetch(`${API_BASE_URL}/api/store/orders/${orderId}/action`, {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//       Authorization: `Bearer ${token}`,
+//     },
+//     body: JSON.stringify({
+//       action: "complete",
+//     }),
+//   });
+//   return response;
+// }
 
 // 내 가게 월별 결제 내역 총합 조회
 export async function getStorePayment() {
@@ -281,7 +323,7 @@ export async function getStorePayment() {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    });
+  });
   if (!response.ok) {
     throw new Error("월별 정산 내역 조회에 실패했습니다.");
   }

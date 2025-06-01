@@ -5,7 +5,9 @@ import Header from "@/components/common/Header";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Button from "@/components/common/Button";
-import { sendSMS, verifySMS } from "@/api/user"; 
+import { sendSMS, verifySMS } from "@/api/user";
+import { ApiError } from "@/error/ApiError";
+import { toast} from "react-toastify";
 
 export default function IDVerificationStep4() {
     const [phoneNumber, setPhoneNumber] = useState("");
@@ -41,24 +43,23 @@ export default function IDVerificationStep4() {
 
     const isButtonActive = agreements.terms && agreements.privacy;
 
-    // 인증번호 요청 API
+    // 인증번호 요청 API/ 인증번호 요청 API
     const handleRequestVerification = async () => {
         try {
             if (!phoneNumber) {
-                alert("휴대폰번호를 입력해주세요.");
+                toast.error("휴대폰번호를 입력해주세요.");
                 return;
             }
             // user.ts의 sendSMS 호출
             const res = await sendSMS(phoneNumber, "SUBSCRIBE_PRODUCT");
-            if (!res.ok) {
-                alert("인증번호 요청에 실패했습니다.");
-                return;
-            }
-            alert("인증번호가 요청되었습니다.");
+            toast.success("인증번호가 요청되었습니다.");
             setHasRequestedVerification(true);
-        } catch (error) {
-            console.error(error);
-            alert("인증번호 요청 중 오류가 발생했습니다.");
+        } catch (e) {
+            if (e instanceof ApiError) {
+                toast.error(`${e.message}`);
+            } else {
+                toast.error("예기치 못한 오류가 발생했습니다."); 
+            }
         }
     };
 
@@ -66,27 +67,26 @@ export default function IDVerificationStep4() {
     const handleVerify = async () => {
         try {
             if (!verificationCode) {
-                alert("인증번호를 입력해주세요.");
+                toast.error("인증번호를 입력해주세요.");
                 return;
             }
             const res = await verifySMS(verificationCode, phoneNumber, "SUBSCRIBE_PRODUCT");
-            if (!res.ok) {
-                alert("인증번호가 일치하지 않습니다.");
-                return;
-            }
-            alert("인증이 완료되었습니다.");
+            toast.success("인증이 완료되었습니다.");
             setIsVerified(true);
-        } catch (error) {
-            console.error(error);
-            alert("인증 확인 중 오류가 발생했습니다.");
+        } catch (e) {
+            if (e instanceof ApiError) {
+                toast.error(`${e.message}`); 
+            } else {
+                toast.error("예기치 못한 오류가 발생했습니다."); 
+            }
         }
     };
 
     const handleComplete = () => {
         const signupState = location.state?.signupState || {};
-        const { productId } = signupState;     
+        const { productId } = signupState;
         navigate(
-            `/token/onsale/products/${productId}/signup`, 
+            `/token/onsale/products/${productId}/signup`,
             { state: { ...signupState, step: 2 } }
         );
     };
@@ -175,14 +175,14 @@ export default function IDVerificationStep4() {
                   />
                 </div>
 
-                {/* 인증번호 확인 버튼 */}
-                <button
-                  onClick={handleVerify}
-                  className="mt-2 w-full py-2.5 text-sm font-medium text-white bg-[#4B5EED] rounded-lg"
-                >
-                  인증번호 확인
-                </button>
-              </div>
+                    {/* 인증번호 확인 버튼 */}
+                    <button
+                        onClick={handleVerify}
+                        className="mt-2 w-full py-2.5 text-sm font-medium text-white bg-[#4B5EED] rounded-lg"
+                    >
+                        인증번호 확인
+                    </button>
+                </div>
             </main >
 
             <div className="p-6 bg-white">
@@ -193,7 +193,7 @@ export default function IDVerificationStep4() {
                         ? "bg-blue-600 hover:bg-blue-700"
                         : "bg-gray-300 cursor-not-allowed"
                         }`}
-                        disabled={!isButtonActive || !isVerified}
+                    disabled={!isButtonActive || !isVerified}
                 />
             </div>
         </div>

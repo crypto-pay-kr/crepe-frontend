@@ -5,6 +5,8 @@ import Button from "@/components/common/Button";
 import CameraComponent from "@/components/common/CameraComponent";
 import { processIdentityCard } from "@/api/user";
 import { Check } from "lucide-react";
+import { toast } from "react-toastify";
+import { ApiError } from "@/error/ApiError";
 
 export default function IDVerificationStep2() {
   const navigate = useNavigate();
@@ -84,17 +86,20 @@ export default function IDVerificationStep2() {
               ...signupState,
               ocrData: processedOcrData,
             },
-          },
-        });
-      } catch (error : any)  {
-        console.error("OCR 처리 중 오류 발생:", error.message);
-        alert(error.message);
+          });
+        } catch (e: any) {
+          if (e instanceof ApiError) {
+            toast.error(`${e.message}`); 
+          } else {
+            toast.error("예기치 못한 오류가 발생했습니다."); 
+          }
+        }
+      } else {
+        toast.error("신분증 이미지가 필요합니다."); 
       }
-    } else {
-      alert("신분증 이미지가 필요합니다.");
-    }
-  };
-  
+    };
+  }
+
   return (
     <div className="flex flex-col h-full bg-gray-50">
       <Header title="본인확인" />
@@ -148,8 +153,8 @@ export default function IDVerificationStep2() {
           className="hidden"
           onChange={handleFileChange}
         />
-        <Button text="파일 업로드" fullWidth onClick={handleFileUpload} className="text-base font-medium py-2"/>
-        <Button text="다음" fullWidth onClick={handleNext} className="text-base font-medium py-2"/>
+        <Button text="파일 업로드" fullWidth onClick={handleFileUpload} className="text-base font-medium py-2" />
+        <Button text="다음" fullWidth onClick={handleNext} className="text-base font-medium py-2" />
         {capturedImage && (
           <Button text="다시 촬영하기" fullWidth onClick={handleRetake} className="text-base font-medium py-2" />
         )}

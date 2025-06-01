@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-
 import { useNavigate, useLocation } from "react-router-dom";
-import { verifySMS } from "@/api/user"; // 인증 요청 API
+import { verifySMS, sendSMS  } from "@/api/user"; // 인증 요청 API
 import Header from "@/components/common/Header";
+import { toast } from "react-toastify";
+import { ApiError } from "@/error/ApiError";
 
 interface PhoneVerificationProps {
   isStore?: boolean;
@@ -32,6 +33,29 @@ export default function PhoneVerification({
       }
     }
   };
+
+    // 코드 재전송 처리
+    const handleRequestVerification = async () => {
+      try {
+        const storedData = sessionStorage.getItem("signUpData");
+        if (!storedData) {
+          toast.error("회원가입 정보를 찾을 수 없습니다.");
+          return;
+        }
+  
+        const { phoneNumber } = JSON.parse(storedData);
+  
+        // user.ts의 sendSMS 호출
+        await sendSMS(phoneNumber, "SIGN_UP");
+        toast.success("인증번호가 요청되었습니다.");
+      } catch (e) {
+        if (e instanceof ApiError) {
+          toast.error(`${e.message}`);
+        } else {
+          toast.error("예기치 못한 오류가 발생했습니다.");
+        }
+      }
+    };
 
   // 모든 입력 필드가 채워졌는지 확인
   useEffect(() => {
@@ -132,7 +156,12 @@ export default function PhoneVerification({
 
           <div className="text-center mb-16">
             <span className="text-gray-500 text-sm">코드가 전송되지 않았나요? </span>
-            <button className="text-blue-600 text-sm font-medium">코드 재전송</button>
+            <button
+              className="text-blue-600 text-sm font-medium"
+              onClick={handleRequestVerification}
+            >
+              코드 재전송
+            </button>
           </div>
         </div>
 
