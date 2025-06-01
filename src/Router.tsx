@@ -52,6 +52,7 @@ import StoreSettlementReportPage from "./app/mypage/settlement-report/page"
 import OtpSetup from "./app/mypage/otp/page";
 import { SellerOnlyRoute, UserOnlyRoute } from '@/routes/RoleProtectedRoute';
 import CustomerSupportPage from "./app/center/page";
+import TransferPage from '@/app/coin/transfer/TransferPage'
 
 function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gray"; toggleButtonColor: () => void }) {
   useEffect(() => {
@@ -146,6 +147,7 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
           <Route path="/token/onsale/products" element={<OnSaleTokenProductListPage />} />
 
           {/* 기타 공통 페이지 */}
+          <Route path="/transfer" element={<TransferPage />} />
           <Route path="/settlement" element={<SettlementCoin />} />
           <Route path="/my/coin" element={<CoinHome />} />
           <Route path="/under-development" element={<UnderDevelopment />} />

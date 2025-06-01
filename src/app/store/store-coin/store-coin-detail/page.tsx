@@ -19,6 +19,7 @@ export interface PaymentHistory {
   transferredAt: string;
   afterBalance: number;
   type: string;
+  name: string;
 
 }
 
@@ -277,6 +278,10 @@ export default function CoinDetailPage() {
                                   ? item.amount > 0
                                     ? '환전 입금 완료'
                                     : '환전 출금 완료'
+                                  : item.type === 'TRANSFER'
+                                    ? item.amount >0
+                                      ? `${item.name}님에게서 받은 송금`
+                                      : `${item.name}님에게 송금 완료`
                                   : '알 수 없음'
                       }
                       balance={`${item.afterBalance ?? '-'} ${symbol}`}
@@ -286,7 +291,8 @@ export default function CoinDetailPage() {
                         (item.type === 'DEPOSIT'&& item.amount<0) ||
                         (item.type === 'EXCHANGE' && item.amount < 0) ||
                         (item.type === 'PAY' && item.amount < 0) ||
-                        (item.type === 'WITHDRAW' && item.amount < 0)
+                        (item.type === 'WITHDRAW' && item.amount < 0)||
+                        (item.type === 'TRANSFER' && item.amount < 0)
                       }
                       showAfterBalance={showAfterBalance}
                     />

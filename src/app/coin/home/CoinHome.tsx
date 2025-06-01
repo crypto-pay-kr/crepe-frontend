@@ -158,22 +158,37 @@ export default function CoinHome() {
 
   return (
     <div className="flex h-full flex-col bg-gray-50">
-      <Header title="자산관리" disableBack/>
+      <Header title="자산관리" disableBack />
       <main className="flex-1 overflow-auto bg-gray-50">
         <div className="px-4 py-6">
           <div className="overflow-hidden rounded-2xl bg-white px-6 py-8 shadow-sm transition hover:shadow-md">
-            <div className="mb-4 flex items-center">
-              <Wallet className="mr-2 h-6 w-6 text-[#4B5EED] drop-shadow-sm" />
-              <span className="text-base font-bold text-[#4B5EED]">총 자산</span>
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center">
+                <Wallet className="mr-2 h-6 w-6 text-[#4B5EED] drop-shadow-sm" />
+                <span className="text-base font-bold text-[#4B5EED]">
+                  총 자산
+                </span>
+              </div>
+
             </div>
-            <h2 className="mb-1 text-2xl font-bold text-gray-800 tracking-tight">
-              {(totalTokenBalanceKRW + totalBalanceKRW).toLocaleString()} KRW
-            </h2>
+            {/* 금액과 버튼을 나란히 정렬 */}
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold tracking-tight text-gray-800">
+                {(totalTokenBalanceKRW + totalBalanceKRW).toLocaleString()} KRW
+              </h2>
+              <button
+                onClick={() => navigate("/transfer")}
+                className="flex items-center gap-1 text-sm font-medium  text-gray-500 bg-gray-200 px-3 py-1.5 rounded-md"
+              >
+                송금
+              </button>
+            </div>
+
           </div>
 
           <div className="mt-5 w-full">
             <button
-              className="w-full bg-[#4B5EED] text-white py-3 rounded-xl font-medium text-base shadow-sm"
+              className="w-full rounded-xl bg-[#4B5EED] py-3 text-base font-medium text-white shadow-sm"
               onClick={handleExchangeClick}
             >
               K-토큰 상품 가입
@@ -200,12 +215,14 @@ export default function CoinHome() {
           {activeTab === 'coin' ? (
             <CoinAssets coins={coins} onClick={handleCoinClick} />
           ) : (
-            <TokenAssets tokens={enrichedTokenBalance} onClick={handleExchangeClick} />
+            <TokenAssets
+              tokens={enrichedTokenBalance}
+              onClick={handleExchangeClick}
+            />
           )}
         </div>
-
       </main>
       <BottomNav />
     </div>
-  );
+  )
 }

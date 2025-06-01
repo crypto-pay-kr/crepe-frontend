@@ -85,7 +85,7 @@ export async function loginUser({ email, password, captchaKey, captchaValue }: {
   captchaKey: string;
   captchaValue: string;
 }) {
-  const response = await fetch("/api/login", {
+  const response = await fetch(`${API_BASE_URL}/api/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password, captchaKey, captchaValue }),
