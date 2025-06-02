@@ -64,17 +64,14 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      '/api': 'https://dev.rolling-crepe.co.kr',
+      '/api': 'https://rolling-crepe.co.kr',
 
     },
     host: '0.0.0.0',
     port: 5173,
     strictPort: true,
     allowedHosts: [
-      'localhost',
-      '127.0.0.1',
-      'dev.rolling-crepe.co.kr',
-      '5bea-118-131-63-237.ngrok-free.app'
+      'rolling-crepe.co.kr',
     ],
   },
   resolve: {
