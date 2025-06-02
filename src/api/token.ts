@@ -225,3 +225,49 @@ export async function fetchTokenBalance(currency: string): Promise<number> {
   return await res.json();
 };
 
+export const requestTransfer = async (email: string, currency: string, amount: number) => {
+  const token = sessionStorage.getItem("accessToken");
+
+  const response = await fetch(`${BASE_URL}/api/transfer`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      receiverEmail: email,
+      currency,
+      amount,
+    }),
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || "송금 요청 실패");
+  }
+
+  return await response.text(); // "송금요청 완료"
+};
+
+
+export const fetchReceiverName = async (email: string, currency: string): Promise<string> => {
+  const token = sessionStorage.getItem("accessToken");
+
+  const params = new URLSearchParams();
+  params.append("email", email);
+  params.append("currency", currency);
+
+  const response = await fetch(`${BASE_URL}/api/receiver-name?${params.toString()}`, {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || "수신자 이름 조회 실패");
+  }
+
+  return await response.text();
+};

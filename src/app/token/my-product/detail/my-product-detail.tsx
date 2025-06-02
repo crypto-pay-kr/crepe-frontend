@@ -17,6 +17,7 @@ interface Transaction {
   afterBalance: number;
   transferredAt: string;
   status: 'ACCEPTED' | 'PENDING' | 'FAILED';
+  name: string;
   type:string;
 }
 
@@ -212,6 +213,10 @@ export default function TokenGroupDetailPage() {
                               ? tx.amount < 0
                                 ? "상품 예치 완료"
                                 : "상품 해지 및 만기 입금"
+                              :tx.type === "TRANSFER"
+                                ?  tx.amount >0
+                                  ? `${tx.name}님에게서 받은 송금`
+                                  : `${tx.name}님에게 송금 완료`
                               : "-"
                         }
                         balance={`${tx.afterBalance?.toFixed(2) ?? '-'} ${bank}`}
