@@ -22,6 +22,26 @@ export async function sendSMS(phone: string, smsType: string) {
   return response;
 }
 
+// 상품가입용 인증 문자 전송 (SMS)
+export async function sendSmsForProduct(phone: string, smsType: string) {
+  const token = sessionStorage.getItem("accessToken");
+  const response = await fetch(`${API_BASE_URL}/api/sms/code/subscribe-product`, {
+
+    method: "POST",
+    headers: { 
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+     },
+    body: JSON.stringify({ phone, smsType }),
+  });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || "UNKNOWN", response.status, body.message || "요청 실패");
+  }
+
+  return response;
+}
+
 // 인증 코드 검증
 export async function verifySMS(code: string, phone: string, smsType: string) {
   const response = await fetch(`${API_BASE_URL}/api/sms/verify`, {

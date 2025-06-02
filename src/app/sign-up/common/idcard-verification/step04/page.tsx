@@ -5,7 +5,7 @@ import Header from "@/components/common/Header";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Button from "@/components/common/Button";
-import { sendSMS, verifySMS } from "@/api/user";
+import { sendSmsForProduct, verifySMS } from "@/api/user";
 import { ApiError } from "@/error/ApiError";
 import { toast} from "react-toastify";
 
@@ -51,7 +51,7 @@ export default function IDVerificationStep4() {
                 return;
             }
             // user.ts의 sendSMS 호출
-            const res = await sendSMS(phoneNumber, "SUBSCRIBE_PRODUCT");
+            const res = await sendSmsForProduct(phoneNumber, "SUBSCRIBE_PRODUCT");
             toast.success("인증번호가 요청되었습니다.");
             setHasRequestedVerification(true);
         } catch (e) {
