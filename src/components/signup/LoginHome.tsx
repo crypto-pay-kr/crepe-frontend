@@ -69,10 +69,15 @@ export default function LoginHome({ onSignup, onStoreSignup, buttonClassName }: 
         return;
       }
 
-      const { accessToken, refreshToken } = await res.json();
-
+      const { accessToken, refreshToken,email,role } = await res.json();
+      console.log('✅ 로그인 응답 데이터:', { 
+            email, 
+            role, 
+            hasAccessToken: !!accessToken, 
+            hasRefreshToken: !!refreshToken 
+          });
       // AuthContext를 통해 로그인 처리 (이메일도 함께 저장)
-      loginToContext(accessToken, refreshToken, userId); // userId(이메일)를 세 번째 파라미터로 전달
+     loginToContext(accessToken, refreshToken, email || userId, role);
 
       console.log('✅ 로그인 성공 - 이메일 저장됨:', userId);
 
