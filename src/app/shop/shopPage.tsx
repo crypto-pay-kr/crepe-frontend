@@ -14,6 +14,20 @@ const ShoppingMall: React.FC = () => {
   const [storeData, setStoreData] = useState<Store[]>([]); 
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const storeTypeLabels: { [key: string]: string } = {
+    RESTAURANT: "🍽️ 음식점",
+    CAFE: "☕ 카페"
+  };
+
+  const storeTypeColors: { [key: string]: string } = {
+    RESTAURANT: "bg-white/80 backdrop-blur-sm text-rose-600 border border-rose-200/50 shadow-sm",
+    CAFE: "bg-white/80 backdrop-blur-sm text-amber-600 border border-amber-200/50 shadow-sm"
+  };
+
+  const storeTypeReverseMap: { [key: string]: string } = {
+    "음식점": "RESTAURANT",
+    "카페": "CAFE"
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -50,15 +64,15 @@ const ShoppingMall: React.FC = () => {
 
   // 탭 필터링 로직
   const filteredStores = storeData.filter((store) => {
-    // 검색어로 필터링
-    const matchesSearch = searchTerm === "" || 
-      store.storeName.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    // 카테고리로 필터링
-    const matchesCategory = activeTab === "전체" || store.storeType === activeTab;
-    
+    const matchesSearch =
+      searchTerm === "" || store.storeName.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesCategory =
+      activeTab === "전체" || store.storeType === storeTypeReverseMap[activeTab];
+
     return matchesSearch && matchesCategory;
   });
+
 
   // 실제 표시할 가게 목록 (에러 상태일 경우 빈 배열)
   const displayStores = error ? [] : filteredStores;
@@ -138,25 +152,7 @@ const ShoppingMall: React.FC = () => {
                   )}
                 </button>
               ))}
-              <button className="ml-auto px-4 py-3 text-sm font-medium text-[#4B5EED] flex items-center">
-                최신순
-                <svg 
-                  width="16" 
-                  height="16" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="ml-1"
-                >
-                  <path 
-                    d="M6 9L12 15L18 9" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
+
             </div>
           </div>
         </div>
@@ -192,8 +188,17 @@ const ShoppingMall: React.FC = () => {
                       navigate(`/mall/store/${store.storeId}`);
                     }}
                   >
+                    {store.storeType && (
+                      <span
+                        className={`inline-block mb-2 px-3 py-1.5 rounded-xl text-sm font-semibold tracking-tight ${
+                          storeTypeColors[store.storeType] || "bg-white/80 backdrop-blur-sm text-gray-600 border border-gray-200/50 shadow-sm"
+                        }`}
+                      >
+     {storeTypeLabels[store.storeType] || store.storeType}
+  </span>
+                    )}
                     <div className="flex justify-between items-center mb-3">
-                      <h3 className="font-bold text-gray-900">{store.storeName}</h3>
+                      <h3 className="font-bold text-lg text-gray-900">{store.storeNickname}</h3>
                       <div className="flex items-center">
                         <img
                           src={store.storeImage}
@@ -205,15 +210,8 @@ const ShoppingMall: React.FC = () => {
                       </div>
                     </div>
 
-                    <CryptocurrencyTags coins={store.coinList || []} />
                     <div className="flex justify-between items-center mt-2">
-                      <div className="text-sm text-gray-500">
-                        {store.storeType && (
-                          <span className="bg-gray-100 px-2 py-1 rounded-full">
-                            {store.storeType}
-                          </span>
-                        )}
-                      </div>
+                      <CryptocurrencyTags coins={store.coinList || []} />
                       <div className="flex items-center text-gray-500 bg-gray-50 px-2 py-1 rounded-full">
                         <svg
                           width="16"
@@ -234,6 +232,7 @@ const ShoppingMall: React.FC = () => {
                         <span className="text-sm font-medium">{store.likeCount || 0}</span>
                       </div>
                     </div>
+
                   </div>
                 ))
               ) : (

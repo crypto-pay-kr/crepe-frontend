@@ -17,6 +17,7 @@ export interface Store {
   storeId: number; // ID 필드 이름 변경: id → storeId
   storeName: string;
   storeImage: string;
+  storeNickname: string;
   likeCount: number;
   storeType: string;
   coinList: CoinList[]; // 타입을 string[] → CoinStatus[]로 변경
@@ -28,6 +29,7 @@ export interface StoreDetail {
   storeName: string;
   storeAddress: string;      // 추가
   storeImageUrl: string;     // 추가
+  storeNickname: string;
   coinList: CoinList[];
   menuList: GetMenuDetailResponse[]; // 추가
 }
@@ -53,6 +55,7 @@ export interface GetOneStoreDetailResponse {
   storeName: string;
   storeAddress: string;
   storeImageUrl: string;
+  storeNickname: string;
   coinList: CoinList[];
   menuList: GetMenuDetailResponse[];
 }
