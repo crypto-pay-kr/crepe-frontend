@@ -15,11 +15,11 @@ export default function SimpleTransactionItem({
                                                 totalBalance,
                                                 afterBalance
                                               }: SimpleTransactionItemProps) {
-  const isCancel = eventType != "TERMINATION";
-  const isPayment = eventType === "PAYMENT";
-  const isDeposit = parseFloat(amount) > 0 && !isCancel && !isPayment;
-
-  const formattedAmount = `${isDeposit ? "+" : "-"}${parseFloat(amount).toLocaleString()} ${currency}`;
+  const amountNum = parseFloat(amount);
+  const isCancel = eventType === "TERMINATION";
+  const isPayment = eventType === "DEPOSIT";
+  const sign = isCancel ? "-" : isPayment ? "+" : "";
+  const formattedAmount = `${sign}${Math.abs(amountNum).toLocaleString()} ${currency}`
   const formattedDate = new Date(date).toLocaleString('ko-KR', {
     timeZone: 'Asia/Seoul',
     year: 'numeric',
@@ -28,7 +28,7 @@ export default function SimpleTransactionItem({
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
-    hour12: true, // 오전/오후 표기
+    hour12: true,
   });
 
   const EVENT_TYPE_KO: Record<string, string> = {
@@ -44,7 +44,7 @@ export default function SimpleTransactionItem({
       <div className="flex justifty-between justify-between">
         <p
           className={`text-base font-semibold ${
-            isCancel ? 'text-red-500' : 'text-indigo-800'
+            isCancel ?  'text-indigo-800':'text-red-500'
           }`}
         >
           {EVENT_TYPE_KO[eventType] ?? eventType}
@@ -52,7 +52,7 @@ export default function SimpleTransactionItem({
 
         <p
           className={`text-base font-bold ${
-            isCancel ? 'text-red-500' : 'text-indigo-800'
+            isCancel ?  'text-indigo-800':'text-red-500'
           }`}
         >
           {formattedAmount}
@@ -63,7 +63,7 @@ export default function SimpleTransactionItem({
       ) : null}
       {isCancel && totalBalance !== undefined && (
         <p className="text-sm font-medium text-gray-700">
-          계좌 잔액: {totalBalance.toLocaleString()} {currency}
+          토큰 계좌 잔액: {totalBalance.toLocaleString()} {currency}
         </p>
       )}
     </div>
