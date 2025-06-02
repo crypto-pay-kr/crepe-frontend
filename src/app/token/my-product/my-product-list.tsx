@@ -30,6 +30,7 @@ export default function TokenProductListPage() {
   const handleCancelClick = () => {
     navigate(`/token/product/cancel/${subscribeId}`, {
       state: {
+        products,
         productState,
         tokenInfoState
       },
