@@ -11,6 +11,7 @@ interface PayHistory {
   storeName: string
   payDate: string
   orderDetail: string
+  storeNickname: string
   payCoinAmount: number
   coinCurrency: string
   payKRWAmount: number
@@ -94,7 +95,7 @@ export default function MyPaymentHistoryPage() {
               <div className="grid grid-cols-12 gap-4 items-center">
                 <div className="col-span-2">
                   <div className="font-semibold text-slate-900 truncate text-sm">
-                    {history.storeName}
+                    {history.storeNickname}
                   </div>
                 </div>
 
