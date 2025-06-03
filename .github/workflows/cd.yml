@@ -53,7 +53,7 @@ jobs:
         REPO: ${{ secrets.DOCKER_REPO_PROD }}
       with:
         host: ${{ secrets.SERVER_PROD_HOST }}
-        username: ec2-user
+        username: ubuntu
         key: ${{ secrets.SERVER_PROD_HOST_PEM }}
         proxy_host: ${{ secrets.BASTION_HOST }}
         proxy_username: ubuntu
