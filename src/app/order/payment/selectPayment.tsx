@@ -89,7 +89,6 @@ export default function SelectPaymentPage() {
         }
 
         setPortfolioData(portfolioList);
-        console.log("Portfolio Data:", portfolioList);
       } catch (err) {
         console.error("바우처 불러오기 실패:", err);
         toast.error("바우처를 불러오는 중 오류가 발생했습니다.");
@@ -111,7 +110,7 @@ export default function SelectPaymentPage() {
         }, {});
         setBalances(balanceMap);
       } catch (err) {
-        console.error("Error fetching balances:", err);
+        console.error("잔액 불러오기 실패:", err);
       }
     };
     fetchBalances();
@@ -128,7 +127,6 @@ export default function SelectPaymentPage() {
         }
       });
       setTotalTokenValue(sum); // 시세 저장
-      console.log("현재 토큰 총 시세:", sum.toFixed(2), "KRW");
     }
   }, [portfolioData, tickerData]);
 
@@ -234,6 +232,7 @@ export default function SelectPaymentPage() {
         paymentType: "VOUCHER",
         currency: selectedOption.bankTokenSymbol,
         voucherSubscribeId: selectedOption.voucherId,
+        exchangeRate: totalTokenValue, 
       };
     } else {
       alert("유효한 결제 방식이 아닙니다.");

@@ -26,6 +26,7 @@ type VoucherOrderRequest = {
   currency: string;
   paymentType: 'VOUCHER';
   voucherSubscribeId: number;
+  exchangeRate: number;
 };
 
 export type OrderRequest = CoinOrderRequest | VoucherOrderRequest;
