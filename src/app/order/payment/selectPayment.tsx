@@ -61,7 +61,7 @@ export default function SelectPaymentPage() {
           throw new Error("장바구니에 상품이 없습니다.");
         }
 
-        const storeId = cartItems[0]?.storeId; 
+        const storeId = cartItems[0]?.storeId;
         if (!storeId) {
           throw new Error("가게 정보가 없습니다.");
         }
@@ -296,11 +296,18 @@ export default function SelectPaymentPage() {
 
       <div className="flex-grow page-container bg-white pb-0 pt-5">
         <div className="p-4 min-h-[70vh]">
-          <PaymentOptionsList
-            options={paymentOptions}
-            selectedPaymentId={selectedPayment}
-            onSelectPayment={handlePaymentSelect}
-          />
+          {/* 결제 가능한 수단이 없을 경우 메시지 표시 */}
+          {availableCurrencies.length === 0 ? (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-gray-500 text-lg">결제 가능한 수단이 없습니다.</p>
+            </div>
+          ) : (
+            <PaymentOptionsList
+              options={paymentOptions}
+              selectedPaymentId={selectedPayment}
+              onSelectPayment={handlePaymentSelect}
+            />
+          )}
         </div>
 
         <div className="flex justify-center mt-auto px-4 pb-4">
@@ -319,6 +326,6 @@ export default function SelectPaymentPage() {
       </div>
 
       <BottomNav />
-    </div>
+    </div >
   );
 }
