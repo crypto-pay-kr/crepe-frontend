@@ -328,7 +328,8 @@ export async function fetchUserPayHistory(): Promise<any> {
   });
 
   if (!response.ok) {
-    throw new Error("사용자의 결제내역 정보를 불러오지 못했습니다.");
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || "UNKNOWN", response.status, body.message || "요청 실패");
   }
 
   return await response.json();
