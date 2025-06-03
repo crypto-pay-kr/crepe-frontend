@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { ApiError } from "@/error/ApiError";
 import { CoinList } from "@/types/store";
-import { patchStoreCoin } from "@/api/store";
+import { patchStoreCoin, getSupportedCoins } from "@/api/store";
 
 interface PaymentCurrencySetModalProps {
   isOpen: boolean;
@@ -41,6 +41,21 @@ export default function PaymentCurrencySetModal({
 
   // 선택한 코인들을 상태로 관리
   const [selectedCoins, setSelectedCoins] = useState<string[]>([]);
+
+  // 이미 선택된 결제 수단을 가져오기
+  useEffect(() => {
+    const fetchSupportedCoins = async () => {
+      try {
+        const supportedCoins = await getSupportedCoins();
+        setSelectedCoins(supportedCoins); // 초기 상태로 설정
+      } catch (err) {
+        console.error("지원하는 결제수단 조회 실패:", err);
+        toast.error("결제수단 정보를 불러오는 중 오류가 발생했습니다.");
+      }
+    };
+
+    fetchSupportedCoins();
+  }, []);
 
   const toggleCoin = (coinName: string) => {
     setSelectedCoins((prev) =>
