@@ -18,26 +18,21 @@ export default function TransactionItem({
                                           showAfterBalance,
                                         }: TransactionItemProps) {
 
-  const BANK_SYMBOL_MAP: Record<string, string> = {
-    'HANA': 'HTK',
-    'SHINHAN': 'STK',
-    'WOORI': 'WTK',
-  };
 
   const [rawAmount, rawSymbol] = amount.split(" ");
   const parsed = parseFloat(rawAmount);
-  const bankSymbol = BANK_SYMBOL_MAP[rawSymbol?.toUpperCase()] ?? rawSymbol;
+  // const bankSymbol = BANK_SYMBOL_MAP[rawSymbol?.toUpperCase()] ?? rawSymbol;
 
 
   const formattedAmount = isNaN(parsed)
     ? amount
-    : `${parsed > 0 ? "+" : ""}${parsed.toFixed(2)} ${bankSymbol}`;
+    : `${parsed > 0 ? "+" : ""}${parsed.toFixed(2)}`;
 
 
 
   const [balanceValue, rawBalanceSymbol] = balance.split(" ");
   const parsedBalance = parseFloat(balanceValue);
-  const balanceSymbol = BANK_SYMBOL_MAP[rawBalanceSymbol?.toUpperCase()] ?? rawBalanceSymbol;
+  const balanceSymbol = rawBalanceSymbol?.toUpperCase() ?? rawBalanceSymbol;
 
 
 
