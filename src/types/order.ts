@@ -23,6 +23,7 @@ type CoinOrderRequest = {
 type VoucherOrderRequest = {
   storeId: number;
   orderDetails: { menuId: number; menuCount: number }[];
+  currency: string;
   paymentType: 'VOUCHER';
   voucherSubscribeId: number;
 };

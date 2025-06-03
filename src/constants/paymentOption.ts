@@ -3,4 +3,8 @@ export interface PaymentOption {
   label: string;
   amount: string;
   insufficientBalance: boolean;
+  type: "COIN" | "VOUCHER";
+  voucherId?: number;
+  convertedPrice?: string;
+  balance?: string; 
 }
