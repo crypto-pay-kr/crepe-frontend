@@ -189,7 +189,7 @@ export default function SelectPaymentPage() {
           bankTokenSymbol: v.bankTokenSymbol,
           amount: `${convertedTokenValue} ${v.bankTokenSymbol}`, // amount에 환산된 금액 표시
           balance: `${v.balance.toFixed(2)} ${v.bankTokenSymbol}`, // balance에 바우처 잔액 표시
-          insufficientBalance: v.balance < totalPrice,
+          insufficientBalance: v.balance < totalPrice / totalTokenValue,
           type: "VOUCHER",
           voucherId: v.id,
         };
