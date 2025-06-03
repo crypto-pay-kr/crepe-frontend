@@ -145,7 +145,7 @@ const handleVerify = async () => {
                 <button
                   onClick={handleVerify}
                   disabled={isUploading}
-                  className="bg-[#002169] w-full h-12 text-white rounded-md font-medium"
+                  className="bg-[#4B5EED] w-full h-12 text-white rounded-md font-medium"
                 >
                   {isUploading ? "OCR 검증 중..." : "OCR 검증 요청"}
                 </button>
