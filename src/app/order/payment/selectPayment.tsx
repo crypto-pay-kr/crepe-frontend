@@ -5,7 +5,7 @@ import Header from "@/components/common/Header";
 import Button from "@/components/common/Button";
 import PaymentOptionsList from "@/components/order/PaymentOptionList";
 import { getCoinBalance } from "@/api/coin";
-import { createOrder, getMyVouchers } from "@/api/order";
+import { createOrder, getMyVouchers, getAvailableCurrency } from "@/api/order";
 import { getTokenInfo } from "@/api/token";
 import { useTickerData } from "@/hooks/useTickerData";
 import { OrderRequest } from "@/types/order";
@@ -35,10 +35,8 @@ export default function SelectPaymentPage() {
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [vouchers, setVouchers] = useState<SubscribeVoucherDto[]>([]);
   const [paymentOptions, setPaymentOptions] = useState<any[]>([]);
-
-  // *추가: 현재 토큰 총 시세 저장용*
+  const [availableCurrencies, setAvailableCurrencies] = useState<string[]>([]);
   const [totalTokenValue, setTotalTokenValue] = useState<number>(0);
-
   const [portfolioData, setPortfolioData] = useState<PortfolioData[]>([]);
 
   // 1. 로컬 스토리지에서 총 금액 가져오기
@@ -47,6 +45,36 @@ export default function SelectPaymentPage() {
     if (storedTotalPrice) {
       setTotalPrice(Number(storedTotalPrice));
     }
+  }, []);
+
+  // 사용 가능한 currency 조회
+  useEffect(() => {
+    const fetchAvailableCurrencies = async () => {
+      try {
+        const cartItemsStr = localStorage.getItem("cartItems");
+        if (!cartItemsStr) {
+          throw new Error("장바구니가 비어있습니다.");
+        }
+
+        const cartItems = JSON.parse(cartItemsStr);
+        if (!cartItems.length) {
+          throw new Error("장바구니에 상품이 없습니다.");
+        }
+
+        const storeId = cartItems[0]?.storeId; 
+        if (!storeId) {
+          throw new Error("가게 정보가 없습니다.");
+        }
+
+        const currencies = await getAvailableCurrency(storeId);
+        setAvailableCurrencies(currencies);
+      } catch (err) {
+        console.error("사용 가능한 currency 조회 실패:", err);
+        toast.error("결제 가능한 수단을 불러오는 중 오류가 발생했습니다.");
+      }
+    };
+
+    fetchAvailableCurrencies();
   }, []);
 
   // 2. 페이지 진입 시 getTokenInfo 호출
@@ -131,40 +159,46 @@ export default function SelectPaymentPage() {
   }, [portfolioData, tickerData]);
 
   useEffect(() => {
-    // 5-1. 코인 결제
-    const coinOptions = ["XRP", "SOL", "USDT"].map((symbol) => {
-      const tradePrice = tickerData[`KRW-${symbol}`]?.trade_price;
-      const balance = balances[symbol] ?? 0; // 코인 잔액 가져오기
-      return {
-        id: symbol,
-        label: symbol,
-        amount: tradePrice
-          ? `${(totalPrice / tradePrice).toFixed(2)} ${symbol}`
-          : "Loading...", // amount에 환산된 금액 표시
-        balance: `${balance.toFixed(2)} ${symbol}`, // balance에 코인 잔액 표시
-        insufficientBalance: !tradePrice || balance < totalPrice / tradePrice,
-        type: "COIN",
-      };
-    });
+    // 3-1. 코인 결제
+    const coinOptions = ["XRP", "SOL", "USDT"]
+      .filter((symbol) => availableCurrencies.includes(symbol)) // 사용 가능한 currency만 필터링
+      .map((symbol) => {
+        const tradePrice = tickerData[`KRW-${symbol}`]?.trade_price;
+        const balance = balances[symbol] ?? 0; // 코인 잔액 가져오기
+        return {
+          id: symbol,
+          label: symbol,
+          amount: tradePrice
+            ? `${(totalPrice / tradePrice).toFixed(2)} ${symbol}`
+            : "Loading...", // amount에 환산된 금액 표시
+          balance: `${balance.toFixed(2)} ${symbol}`, // balance에 코인 잔액 표시
+          insufficientBalance: !tradePrice || balance < totalPrice / tradePrice,
+          type: "COIN",
+        };
+      });
 
-    // 5-2. 바우처 결제
-    const voucherOptions = vouchers.map((v) => {
-      const convertedTokenValue =
-        totalTokenValue > 0 ? (totalPrice / totalTokenValue).toFixed(6) : "0";
-      return {
-        id: `VOUCHER-${v.id}`,
-        label: `${v.productName}`,
-        bankTokenSymbol: v.bankTokenSymbol,
-        amount: `${convertedTokenValue} ${v.bankTokenSymbol}`, 
-        balance: `${v.balance.toFixed(2)} ${v.bankTokenSymbol}`,
-        insufficientBalance: v.balance < totalPrice,
-        type: "VOUCHER",
-        voucherId: v.id,
-      };
-    });
+    // 3-2. 바우처 결제
+    const voucherOptions = vouchers
+      .filter((v) => availableCurrencies.includes(v.bankTokenSymbol)) // 사용 가능한 currency만 필터링
+      .map((v) => {
+        const convertedTokenValue =
+          totalTokenValue > 0 ? (totalPrice / totalTokenValue).toFixed(6) : "0";
+        return {
+          id: `VOUCHER-${v.id}`,
+          label: `${v.productName}`,
+          bankTokenSymbol: v.bankTokenSymbol,
+          amount: `${convertedTokenValue} ${v.bankTokenSymbol}`, // amount에 환산된 금액 표시
+          balance: `${v.balance.toFixed(2)} ${v.bankTokenSymbol}`, // balance에 바우처 잔액 표시
+          insufficientBalance: v.balance < totalPrice,
+          type: "VOUCHER",
+          voucherId: v.id,
+        };
+      });
 
     setPaymentOptions([...coinOptions, ...voucherOptions]);
-  }, [balances, tickerData, totalPrice, vouchers, totalTokenValue]);
+  }, [balances, tickerData, totalPrice, vouchers, totalTokenValue, availableCurrencies]);
+
+
   // 6. 결제 수단 선택 핸들러
   const handlePaymentSelect = (method: string) => {
     setSelectedPayment(method);
@@ -232,7 +266,7 @@ export default function SelectPaymentPage() {
         paymentType: "VOUCHER",
         currency: selectedOption.bankTokenSymbol,
         voucherSubscribeId: selectedOption.voucherId,
-        exchangeRate: totalTokenValue, 
+        exchangeRate: totalTokenValue,
       };
     } else {
       alert("유효한 결제 방식이 아닙니다.");
