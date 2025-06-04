@@ -44,8 +44,6 @@ export default function SplashPage() {
             textVisible ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-4'
           }`}
         >
-          <span>스마트한 디지털 금융의 시작,</span>
-          <span className="text-[#1C355E] font-semibold ml-1">Crepe</span>
         </div>
       </div>
     </div>

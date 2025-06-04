@@ -8,6 +8,7 @@ import { ApiError } from "@/error/ApiError";
 interface ShopInfoDTO {
   storeId: number;
   storeName: string;
+  storeNickname: string;
   storeAddress: string;
   likeCount: number;
   storeStatus: "OPEN" | "CLOSED";
@@ -93,7 +94,7 @@ function ShopInfo() {
 
       {/* 가게 이름 */}
       <h2 className="text-3xl font-bold tracking-tight">
-        {shopInfo.storeName}
+        {shopInfo.storeNickname}
       </h2>
 
       {/* 가게 주소 */}
