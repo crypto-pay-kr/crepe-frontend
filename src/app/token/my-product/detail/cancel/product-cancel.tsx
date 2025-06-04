@@ -25,7 +25,7 @@ export default function TokenCancelPage() {
   const { fetchBankTokens } = useBankStore.getState();
   const { subscribeId } = useParams<{ subscribeId: string }>();
   const location = useLocation();
-  const { productState, tokenInfoState } = location.state || {};
+  const { products,productState, tokenInfoState } = (location.state as any) || {};
   const [terminatePreview, setTerminatePreview] = useState<TerminatePreview | null>(null);
 
 
@@ -70,6 +70,7 @@ export default function TokenCancelPage() {
       toast("상품이 해지되었습니다.");
       navigate(`/token/product/detail/${subscribeId}`, {
         state: {
+          products,
           productState,
           tokenInfoState,
         },
@@ -233,7 +234,6 @@ export default function TokenCancelPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div className="mr-3">
-                {/*<BankLogo bank={tokenInfoState.currency as BankLogoProps["bank"]} />*/}
               </div>
               <p className="text-xl font-semibold">{tokenInfoState.bankTokenName}</p>
             </div>
