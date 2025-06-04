@@ -19,8 +19,8 @@ interface SubscribeVoucherDto {
   expiredDate: string;
   storeType: string;
   bankTokenSymbol: string;
+  tokenBalance?: number;
 }
-
 interface PortfolioData {
   currency: string;
   amount: number;
@@ -82,8 +82,7 @@ export default function SelectPaymentPage() {
     const fetchTokenInfo = async () => {
       try {
         const voucherList = await getMyVouchers();
-        setVouchers(voucherList);
-
+        const updatedVouchers: SubscribeVoucherDto[] = [];
         const portfolioList: PortfolioData[] = [];
 
         for (const voucher of voucherList) {
@@ -105,6 +104,11 @@ export default function SelectPaymentPage() {
                   }
                 });
               }
+              // tokenBalance 값 추가
+              updatedVouchers.push({
+                ...voucher,
+                tokenBalance: tokenInfo.tokenBalance,
+              });
             } catch (err) {
               console.error(`토큰 정보 조회 실패 (${voucher.bankTokenSymbol}):`, err);
               if (err instanceof ApiError) {
@@ -116,6 +120,7 @@ export default function SelectPaymentPage() {
           }
         }
 
+        setVouchers(updatedVouchers);
         setPortfolioData(portfolioList);
       } catch (err) {
         console.error("바우처 불러오기 실패:", err);
@@ -181,17 +186,25 @@ export default function SelectPaymentPage() {
     const voucherOptions = vouchers
       .filter((v) => availableCurrencies.includes(v.bankTokenSymbol)) // 사용 가능한 currency만 필터링
       .map((v) => {
-        const convertedTokenValue =
-          totalTokenValue > 0 ? (totalPrice / totalTokenValue).toFixed(6) : "0";
+        let convertedTokenValue = "0";
+        let exchangeRate = 0;
+
+        if (totalTokenValue > 0 && v.tokenBalance) {
+          exchangeRate = v.tokenBalance / totalTokenValue;
+          const adjustedValue = totalPrice * exchangeRate; ;
+          convertedTokenValue = `${adjustedValue.toFixed(2)} ${v.bankTokenSymbol}`;
+        }
+
         return {
           id: `VOUCHER-${v.id}`,
           label: `${v.productName}`,
           bankTokenSymbol: v.bankTokenSymbol,
-          amount: `${convertedTokenValue} ${v.bankTokenSymbol}`, // amount에 환산된 금액 표시
+          amount: convertedTokenValue, // amount에 환산된 금액 표시
           balance: `${v.balance.toFixed(2)} ${v.bankTokenSymbol}`, // balance에 바우처 잔액 표시
-          insufficientBalance: v.balance < totalPrice / totalTokenValue,
+          insufficientBalance: v.balance < totalPrice, // 잔액 부족 여부 계산
           type: "VOUCHER",
           voucherId: v.id,
+          exchangeRate,
         };
       });
 
@@ -266,7 +279,7 @@ export default function SelectPaymentPage() {
         paymentType: "VOUCHER",
         currency: selectedOption.bankTokenSymbol,
         voucherSubscribeId: selectedOption.voucherId,
-        exchangeRate: totalTokenValue,
+        exchangeRate:selectedOption.exchangeRate, 
       };
     } else {
       alert("유효한 결제 방식이 아닙니다.");
