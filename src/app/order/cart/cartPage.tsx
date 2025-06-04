@@ -58,7 +58,7 @@ export default function CartPage() {
           {/* 상점 정보 카드 */}
           <div className="text-center px-4 mt-4 mb-5">
             <h2 className="text-3xl font-bold tracking-tight">
-              {storeData?.storeName}
+              {storeData?.storeNickname}
             </h2>
 
             <p className="text-base tracking-tight mt-2 text-gray-700">

@@ -41,6 +41,7 @@ function MallDetailPage() {
                     storeName: data.storeName,
                     storeAddress: data.storeAddress,
                     storeImageUrl: data.storeImageUrl,
+                    storeNickname: data.storeNickname,
                     coinList: data.coinList,
                     menuList: data.menuList,
                 };
@@ -151,7 +152,7 @@ function MallDetailPage() {
     // 6) 렌더링
     return (
         <div className="flex flex-col h-full bg-gray-50 relative">
-            <Header title={storeDetail.storeName} isStore={true} />
+            <Header title={storeDetail.storeNickname} isStore={true} />
 
             <main className={`flex-1 overflow-auto transition-all duration-300 ${
                 cartItems.length > 0 ? 'pb-48' : 'pb-16'
@@ -161,11 +162,11 @@ function MallDetailPage() {
                     <div className="relative">
                         <img
                             src={storeDetail.storeImageUrl || "/store-image.png"}
-                            alt={`${storeDetail.storeName} 가게사진`}
+                            alt={`${storeDetail.storeNickname} 가게사진`}
                             className="w-full h-72 object-cover"
                         />
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
-                            <h2 className="text-white text-2xl font-bold">{storeDetail.storeName}</h2>
+                            <h2 className="text-white text-2xl font-bold">{storeDetail.storeNickname}</h2>
                         </div>
                     </div>
 
