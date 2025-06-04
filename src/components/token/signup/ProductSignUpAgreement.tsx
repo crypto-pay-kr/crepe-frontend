@@ -3,13 +3,20 @@ import React from "react";
 interface ProductSignUpAgreementProps {
   label: string;
   checked: boolean;
-  onToggle: () => void;
+  onToggle: () => void; // 체크박스 클릭 이벤트
+  onClick?: () => void; // 화살표 클릭 이벤트 (모달 열기 등)
 }
 
-export default function ProductSignUpAgreement({ label, checked, onToggle }: ProductSignUpAgreementProps) {
+export default function ProductSignUpAgreement({
+  label,
+  checked,
+  onToggle,
+  onClick,
+}: ProductSignUpAgreementProps) {
   return (
-    <div onClick={onToggle} className="flex items-center justify-between p-3 border rounded-md cursor-pointer">
-      <div className="flex items-center">
+    <div className="flex items-center justify-between p-3 border rounded-md cursor-pointer">
+      {/* 체크박스 및 텍스트 */}
+      <div className="flex items-center" onClick={onToggle}>
         <div
           className={`w-6 h-6 rounded-full flex items-center justify-center mr-3 ${
             checked ? "bg-[#4B5EED]" : "border border-gray-300"
@@ -35,7 +42,9 @@ export default function ProductSignUpAgreement({ label, checked, onToggle }: Pro
         </div>
         <div>{label}</div>
       </div>
-      <div>
+
+      {/* 화살표 아이콘 */}
+      <div onClick={(e) => { e.stopPropagation(); onClick?.(); }}>
         <svg
           width="24"
           height="24"
