@@ -55,7 +55,7 @@ export default function TokenGroupDetailPage() {
     }, 0);
 
     setTokenCapital(totalCapital);
-    const pricePerToken = calculateTokenPrice(totalCapital, tokenInfo.totalSupply ?? 0);
+    const pricePerToken = calculateTokenPrice(totalCapital, tokenInfo.tokenBalance ?? 0);
     setTokenPrice(pricePerToken);
   }, [tokenInfo, tickerData]);
 
