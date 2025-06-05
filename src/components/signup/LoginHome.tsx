@@ -111,14 +111,14 @@ export default function LoginHome({ onSignup, onStoreSignup, buttonClassName }: 
               placeholder="아이디 (이메일)"
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none  "
             />
             <input
               type="password"
               placeholder="비밀번호"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none  "
             />
           </div>
         </LoginForm>

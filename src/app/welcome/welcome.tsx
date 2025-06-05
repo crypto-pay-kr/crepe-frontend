@@ -96,7 +96,7 @@ export default function WelcomePage() {
       </div>
 
       {/* 하단 버튼 및 텍스트 - 애니메이션 추가 */}
-      <div className="w-full mt-15 mb-10 px-5 relative z-10">
+      <div className="w-full mt-15 mb-1 px-5 relative z-10">
         <div className="flex flex-col space-y-4 animate-fade-in-up" style={{animationDelay: '1s'}}>
           <div className="text-center text-base bg-white/60 backdrop-blur-sm rounded-xl p-1  hover:bg-white/80 hover:border-gray-200/70 transition-all duration-300">
             <span className="text-gray-600">이미 가입하셨나요? </span>
