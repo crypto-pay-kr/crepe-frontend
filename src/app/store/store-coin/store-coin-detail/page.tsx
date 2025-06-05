@@ -260,7 +260,7 @@ const getDisplayAmount = (item: PaymentHistory): number => {
               </div>
             </div>
           </div>
-          
+
           {/* 버튼 영역 */}
           <div className="mb-4 w-full sm:mb-5 md:mb-6">
             <div className="flex gap-2 sm:gap-3">
@@ -327,14 +327,15 @@ const getDisplayAmount = (item: PaymentHistory): number => {
               }}
             >
               <span className="text-base font-medium text-white">
-                {{
-                  ACTIVE: '계좌 변경',
-                  REGISTERING: '계좌가 등록 중 입니다.',
-                  UNREGISTERED: '계좌가 등록 해제 중 입니다...',
-                  UNREGISTERED_AND_REGISTERING: '계좌 등록 해제 후 변경 중 입니다...',
-                  NOT_REGISTERED: '출금계좌 등록하기',
-                  REJECTED: '거절 되었습니다 다시 등록하기',
-                  HOLD: '계좌가 정지당했습니다',
+             {{
+               ACTIVE: '계좌 변경',
+               REGISTERING: '계좌가 등록 중 입니다.',
+               UNREGISTERED: '계좌가 등록 해제 중 입니다...',
+               UNREGISTERED_AND_REGISTERING: '계좌 등록 해제 후 변경 중 입니다...',
+               NOT_REGISTERED: '출금계좌 등록하기',
+               REJECTED: '거절 되었습니다 다시 등록하기',
+               HOLD: '계좌가 정지당했습니다',
+             }[addressStatus as string] || ''}
               </span>
             </div>
           </div>
@@ -360,14 +361,14 @@ const getDisplayAmount = (item: PaymentHistory): number => {
           <div className="mb-0 space-y-4 pb-16 text-sm sm:space-y-5 sm:pb-10 sm:text-base md:space-y-6 md:text-lg lg:text-xl">
             {data?.pages.map((page, pageIndex) =>
               page.content.map((item: PaymentHistory, idx: number) => {
+                console.log('거래내역 item:', item)
 
-                console.log('거래내역 item:', item);
-               
-                const rate = tickerData[`KRW-${symbol}`]?.trade_price ?? 0;
-                const displayAmount = getDisplayAmount(item);
-                const krw = Math.floor(displayAmount * rate).toLocaleString();
-                const showAfterBalance = item.status === 'ACCEPTED';
-                const isDeposit = getTransactionDirection(item, isUser) === 'deposit';
+                const rate = tickerData[`KRW-${symbol}`]?.trade_price ?? 0
+                const displayAmount = getDisplayAmount(item)
+                const krw = Math.floor(displayAmount * rate).toLocaleString()
+                const showAfterBalance = item.status === 'ACCEPTED'
+                const isDeposit =
+                  getTransactionDirection(item, isUser) === 'deposit'
 
                 return (
                   <div
@@ -383,12 +384,12 @@ const getDisplayAmount = (item: PaymentHistory): number => {
                       isDeposit={isDeposit}
                       showAfterBalance={showAfterBalance}
                       originalAmount={item.amount}
-                      transactionType={item.type} 
-                  />
-                </div>
-              );
-            })
-          )}
+                      transactionType={item.type}
+                    />
+                  </div>
+                )
+              })
+            )}
             <div
               ref={observerElemRef}
               className="mt-4 flex h-10 items-center justify-center"

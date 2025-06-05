@@ -63,7 +63,7 @@ export default function TransactionItem({
             <span className={`text-base font-bold ${
               isDeposit ? "text-indigo-800" : "text-red-500"
 
-            } mb-2`}>{formattedAmount} {rawSymbol}</span>
+            } mb-2`}>{formattedAmount} {symbol}</span>
 
           </p>
           <p className="text-sm text-gray-600">= {Number(krw).toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KRW</p>
