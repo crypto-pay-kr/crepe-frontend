@@ -6,40 +6,40 @@ interface TransactionItemProps {
   krw: string;
   isDeposit: boolean;
   showAfterBalance: boolean;
+  originalAmount: number;
+  transactionType: string; // 거래 타입 추가
 }
 
 export default function TransactionItem({
-                                          date,
-                                          type,
-                                          balance,
-                                          amount,
-                                          krw,
-                                          isDeposit,
-                                          showAfterBalance,
-                                        }: TransactionItemProps) {
+  date,
+  type,
+  balance,
+  amount,
+  krw,
+  isDeposit,
+  showAfterBalance,
+  originalAmount,
+  transactionType,
+}: TransactionItemProps) {
 
+  // 금액에서 심볼 추출
+  const [amountValue, symbol] = amount.split(' ');
+  const displayAmount = parseFloat(amountValue);
+  
+  // 입금/출금에 따른 +/- 기호 결정
+  const formattedAmount = `${isDeposit ? '+' : '-'}${displayAmount.toFixed(2)} ${symbol}`;
 
-  const [rawAmount, rawSymbol] = amount.split(" ");
-  const parsed = parseFloat(rawAmount);
-  // const bankSymbol = BANK_SYMBOL_MAP[rawSymbol?.toUpperCase()] ?? rawSymbol;
-
-
-  const formattedAmount = isNaN(parsed)
-    ? amount
-    : `${parsed > 0 ? "+" : ""}${parsed.toFixed(2)}`;
-
-
-
+  // 잔액 포맷팅
   const [balanceValue, rawBalanceSymbol] = balance.split(" ");
   const parsedBalance = parseFloat(balanceValue);
   const balanceSymbol = rawBalanceSymbol?.toUpperCase() ?? rawBalanceSymbol;
-
-
 
   const formattedBalance = isNaN(parsedBalance)
     ? balance
     : `${parsedBalance.toFixed(2)} ${balanceSymbol}`;
 
+  // 디버깅용 로그
+  console.log(`거래: ${transactionType}, 원본금액: ${originalAmount}, 표시방향: ${isDeposit ? '입금' : '출금'}, 표시금액: ${formattedAmount}`);
 
   return (
     <div className="space-y-2 border-b border-gray-300 pb-4">
@@ -59,9 +59,11 @@ export default function TransactionItem({
         </div>
         <div className="text-right">
           <p>
-            <span  className={`text-base font-bold ${
+            <span className={`text-base font-bold ${
               isDeposit ? "text-indigo-800" : "text-red-500"
-            } mb-2`}>{formattedAmount}</span>
+            } mb-2`}>
+              {formattedAmount}
+            </span>
           </p>
           <p className="text-sm text-gray-600">= {krw}</p>
         </div>
