@@ -11,7 +11,7 @@ export function OrderItem({ order }: OrderItemProps) {
   const navigate = useNavigate();
   const {
     id,
-    status,   // WAITING | PAID | CANCELLED | COMPLETED
+    status,   
     reason,   // 거절 메시지 
     storeName,
     orderItems,
@@ -29,7 +29,7 @@ export function OrderItem({ order }: OrderItemProps) {
         return "주문 수락";
       case "COMPLETED":
         return "준비 완료";
-      case "CANCELLED":
+      case "REFUSED":
         // 거절 사유 표시
         return `주문 거절${reason ? " - " + reason : ""}`;
       default:
@@ -44,7 +44,7 @@ export function OrderItem({ order }: OrderItemProps) {
       case "PAID":
       case "COMPLETED":
         return "bg-green-500";
-      case "CANCELLED":
+      case "REFUSED":
         return "bg-red-500";
       default:
         return "bg-gray-400";

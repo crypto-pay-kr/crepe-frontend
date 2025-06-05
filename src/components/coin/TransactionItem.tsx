@@ -6,40 +6,41 @@ interface TransactionItemProps {
   krw: number|string;
   isDeposit: boolean;
   showAfterBalance: boolean;
+  originalAmount: number;
+  transactionType: string;
 }
 
 export default function TransactionItem({
-                                          date,
-                                          type,
-                                          balance,
-                                          amount,
-                                          krw,
-                                          isDeposit,
-                                          showAfterBalance,
-                                        }: TransactionItemProps) {
+  date,
+  type,
+  balance,
+  amount,
+  krw,
+  isDeposit,
+  showAfterBalance,
+  originalAmount,
+  transactionType,
+}: TransactionItemProps) {
 
 
-  const [rawAmount, rawSymbol] = amount.split(" ");
-  const parsed = parseFloat(rawAmount);
-  const formattedAmount = isNaN(parsed)
-    ? Number(amount).toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-    : `${parsed > 0 ? "+" : parsed < 0 ? "-" : ""}${Math.abs(parsed).toLocaleString('ko-KR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    })}`;
+  // 금액에서 심볼 추출
+  const [amountValue, symbol] = amount.split(' ');
+  const displayAmount = parseFloat(amountValue);
+  
+  // 입금/출금에 따른 +/- 기호 결정
+  const formattedAmount = `${isDeposit ? '+' : '-'}${displayAmount.toFixed(2)} ${symbol}`;
 
-
-
+  // 잔액 포맷팅
   const [balanceValue, rawBalanceSymbol] = balance.split(" ");
   const parsedBalance = parseFloat(balanceValue);
   const balanceSymbol = rawBalanceSymbol?.toUpperCase() ?? rawBalanceSymbol;
-
-
 
   const formattedBalance = isNaN(parsedBalance)
     ? Number(balance).toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     : `${Number(parsedBalance).toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${balanceSymbol}`;
 
+  // 디버깅용 로그
+  console.log(`거래: ${transactionType}, 원본금액: ${originalAmount}, 표시방향: ${isDeposit ? '입금' : '출금'}, 표시금액: ${formattedAmount}`);
 
   return (
     <div className="space-y-2 border-b border-gray-300 pb-4">
@@ -59,9 +60,11 @@ export default function TransactionItem({
         </div>
         <div className="text-right">
           <p>
-            <span  className={`text-base font-bold ${
+            <span className={`text-base font-bold ${
               isDeposit ? "text-indigo-800" : "text-red-500"
+
             } mb-2`}>{formattedAmount} {rawSymbol}</span>
+
           </p>
           <p className="text-sm text-gray-600">= {Number(krw).toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KRW</p>
         </div>

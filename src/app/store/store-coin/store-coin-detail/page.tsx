@@ -13,16 +13,16 @@ import {
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useCoinStore } from '@/constants/useCoin';
 import { useTickerData } from '@/hooks/useTickerData'
+
+// 수정된 PaymentHistory 인터페이스 - Backend enum과 일치
 export interface PaymentHistory {
-  status: 'ACCEPTED' | 'PENDING' | 'FAILED';
+  status: 'ACCEPTED' | 'PENDING' | 'FAILED' | 'REFUNDED';
   amount: number;
   transferredAt: string;
   afterBalance: number;
-  type: string;
-  name: string;
-
+  type: 'DEPOSIT' | 'WITHDRAW' | 'INTEREST' | 'SETTLEMENT' | 'REFUND' | 'PAY' | 'CANCEL' | 'TRANSFER' | 'EXCHANGE';
+  name?: string; // optional로 변경
 }
-
 
 export default function CoinDetailPage() {
   const styleSheet = document.createElement("style");
@@ -43,6 +43,125 @@ export default function CoinDetailPage() {
   const coinList = useCoinStore(state => state.coins);
   const coinMeta = coinList.find(c => c.currency === symbol);
   const livePrice = tickerData[`KRW-${symbol}`]?.trade_price ?? 0;
+
+  const getTransactionDirection = (item: PaymentHistory, isUser: boolean): 'deposit' | 'withdraw' => {
+  switch (item.type) {
+    case 'DEPOSIT':
+      return 'deposit'; // 입금 (양쪽 동일)
+      
+    case 'WITHDRAW':
+      return 'withdraw'; // 출금 (양쪽 동일)
+      
+    case 'PAY':
+      // 결제: 유저는 돈이 나가고, 스토어는 돈이 들어옴
+      return isUser ? 'withdraw' : 'deposit';
+      
+    case 'REFUND':
+      return 'deposit'; // 환불 = 입금 (양쪽 동일 - 돈 돌려받음)
+      
+    case 'CANCEL':
+      // 주문 취소: 유저는 돈을 돌려받고, 스토어는 돈이 나감
+      return isUser ? 'deposit' : 'withdraw';
+      
+    case 'INTEREST':
+      return 'deposit'; // 이자 = 입금 (양쪽 동일)
+      
+    case 'EXCHANGE':
+      return item.amount > 0 ? 'deposit' : 'withdraw'; // 교환은 금액으로 판별
+      
+    case 'SETTLEMENT':
+      return item.amount > 0 ? 'deposit' : 'withdraw'; // 정산은 금액으로 판별
+      
+    case 'TRANSFER':
+      return item.amount > 0 ? 'deposit' : 'withdraw'; // 송금도 금액으로 판별
+      
+    default:
+      return item.amount > 0 ? 'deposit' : 'withdraw'; // 기본값은 금액으로 판별
+  }
+};
+
+const getTransactionTypeDisplay = (item: PaymentHistory, isUser: boolean): string => {
+  console.log('Processing transaction:', item.type, item.status, item.amount, 'isUser:', isUser);
+  
+  switch (item.type) {
+    case 'DEPOSIT':
+      return item.status === 'ACCEPTED' ? '입금 완료' : '입금 대기중';
+      
+    case 'WITHDRAW':
+      return item.status === 'ACCEPTED' ? '출금 완료' : '출금 대기중';
+      
+    case 'PAY':
+      if (isUser) {
+        // 유저 관점: 결제
+        switch (item.status) {
+          case 'ACCEPTED': return '결제 완료';
+          case 'PENDING': return '결제 대기중';
+          case 'FAILED': return '결제 실패';
+          case 'REFUNDED': return '결제 환불';
+          default: return '결제';
+        }
+      } else {
+        // 스토어 관점: 매출
+        switch (item.status) {
+          case 'ACCEPTED': return '매출 입금';
+          case 'PENDING': return '매출 대기중';
+          case 'FAILED': return '매출 실패';
+          case 'REFUNDED': return '매출 환불';
+          default: return '매출';
+        }
+      }
+      
+    case 'REFUND':
+      return '환불 완료';
+      
+    case 'SETTLEMENT':
+      return item.status === 'ACCEPTED' ? '정산 완료' : '정산 대기중';
+      
+    case 'INTEREST':
+      return '이자 지급';
+      
+    case 'CANCEL':
+      if (isUser) {
+        // 유저 관점: 주문 취소 (돈 돌려받음)
+        switch (item.status) {
+          case 'ACCEPTED': return '주문 취소 완료';
+          case 'PENDING': return '주문 취소 대기중';
+          case 'FAILED': return '주문 취소 실패';
+          default: return '주문 취소';
+        }
+      } else {
+        // 스토어 관점: 주문 취소 (환불 처리)
+        switch (item.status) {
+          case 'ACCEPTED': return '주문 취소 환불';
+          case 'PENDING': return '주문 취소 환불 대기중';
+          case 'FAILED': return '주문 취소 환불 실패';
+          default: return '주문 취소 환불';
+        }
+      }
+      
+    case 'EXCHANGE':
+      return item.amount > 0 ? '토큰 매도' : '토큰 매수';
+      
+    case 'TRANSFER':
+      if (item.name) {
+        return item.amount > 0 
+          ? `${item.name}님에게서 받은 송금`
+          : `${item.name}님에게 송금 완료`;
+      }
+      return item.amount > 0 ? '송금 받음' : '송금 완료';
+      
+    default:
+      console.warn('Unknown transaction type:', item.type);
+      return '알 수 없는 거래';
+  }
+};
+
+// 표시할 금액 계산 (항상 양수로 표시하되, 방향은 별도 처리)
+const getDisplayAmount = (item: PaymentHistory): number => {
+  return Math.abs(item.amount);
+};
+
+
   // 입금 주소가 유효한지 확인
   useEffect(() => {
     if (symbol) {
@@ -50,7 +169,6 @@ export default function CoinDetailPage() {
         .then((res) => {
           setAddressStatus(res.addressRegistryStatus);
           setAddressInfo({ address: res.address, tag: res.tag, addressStatus: res.addressRegistryStatus });
-
         })
         .catch((err) => {
           console.error("등록된 주소없음", err);
@@ -59,8 +177,6 @@ export default function CoinDetailPage() {
         });
     }
   }, [symbol]);
-
-
 
   // 코인 잔액 조회
   useEffect(() => {
@@ -77,7 +193,6 @@ export default function CoinDetailPage() {
 
     fetchBalance();
   }, [symbol]);
-
 
   const observerElemRef = useRef<HTMLDivElement | null>(null);
 
@@ -106,9 +221,6 @@ export default function CoinDetailPage() {
 
     return () => observer.disconnect();
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
-
-
-
 
   return (
     <div className="relative flex h-full flex-col bg-gray-50">
@@ -148,6 +260,7 @@ export default function CoinDetailPage() {
               </div>
             </div>
           </div>
+          
           {/* 버튼 영역 */}
           <div className="mb-4 w-full sm:mb-5 md:mb-6">
             <div className="flex gap-2 sm:gap-3">
@@ -222,7 +335,6 @@ export default function CoinDetailPage() {
                   NOT_REGISTERED: '출금계좌 등록하기',
                   REJECTED: '거절 되었습니다 다시 등록하기',
                   HOLD: '계좌가 정지당했습니다',
-                }[addressStatus as string] || ''}
               </span>
             </div>
           </div>
@@ -244,13 +356,18 @@ export default function CoinDetailPage() {
             </h3>
           </div>
 
-          {/* 거래 내역 */}
+          {/* 거래 내역 - +/- 표시가 제대로 되도록 수정 */}
           <div className="mb-0 space-y-4 pb-16 text-sm sm:space-y-5 sm:pb-10 sm:text-base md:space-y-6 md:text-lg lg:text-xl">
             {data?.pages.map((page, pageIndex) =>
               page.content.map((item: PaymentHistory, idx: number) => {
-                const rate = tickerData[`KRW-${symbol}`]?.trade_price ?? 0
-                const krw = (item.amount * rate)
-                const showAfterBalance = item.status === 'ACCEPTED'
+
+                console.log('거래내역 item:', item);
+               
+                const rate = tickerData[`KRW-${symbol}`]?.trade_price ?? 0;
+                const displayAmount = getDisplayAmount(item);
+                const krw = Math.floor(displayAmount * rate).toLocaleString();
+                const showAfterBalance = item.status === 'ACCEPTED';
+                const isDeposit = getTransactionDirection(item, isUser) === 'deposit';
 
                 return (
                   <div
@@ -259,51 +376,19 @@ export default function CoinDetailPage() {
                   >
                     <TransactionItem
                       date={new Date(item.transferredAt).toLocaleString()}
-                      type={
-                        item.type === 'DEPOSIT'
-                          ? item.status === 'ACCEPTED'
-                            ? '입금 완료'
-                            : '입금 대기중'
-                          : item.type === 'WITHDRAW'
-                            ? item.status === 'ACCEPTED'
-                              ? '출금 완료'
-                              : '출금 대기중'
-                            : item.type === 'PAY'
-                              ? item.status === 'ACCEPTED'
-                                ? '결제 완료'
-                                : item.status === 'PENDING'
-                                  ? '정산 대기중'
-                                  : item.status === 'FAILED'
-                                    ? '결제 취소'
-                                    : '환불 완료'
-                              : item.type === 'REFUND'
-                                ? '환불 완료'
-                                : item.type === 'EXCHANGE'
-                                  ? item.amount > 0
-                                    ? '환전 입금 완료'
-                                    : '환전 출금 완료'
-                                  : item.type === 'TRANSFER'
-                                    ? item.amount > 0
-                                      ? `${item.name}님에게서 받은 송금`
-                                      : `${item.name}님에게 송금 완료`
-                                    : '알 수 없음'
-                      }
+                      type={getTransactionTypeDisplay(item, isUser)}
                       balance={`${item.afterBalance ?? '-'} ${symbol}`}
-                      amount={item.amount.toFixed(2) + ' ' + symbol}
-                      krw={krw}
-                      isDeposit={
-                        (item.type === 'DEPOSIT' && item.amount < 0) ||
-                        (item.type === 'EXCHANGE' && item.amount < 0) ||
-                        (item.type === 'PAY' && item.amount < 0) ||
-                        (item.type === 'WITHDRAW' && item.amount < 0) ||
-                        (item.type === 'TRANSFER' && item.amount < 0)
-                      }
+                      amount={`${displayAmount.toFixed(2)} ${symbol}`}
+                      krw={`${krw} KRW`}
+                      isDeposit={isDeposit}
                       showAfterBalance={showAfterBalance}
-                    />
-                  </div>
-                )
-              })
-            )}
+                      originalAmount={item.amount}
+                      transactionType={item.type} 
+                  />
+                </div>
+              );
+            })
+          )}
             <div
               ref={observerElemRef}
               className="mt-4 flex h-10 items-center justify-center"

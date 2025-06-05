@@ -17,9 +17,10 @@ export default function SimpleTransactionItem({
                                               }: SimpleTransactionItemProps) {
   const amountNum = parseFloat(amount);
   const isCancel = eventType === "TERMINATION";
-  const isPayment = eventType === "DEPOSIT";
-  const sign = isCancel ? "-" : isPayment ? "+" : "";
-  const formattedAmount = `${sign}${amountNum.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`
+  const isPayment = eventType === "PAYMENT";
+  const isDeposit = eventType === "DEPOSIT";
+  const sign = isCancel ?"+": isPayment ? "-" : isDeposit  ? "+" : "-";
+  const formattedAmount = `${sign}${(amountNum).toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`
   const formattedDate = new Date(date).toLocaleString('ko-KR', {
     timeZone: 'Asia/Seoul',
     year: 'numeric',
@@ -44,7 +45,7 @@ export default function SimpleTransactionItem({
       <div className="flex justifty-between justify-between">
         <p
           className={`text-base font-semibold ${
-            isCancel ?  'text-indigo-800':'text-red-500'
+            isCancel ? 'text-red-500' : isDeposit ? 'text-indigo-800' : 'text-red-500'
           }`}
         >
           {EVENT_TYPE_KO[eventType] ?? eventType}
@@ -52,7 +53,7 @@ export default function SimpleTransactionItem({
 
         <p
           className={`text-base font-bold ${
-            isCancel ?  'text-indigo-800':'text-red-500'
+            isCancel ? 'text-red-500' : isDeposit ? 'text-indigo-800' : 'text-red-500'
           }`}
         >
           {formattedAmount}

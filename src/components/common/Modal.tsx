@@ -18,7 +18,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps):
         <div className="flex justify-center">
           <button 
             onClick={onClose} 
-            className="bg-[#0a2e65] text-white px-8 py-2 rounded w-full"
+            className="bg-[#4B5EED] text-white px-8 py-2 rounded w-full"
           >
             닫기
           </button>

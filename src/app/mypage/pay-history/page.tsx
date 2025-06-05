@@ -33,7 +33,7 @@ export default function MyPaymentHistoryPage() {
     const styles: { [key: string]: string } = {
       PENDING: 'bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 border border-amber-200',
       REFUND: 'bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border border-red-200',
-      PAID: 'bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border border-emerald-200'
+      APPROVED: 'bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border border-emerald-200',
     };
     return styles[payType] || 'bg-gray-50 text-gray-600 border border-gray-200';
   };
@@ -42,7 +42,7 @@ export default function MyPaymentHistoryPage() {
     const texts: { [key: string]: string } = {
       PENDING: '수락 대기',
       REFUND: '환불 완료',
-      PAID: '결제 완료'
+      APPROVED: '결제 완료',
     };
     return texts[payType] || payType;
   };
