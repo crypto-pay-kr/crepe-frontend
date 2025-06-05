@@ -28,7 +28,7 @@ export default function TransactionItem({
   const displayAmount = parseFloat(amountValue);
   
   // 입금/출금에 따른 +/- 기호 결정
-  const formattedAmount = `${isDeposit ? '+' : '-'}${displayAmount.toFixed(2)} ${symbol}`;
+  const formattedAmount = `${isDeposit ? '+' : '-'}${displayAmount.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${symbol}`;
 
   // 잔액 포맷팅
   const [balanceValue, rawBalanceSymbol] = balance.split(" ");
