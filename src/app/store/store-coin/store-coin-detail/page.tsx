@@ -20,7 +20,7 @@ export interface PaymentHistory {
   amount: number;
   transferredAt: string;
   afterBalance: number;
-  type: 'DEPOSIT' | 'WITHDRAW' | 'INTEREST' | 'SETTLEMENT' | 'REFUND' | 'PAY' | 'CANCEL' | 'TRANSFER';
+  type: 'DEPOSIT' | 'WITHDRAW' | 'INTEREST' | 'SETTLEMENT' | 'REFUND' | 'PAY' | 'CANCEL' | 'TRANSFER' | 'EXCHANGE';
   name?: string; // optional로 변경
 }
 
@@ -63,7 +63,8 @@ export default function CoinDetailPage() {
       
     case 'INTEREST':
       return 'deposit'; // 이자 = 입금 (돈 받음)
-      
+    case 'EXCHANGE':
+      return item.amount > 0 ? 'deposit' : 'withdraw'; // 환전은 금액으로 판별
     case 'SETTLEMENT':
       return item.amount > 0 ? 'deposit' : 'withdraw'; // 정산은 금액으로 판별
       
@@ -104,6 +105,8 @@ const getTransactionTypeDisplay = (item: PaymentHistory): string => {
       
     case 'CANCEL':
       return '주문 취소';
+    case 'EXCHANGE':
+      return item.amount > 0 ? '토큰 매도' : '토큰 매수';
       
     case 'TRANSFER':
       if (item.name) {
@@ -124,26 +127,6 @@ const getDisplayAmount = (item: PaymentHistory): number => {
   return Math.abs(item.amount);
 };
 
-// 색상 결정 (거래 상태와 방향 고려)
-const getTransactionDisplayColor = (item: PaymentHistory): 'blue' | 'green' | 'red' => {
-  // 대기중인 경우
-  if (item.status === 'PENDING') {
-    return 'green';
-  }
-  
-  // 실패한 경우
-  if (item.status === 'FAILED') {
-    return 'red';
-  }
-  
-  // 성공한 거래의 경우 거래 방향으로 판단
-  if (item.status === 'ACCEPTED' || item.status === 'REFUNDED') {
-    const direction = getTransactionDirection(item);
-    return direction === 'deposit' ? 'blue' : 'red';
-  }
-  
-  return 'red';
-};
 
   // 입금 주소가 유효한지 확인
   useEffect(() => {
