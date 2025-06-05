@@ -20,7 +20,7 @@ export interface PaymentHistory {
   amount: number;
   transferredAt: string;
   afterBalance: number;
-  type: 'DEPOSIT' | 'WITHDRAW' | 'INTEREST' | 'SETTLEMENT' | 'REFUND' | 'PAY' | 'CANCEL' | 'TRANSFER' | 'EXCHANGE';
+  type: 'DEPOSIT' | 'WITHDRAW' | 'INTEREST' | 'SETTLEMENT' | 'REFUND' | 'PAY' | 'CANCEL' | 'TRANSFER' | 'EXCHANGE'|'SUBSCRIBE';
   name?: string; // optional로 변경
 }
 
@@ -29,7 +29,7 @@ export default function CoinDetailPage() {
   document.head.appendChild(styleSheet);
   const { symbol } = useParams()
   const location = useLocation()
-  const isUser = location.state?.isUser ?? false
+  const isUser = sessionStorage.getItem("userRole") === "USER"
   const tickerData = useTickerData();
   const [addressStatus, setAddressStatus] = useState<'ACTIVE' | 'REGISTERING' | 'NOT_REGISTERED' |'UNREGISTERED'|'UNREGISTERED_AND_REGISTERING'|'REJECTED'|'HOLD'| null>(null);
   const [showModal, setShowModal] = useState(false)
@@ -57,7 +57,7 @@ export default function CoinDetailPage() {
       return isUser ? 'withdraw' : 'deposit';
       
     case 'REFUND':
-      return 'deposit'; // 환불 = 입금 (양쪽 동일 - 돈 돌려받음)
+      return isUser? 'deposit' : 'withdraw'
       
     case 'CANCEL':
       // 주문 취소: 유저는 돈을 돌려받고, 스토어는 돈이 나감
@@ -144,7 +144,7 @@ const getTransactionTypeDisplay = (item: PaymentHistory, isUser: boolean): strin
       
     case 'TRANSFER':
       if (item.name) {
-        return item.amount > 0 
+        return item.amount > 0
           ? `${item.name}님에게서 받은 송금`
           : `${item.name}님에게 송금 완료`;
       }
@@ -365,7 +365,7 @@ const getDisplayAmount = (item: PaymentHistory): number => {
 
                 const rate = tickerData[`KRW-${symbol}`]?.trade_price ?? 0
                 const displayAmount = getDisplayAmount(item)
-                const krw = Math.floor(displayAmount * rate).toLocaleString()
+                const krw = displayAmount * rate
                 const showAfterBalance = item.status === 'ACCEPTED'
                 const isDeposit =
                   getTransactionDirection(item, isUser) === 'deposit'
@@ -380,7 +380,7 @@ const getDisplayAmount = (item: PaymentHistory): number => {
                       type={getTransactionTypeDisplay(item, isUser)}
                       balance={`${item.afterBalance ?? '-'} ${symbol}`}
                       amount={`${displayAmount.toFixed(2)} ${symbol}`}
-                      krw={`${krw} KRW`}
+                      krw={`${krw}`}
                       isDeposit={isDeposit}
                       showAfterBalance={showAfterBalance}
                       originalAmount={item.amount}

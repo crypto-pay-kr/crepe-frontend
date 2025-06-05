@@ -49,7 +49,7 @@ export default function TransactionItem({
         <div>
           <p
             className={`text-base font-bold ${
-              isDeposit ? "text-indigo-800" : "text-red-500"
+              isDeposit ? "text-red-500":"text-indigo-800" 
             } mb-2`}
           >
             {type}
@@ -61,9 +61,9 @@ export default function TransactionItem({
         <div className="text-right">
           <p>
             <span className={`text-base font-bold ${
-              isDeposit ? "text-indigo-800" : "text-red-500"
+              isDeposit ? "text-red-500" :"text-indigo-800"
 
-            } mb-2`}>{formattedAmount} {symbol}</span>
+            } mb-2`}>{formattedAmount}</span>
 
           </p>
           <p className="text-sm text-gray-600">= {Number(krw).toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KRW</p>
