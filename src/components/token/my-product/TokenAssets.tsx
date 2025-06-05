@@ -51,9 +51,9 @@ export default function TokenAssets({
                    onClick={() => toggle(token.currency)}>
                 <div className="text-right">
                   <div className="font-medium text-gray-900">
-                    {token.balance.toLocaleString()} {token.currency}
+                    {token.balance.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {token.currency}
                   </div>
-                  <div className="text-sm text-gray-500">{token.krw}</div>
+                  <div className="text-sm text-gray-500">{Number(token.krw).toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KRW</div>
                 </div>
                 {expanded[token.currency] ? (
                   <ChevronDown size={16} className="text-gray-500" />
@@ -90,9 +90,8 @@ export default function TokenAssets({
                     </div>
                   </div>
                   <div className="flex items-center gap-2 text-right">
-                    <div className="flex flex-col items-end">
-                      <p className="text-blue-600 font-medium">{products.balance}</p>
-                      <p className="text-xs text-gray-500">{token.currency}</p>
+                    <div className="flex items-end">
+                      <p className="text-blue-600 font-medium">{products.balance.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {token.currency}</p>
                     </div>
                     <ChevronRight size={16} className="text-gray-500" />
                   </div>

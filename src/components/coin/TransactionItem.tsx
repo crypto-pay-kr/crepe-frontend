@@ -3,7 +3,7 @@ interface TransactionItemProps {
   type: string;
   balance: string;
   amount: string;
-  krw: string;
+  krw: number|string;
   isDeposit: boolean;
   showAfterBalance: boolean;
 }
@@ -21,12 +21,12 @@ export default function TransactionItem({
 
   const [rawAmount, rawSymbol] = amount.split(" ");
   const parsed = parseFloat(rawAmount);
-  // const bankSymbol = BANK_SYMBOL_MAP[rawSymbol?.toUpperCase()] ?? rawSymbol;
-
-
   const formattedAmount = isNaN(parsed)
-    ? amount
-    : `${parsed > 0 ? "+" : ""}${parsed.toFixed(2)}`;
+    ? Number(amount).toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : `${parsed > 0 ? "+" : parsed < 0 ? "-" : ""}${Math.abs(parsed).toLocaleString('ko-KR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })}`;
 
 
 
@@ -37,8 +37,8 @@ export default function TransactionItem({
 
 
   const formattedBalance = isNaN(parsedBalance)
-    ? balance
-    : `${parsedBalance.toFixed(2)} ${balanceSymbol}`;
+    ? Number(balance).toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : `${Number(parsedBalance).toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${balanceSymbol}`;
 
 
   return (
@@ -61,9 +61,9 @@ export default function TransactionItem({
           <p>
             <span  className={`text-base font-bold ${
               isDeposit ? "text-indigo-800" : "text-red-500"
-            } mb-2`}>{formattedAmount}</span>
+            } mb-2`}>{formattedAmount} {rawSymbol}</span>
           </p>
-          <p className="text-sm text-gray-600">= {krw}</p>
+          <p className="text-sm text-gray-600">= {Number(krw).toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KRW</p>
         </div>
       </div>
     </div>

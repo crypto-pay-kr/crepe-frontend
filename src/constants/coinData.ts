@@ -3,7 +3,7 @@ export interface Coin {
   coinName: string;
   icon: string;
   balance: string;
-  krw: string;
+  krw: number |string;
   change: string;
 
 }

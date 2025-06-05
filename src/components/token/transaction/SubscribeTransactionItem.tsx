@@ -19,7 +19,7 @@ export default function SimpleTransactionItem({
   const isCancel = eventType === "TERMINATION";
   const isPayment = eventType === "DEPOSIT";
   const sign = isCancel ? "-" : isPayment ? "+" : "";
-  const formattedAmount = `${sign}${Math.abs(amountNum).toLocaleString()} ${currency}`
+  const formattedAmount = `${sign}${amountNum.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`
   const formattedDate = new Date(date).toLocaleString('ko-KR', {
     timeZone: 'Asia/Seoul',
     year: 'numeric',
@@ -59,11 +59,11 @@ export default function SimpleTransactionItem({
         </p>
       </div>
       {!isCancel || totalBalance === undefined ? (
-        <p className="text-sm text-gray-600">잔액: {afterBalance} {currency}</p>
+        <p className="text-sm text-gray-600">잔액: {Number(afterBalance).toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}</p>
       ) : null}
       {isCancel && totalBalance !== undefined && (
         <p className="text-sm font-medium text-gray-700">
-          토큰 계좌 잔액: {totalBalance.toLocaleString()} {currency}
+          토큰 계좌 잔액: {Number(totalBalance).toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
         </p>
       )}
     </div>
