@@ -20,7 +20,7 @@ export interface PaymentHistory {
   amount: number;
   transferredAt: string;
   afterBalance: number;
-  type: 'DEPOSIT' | 'WITHDRAW' | 'INTEREST' | 'SETTLEMENT' | 'REFUND' | 'PAY' | 'CANCEL' | 'TRANSFER' | 'EXCHANGE';
+  type: 'DEPOSIT' | 'WITHDRAW' | 'INTEREST' | 'SETTLEMENT' | 'REFUND' | 'PAY' | 'CANCEL' | 'TRANSFER' | 'EXCHANGE'|'SUBSCRIBE';
   name?: string; // optional로 변경
 }
 
@@ -29,9 +29,9 @@ export default function CoinDetailPage() {
   document.head.appendChild(styleSheet);
   const { symbol } = useParams()
   const location = useLocation()
-  const isUser = location.state?.isUser ?? false
+  const isUser = sessionStorage.getItem("userRole") === "USER"
   const tickerData = useTickerData();
-  const [addressStatus, setAddressStatus] = useState<'ACTIVE' | 'REGISTERING' | 'NOT_REGISTERED' |'UNREGISTERED'|'UNREGISTERED_AND_REGISTERING'|'REJECTED'| null>(null);
+  const [addressStatus, setAddressStatus] = useState<'ACTIVE' | 'REGISTERING' | 'NOT_REGISTERED' |'UNREGISTERED'|'UNREGISTERED_AND_REGISTERING'|'REJECTED'|'HOLD'| null>(null);
   const [showModal, setShowModal] = useState(false)
   const [addressInfo, setAddressInfo] = useState<{
     address: string;
@@ -57,7 +57,7 @@ export default function CoinDetailPage() {
       return isUser ? 'withdraw' : 'deposit';
       
     case 'REFUND':
-      return 'deposit'; // 환불 = 입금 (양쪽 동일 - 돈 돌려받음)
+      return isUser? 'deposit' : 'withdraw'
       
     case 'CANCEL':
       // 주문 취소: 유저는 돈을 돌려받고, 스토어는 돈이 나감
@@ -144,7 +144,7 @@ const getTransactionTypeDisplay = (item: PaymentHistory, isUser: boolean): strin
       
     case 'TRANSFER':
       if (item.name) {
-        return item.amount > 0 
+        return item.amount > 0
           ? `${item.name}님에게서 받은 송금`
           : `${item.name}님에게 송금 완료`;
       }
@@ -232,14 +232,14 @@ const getDisplayAmount = (item: PaymentHistory): number => {
       />
 
       <main className="flex-1 overflow-auto bg-gray-50">
-        <div className="px-4 py-6 max-w-2xl mx-auto space-y-6">
-          <div className="overflow-hidden rounded-2xl py-10 px-6 bg-white shadow-sm transition hover:shadow-md">
+        <div className="mx-auto max-w-2xl space-y-6 px-4 py-6">
+          <div className="overflow-hidden rounded-2xl bg-white px-6 py-10 shadow-sm transition hover:shadow-md">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <img
                   src={coinMeta?.coinImageUrl}
                   alt={coinMeta?.coinName ?? symbol}
-                  className="h-8 w-8 rounded-full mr-2"
+                  className="mr-2 h-8 w-8 rounded-full"
                 />
                 <p className="text-lg font-semibold sm:text-xl md:text-2xl">
                   총 보유
@@ -250,18 +250,23 @@ const getDisplayAmount = (item: PaymentHistory): number => {
                   {balance.toFixed(2)} {symbol}
                 </p>
                 <p className="text-sm text-gray-500 sm:text-base">
-                  = {(balance * livePrice).toLocaleString()} KRW
+                  ={' '}
+                  {(balance * livePrice).toLocaleString('ko-KR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}{' '}
+                  KRW
                 </p>
               </div>
             </div>
           </div>
-          
+
           {/* 버튼 영역 */}
           <div className="mb-4 w-full sm:mb-5 md:mb-6">
             <div className="flex gap-2 sm:gap-3">
               {/* 코인 충전 버튼 */}
               <button
-                className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-[#4B5EED] py-1.5 font-medium text-base  text-white shadow sm:gap-2 sm:rounded-xl sm:py-2 sm:text-lg"
+                className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-[#4B5EED] py-1.5 text-base font-medium text-white shadow sm:gap-2 sm:rounded-xl sm:py-2 sm:text-lg"
                 onClick={() => {
                   // Add transition before navigation
                   setTimeout(() => {
@@ -280,7 +285,7 @@ const getDisplayAmount = (item: PaymentHistory): number => {
                 </span>
               </button>
               <button
-                className={`flex flex-1 items-center justify-center gap-1 rounded-lg py-1.5 font-medium text-base  shadow transition sm:gap-2 sm:rounded-xl sm:py-2 sm:text-lg ${
+                className={`flex flex-1 items-center justify-center gap-1 rounded-lg py-1.5 text-base font-medium shadow transition sm:gap-2 sm:rounded-xl sm:py-2 sm:text-lg ${
                   addressStatus === 'ACTIVE'
                     ? 'bg-[#4B5EED] text-white'
                     : 'cursor-not-allowed bg-gray-300 text-gray-400'
@@ -288,7 +293,6 @@ const getDisplayAmount = (item: PaymentHistory): number => {
                 disabled={addressStatus !== 'ACTIVE'}
                 onClick={() => {
                   if (addressStatus === 'ACTIVE') {
-                    // Add transition before navigation
                     setTimeout(() => {
                       navigate('/settlement', { state: { isUser, symbol } })
                     }, 200)
@@ -304,7 +308,7 @@ const getDisplayAmount = (item: PaymentHistory): number => {
             </div>
 
             <div
-              className={`mt-2 w-full rounded-lg py-2 text-center font-medium text-sm transition sm:mt-3 sm:rounded-xl sm:py-3 sm:text-base ${
+              className={`mt-2 w-full rounded-lg py-2 text-center text-sm font-medium transition sm:mt-3 sm:rounded-xl sm:py-3 sm:text-base ${
                 addressStatus === 'REGISTERING' ||
                 addressStatus === 'UNREGISTERED_AND_REGISTERING'
                   ? 'cursor-not-allowed bg-gray-300 text-gray-400'
@@ -322,13 +326,16 @@ const getDisplayAmount = (item: PaymentHistory): number => {
                 }
               }}
             >
-              <span className="text-white font-medium text-base ">
-                {addressStatus === 'ACTIVE' && '계좌 변경'}
-                {addressStatus === 'REGISTERING' && '계좌가 등록중입니다.'}
-                {addressStatus === 'UNREGISTERED' && '계좌가 등록 해제 중입니다...'}
-                {addressStatus === 'UNREGISTERED_AND_REGISTERING' && '계좌 등록 해제 후 변경 중입니다...'}
-                {addressStatus === 'NOT_REGISTERED' && '출금계좌 등록하기'}
-                {addressStatus === 'REJECTED' && '거절 되었습니다 다시 등록하기'}
+              <span className="text-base font-medium text-white">
+             {{
+               ACTIVE: '계좌 변경',
+               REGISTERING: '계좌가 등록 중 입니다.',
+               UNREGISTERED: '계좌가 등록 해제 중 입니다...',
+               UNREGISTERED_AND_REGISTERING: '계좌 등록 해제 후 변경 중 입니다...',
+               NOT_REGISTERED: '출금계좌 등록하기',
+               REJECTED: '거절 되었습니다 다시 등록하기',
+               HOLD: '계좌가 정지당했습니다',
+             }[addressStatus as string] || ''}
               </span>
             </div>
           </div>
@@ -354,13 +361,14 @@ const getDisplayAmount = (item: PaymentHistory): number => {
           <div className="mb-0 space-y-4 pb-16 text-sm sm:space-y-5 sm:pb-10 sm:text-base md:space-y-6 md:text-lg lg:text-xl">
             {data?.pages.map((page, pageIndex) =>
               page.content.map((item: PaymentHistory, idx: number) => {
-                console.log('거래내역 item:', item);
-                
-                const rate = tickerData[`KRW-${symbol}`]?.trade_price ?? 0;
-                const displayAmount = getDisplayAmount(item);
-                const krw = Math.floor(displayAmount * rate).toLocaleString();
-                const showAfterBalance = item.status === 'ACCEPTED';
-                const isDeposit = getTransactionDirection(item, isUser) === 'deposit';
+                console.log('거래내역 item:', item)
+
+                const rate = tickerData[`KRW-${symbol}`]?.trade_price ?? 0
+                const displayAmount = getDisplayAmount(item)
+                const krw = displayAmount * rate
+                const showAfterBalance = item.status === 'ACCEPTED'
+                const isDeposit =
+                  getTransactionDirection(item, isUser) === 'deposit'
 
                 return (
                   <div
@@ -372,16 +380,16 @@ const getDisplayAmount = (item: PaymentHistory): number => {
                       type={getTransactionTypeDisplay(item, isUser)}
                       balance={`${item.afterBalance ?? '-'} ${symbol}`}
                       amount={`${displayAmount.toFixed(2)} ${symbol}`}
-                      krw={`${krw} KRW`}
+                      krw={`${krw}`}
                       isDeposit={isDeposit}
                       showAfterBalance={showAfterBalance}
                       originalAmount={item.amount}
-                      transactionType={item.type} 
-                  />
-                </div>
-              );
-            })
-          )}
+                      transactionType={item.type}
+                    />
+                  </div>
+                )
+              })
+            )}
             <div
               ref={observerElemRef}
               className="mt-4 flex h-10 items-center justify-center"

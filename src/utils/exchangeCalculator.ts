@@ -40,30 +40,22 @@ export function calculateTokenPrice(
 // 최대 교환 가능한 코인 수량 계산
 export function calculateMaxExchangeCoin({
                                            tokenInfo,
-                                           selectedCurrency,
-                                           tokenCapital,
-                                           tickerData,
+                                           selectedCurrency
                                          }: {
   tokenInfo: any;
   selectedCurrency: string;
   tokenCapital: number;
   tickerData: Record<string, TickerData>;
 }): string {
-  if (!tokenInfo || !selectedCurrency || !tokenCapital || !tokenInfo.totalSupply) return '-';
+  if (!tokenInfo || !selectedCurrency) return '-';
 
-  const tokenPrice = tokenCapital / tokenInfo.totalSupply;
-  const coinRate = tickerData[`KRW-${selectedCurrency}`]?.trade_price ?? 0;
-
-  const portfolio = tokenInfo.portfolios.find((p: any) => p.currency === selectedCurrency);
+  const portfolio = tokenInfo.portfolios.find(
+    (p: any) => p.currency === selectedCurrency && p.nonAvailableAmount != null
+  );
   if (!portfolio) return '-';
 
-  const available = (portfolio.amount ?? 0) - (portfolio.nonAvailableAmount ?? 0);
-  const availableCapital = available * coinRate;
-
-  const maxToken = availableCapital / tokenPrice;
-  const maxCoin = (maxToken * tokenPrice) / coinRate;
-
-  return maxCoin.toFixed(2);
+  const result = portfolio.nonAvailableAmount;
+  return result.toFixed(2);
 }
 
 // 최대 교환 가능한 토큰 수량 계산
@@ -89,7 +81,6 @@ export function calculateMaxExchangeToken({
   if (coinRate === 0 || tokenPrice === 0) return '-';
 
   const availableCapital = available * coinRate;
-  const maxToken = availableCapital / tokenPrice;
 
-  return maxToken.toFixed(2);
+  return availableCapital.toFixed(2);
 }

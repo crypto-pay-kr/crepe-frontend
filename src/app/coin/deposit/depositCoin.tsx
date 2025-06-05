@@ -52,19 +52,15 @@ export default function CoinDeposit() {
 
   return (
     <div className="flex flex-col h-screen bg-white">
-      <Header title="코인 입금" />
-
+      <Header title={`${symbol} 코인 입금`} />
       <div className="flex-1 px-6 py-6 overflow-auto bg-gray-50">
         <div className="mb-16 max-w-md mx-auto">
-          <NetworkDisplay networkName={symbol || "Unknown"} />
-          
           <DepositAddress 
             address={coinInfo?.address?? ' '}
             tag={coinInfo?.tag?? ''}
             copied={copied}
             onCopy={handleCopy}
           />
-          
           <DepositInstructions currency={coinInfo?.currency?? ''} />
         </div>
       </div>
