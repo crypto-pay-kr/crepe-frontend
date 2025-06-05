@@ -57,9 +57,9 @@ export default function NicknameChangeForm({ onSuccess,  onSubmit, }: NicknameCh
           />
           <button
             onClick={checkNicknameDuplicate}
-            className="ml-2 bg-white border border-[#0a2e65] text-[#0a2e65] px-3 py-2 rounded"
+            className="ml-2 text-sm bg-white bg-[#4B5EED]  px-3 py-2 rounded text-[#4B5EED] border border-[#4B5EED]"
           >
-            중복확인
+            중복 확인
           </button>
         </div>
 
@@ -72,9 +72,9 @@ export default function NicknameChangeForm({ onSuccess,  onSubmit, }: NicknameCh
 
       <button
         onClick={handleNicknameChange}
-        className={`w-full py-3 rounded ${
+        className={`w-full py-2 rounded ${
           isNicknameVerified
-            ? "bg-[#0a2e65] text-white"
+            ? "bg-[#4B5EED] text-white"
             : "bg-gray-300 text-gray-500"
         }`}
         disabled={!isNicknameVerified}
