@@ -44,27 +44,31 @@ export default function CoinDetailPage() {
   const coinMeta = coinList.find(c => c.currency === symbol);
   const livePrice = tickerData[`KRW-${symbol}`]?.trade_price ?? 0;
 
-  const getTransactionDirection = (item: PaymentHistory): 'deposit' | 'withdraw' => {
+  const getTransactionDirection = (item: PaymentHistory, isUser: boolean): 'deposit' | 'withdraw' => {
   switch (item.type) {
     case 'DEPOSIT':
-      return 'deposit'; // 입금
+      return 'deposit'; // 입금 (양쪽 동일)
       
     case 'WITHDRAW':
-      return 'withdraw'; // 출금
+      return 'withdraw'; // 출금 (양쪽 동일)
       
     case 'PAY':
-      return 'withdraw'; // 결제 = 출금
+      // 결제: 유저는 돈이 나가고, 스토어는 돈이 들어옴
+      return isUser ? 'withdraw' : 'deposit';
       
     case 'REFUND':
-      return 'deposit'; // 환불 = 입금 (돈 돌려받음)
+      return 'deposit'; // 환불 = 입금 (양쪽 동일 - 돈 돌려받음)
       
     case 'CANCEL':
-      return 'deposit'; // 주문취소 = 입금 (돈 돌려받음)
+      // 주문 취소: 유저는 돈을 돌려받고, 스토어는 돈이 나감
+      return isUser ? 'deposit' : 'withdraw';
       
     case 'INTEREST':
-      return 'deposit'; // 이자 = 입금 (돈 받음)
+      return 'deposit'; // 이자 = 입금 (양쪽 동일)
+      
     case 'EXCHANGE':
-      return item.amount > 0 ? 'deposit' : 'withdraw'; // 환전은 금액으로 판별
+      return item.amount > 0 ? 'deposit' : 'withdraw'; // 교환은 금액으로 판별
+      
     case 'SETTLEMENT':
       return item.amount > 0 ? 'deposit' : 'withdraw'; // 정산은 금액으로 판별
       
@@ -75,8 +79,9 @@ export default function CoinDetailPage() {
       return item.amount > 0 ? 'deposit' : 'withdraw'; // 기본값은 금액으로 판별
   }
 };
-const getTransactionTypeDisplay = (item: PaymentHistory): string => {
-  console.log('Processing transaction:', item.type, item.status, item.amount);
+
+const getTransactionTypeDisplay = (item: PaymentHistory, isUser: boolean): string => {
+  console.log('Processing transaction:', item.type, item.status, item.amount, 'isUser:', isUser);
   
   switch (item.type) {
     case 'DEPOSIT':
@@ -86,12 +91,24 @@ const getTransactionTypeDisplay = (item: PaymentHistory): string => {
       return item.status === 'ACCEPTED' ? '출금 완료' : '출금 대기중';
       
     case 'PAY':
-      switch (item.status) {
-        case 'ACCEPTED': return '결제 완료';
-        case 'PENDING': return '결제 대기중';
-        case 'FAILED': return '결제 실패';
-        case 'REFUNDED': return '결제 환불';
-        default: return '결제';
+      if (isUser) {
+        // 유저 관점: 결제
+        switch (item.status) {
+          case 'ACCEPTED': return '결제 완료';
+          case 'PENDING': return '결제 대기중';
+          case 'FAILED': return '결제 실패';
+          case 'REFUNDED': return '결제 환불';
+          default: return '결제';
+        }
+      } else {
+        // 스토어 관점: 매출
+        switch (item.status) {
+          case 'ACCEPTED': return '매출 입금';
+          case 'PENDING': return '매출 대기중';
+          case 'FAILED': return '매출 실패';
+          case 'REFUNDED': return '매출 환불';
+          default: return '매출';
+        }
       }
       
     case 'REFUND':
@@ -104,7 +121,24 @@ const getTransactionTypeDisplay = (item: PaymentHistory): string => {
       return '이자 지급';
       
     case 'CANCEL':
-      return '주문 취소';
+      if (isUser) {
+        // 유저 관점: 주문 취소 (돈 돌려받음)
+        switch (item.status) {
+          case 'ACCEPTED': return '주문 취소 완료';
+          case 'PENDING': return '주문 취소 대기중';
+          case 'FAILED': return '주문 취소 실패';
+          default: return '주문 취소';
+        }
+      } else {
+        // 스토어 관점: 주문 취소 (환불 처리)
+        switch (item.status) {
+          case 'ACCEPTED': return '주문 취소 환불';
+          case 'PENDING': return '주문 취소 환불 대기중';
+          case 'FAILED': return '주문 취소 환불 실패';
+          default: return '주문 취소 환불';
+        }
+      }
+      
     case 'EXCHANGE':
       return item.amount > 0 ? '토큰 매도' : '토큰 매수';
       
@@ -326,7 +360,7 @@ const getDisplayAmount = (item: PaymentHistory): number => {
                 const displayAmount = getDisplayAmount(item);
                 const krw = Math.floor(displayAmount * rate).toLocaleString();
                 const showAfterBalance = item.status === 'ACCEPTED';
-                const isDeposit = getTransactionDirection(item) === 'deposit';
+                const isDeposit = getTransactionDirection(item, isUser) === 'deposit';
 
                 return (
                   <div
@@ -335,7 +369,7 @@ const getDisplayAmount = (item: PaymentHistory): number => {
                   >
                     <TransactionItem
                       date={new Date(item.transferredAt).toLocaleString()}
-                      type={getTransactionTypeDisplay(item)}
+                      type={getTransactionTypeDisplay(item, isUser)}
                       balance={`${item.afterBalance ?? '-'} ${symbol}`}
                       amount={`${displayAmount.toFixed(2)} ${symbol}`}
                       krw={`${krw} KRW`}
