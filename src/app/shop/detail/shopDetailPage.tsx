@@ -77,7 +77,7 @@ function MallDetailPage() {
                 localStorage.setItem("cartItems", JSON.stringify(newCart));
                 return newCart;
             }
-    
+
             // 이미 같은 storeId, 같은 item.id를 가진 아이템이 있는지 검사
             const existingItem = prev.find(
                 (cartItem) => cartItem.id === item.id && cartItem.storeId === storeId
@@ -157,25 +157,25 @@ function MallDetailPage() {
             <main className={`flex-1 overflow-auto transition-all duration-300 ${
                 cartItems.length > 0 ? 'pb-48' : 'pb-16'
             }`}>
-                {/* 가게 정보 */}
-                <div className="bg-white shadow-sm mb-4 min-h-[450px]">
-                    <div className="relative">
-                        <img
-                            src={storeDetail.storeImageUrl || "/store-image.png"}
-                            alt={`${storeDetail.storeNickname} 가게사진`}
-                            className="w-full h-72 object-cover"
-                        />
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
-                            <h2 className="text-white text-2xl font-bold">{storeDetail.storeNickname}</h2>
-                        </div>
+              {/* 가게 정보 */}
+              <div className="mx-4 mt-4 mb-6 bg-white rounded-2xl shadow-sm overflow-hidden">
+                <div className="relative">
+                  <img
+                    src={storeDetail.storeImageUrl || "/store-image.png"}
+                    alt={storeDetail.storeNickname}
+                    className="w-full h-64 object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <div className="flex justify-between items-end">
+                      <h2 className="text-white text-2xl font-bold">{storeDetail.storeNickname}</h2>
+                      <div className="bg-white/20 backdrop-blur rounded-full px-3 py-1 flex items-center">
+                        <Heart size={16} className="mr-1 fill-red-500 stroke-red-500" />
+                        <span className="text-white text-sm">{storeDetail.likeCount}</span>
+                      </div>
                     </div>
-
-                    <div className="flex justify-end px-6 mt-5">
-                        <div className="flex items-center text-sm text-zinc-500">
-                            <Heart size={18} className="mr-1 fill-red-500 stroke-red-500" />
-                             {storeDetail.likeCount}
-                        </div>
-                    </div>
+                  </div>
+                </div>
 
                     {/* 가게 정보 중앙 정렬 영역 */}
                     <div className="text-center px-6 mt-4 mb-6">
@@ -191,27 +191,34 @@ function MallDetailPage() {
                     </div>
                 </div>
 
-                {/* 메뉴 목록 */}
-                <div className="bg-white pb-4">
-                    <div className="divide-y divide-gray-100 px-5">
-                        {storeDetail.menuList.map((item) => (
-                            <div key={item.menuId} className="py-4">
-                                <div className="flex justify-between">
-                                    <div className="flex-1 pr-4">
-                                        <h3 className="font-bold text-gray-900">{item.menuName}</h3>
-                                        <div className="mt-2 font-bold text-gray-900">
-                                            {item.menuPrice.toLocaleString()} KRW
-                                        </div>
-                                    </div>
+              {/* 메뉴 목록 */}
+              <div className="bg-white">
 
-                                    <div className="relative">
-                                        <div className="h-24 w-24 rounded-lg overflow-hidden bg-gray-100">
-                                            <img
-                                                src={item.menuImage || "/store-image.png"}
-                                                alt={item.menuName}
-                                                className="h-full w-full object-cover"
-                                            />
-                                        </div>
+                <div className="bg-gray-50 px-5 py-3">
+                  <h3 className="text-lg font-bold text-gray-800">
+                    메뉴 ({storeDetail.menuList.length})
+                  </h3>
+                </div>
+                <div className="divide-y divide-gray-100">
+                  {storeDetail.menuList.map((item) => (
+                    <div key={item.menuId} className="px-4 py-5">
+                      <div className="flex justify-between items-center">
+                        <div className="flex-1 pr-4">
+                          <h4 className="font-bold text-gray-900 text-base mb-2">
+                            {item.menuName}
+                          </h4>
+                          <p className="text-lg font-bold text-gray-900">
+                            {item.menuPrice.toLocaleString()} KRW
+                          </p>
+                        </div>
+                        <div className="relative flex-shrink-0">
+                          <div className="h-20 w-20 rounded-lg overflow-hidden bg-gray-100">
+                            <img
+                              src={item.menuImage || "/store-image.png"}
+                              alt={item.menuName}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
                                         <button
                                             onClick={() =>
                                                 addToCart({
@@ -221,7 +228,7 @@ function MallDetailPage() {
                                                     image: item.menuImage,
                                                 })
                                             }
-                                            className="absolute -bottom-2 -right-2 bg-[#4B5EED] rounded-full p-2 shadow-md hover:bg-[#4B5EED]"
+                                            className="absolute -bottom-2 -right-2 bg-[#5d63db] rounded-full p-1 shadow-md hover:bg-[#5d63db]"
                                         >
                                             <svg
                                                 width="16"
@@ -329,7 +336,7 @@ function MallDetailPage() {
                         </div>
 
                         {/* 장바구니 액션 버튼 */}
-                        <div className="px-5 py-3 border-t border-gray-100">
+                        <div className="px-5 py-2 border-t border-gray-100">
                             <div className="flex justify-center gap-3">
                                 <Button
                                     text="취소하기"
@@ -340,12 +347,12 @@ function MallDetailPage() {
                                         localStorage.setItem("cartItems", JSON.stringify([]));
                                         localStorage.setItem("totalPrice", JSON.stringify([]));
                                     }}
-                                    className="w-1/2 py-3 rounded-lg font-medium bg-gray-100 text-black border border-gray-200"
+                                    className="w-1/2 py-1 text-sm rounded-lg font-semibold bg-gray-100 text-black border border-gray-200"
                                 />
                                 <Button
                                     text="주문하기"
                                     onClick={() => navigate("/mall/store/cart")}
-                                    className="w-1/2 py-3 rounded-lg font-medium bg-[#002169] text-white shadow-sm"
+                                    className="w-1/2 py-1 text-sm rounded-lg font-semibold  bg-[#4B5EED] text-white shadow-sm"
                                 />
                             </div>
                         </div>
