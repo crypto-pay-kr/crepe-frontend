@@ -203,28 +203,30 @@ export default function TokenGroupDetailPage() {
                       className="transition-all duration-300 ease-in-out"
                     >
                       <TransactionItem
-                        date={new Date(tx.transferredAt).toLocaleString()}
-                        type={
-                          tx.type === "EXCHANGE"
-                            ? tx.amount > 0
-                              ? "환전 입금 완료"
-                              : "환전 출금 완료"
-                            : tx.type === "SUBSCRIBE"
-                              ? tx.amount < 0
-                                ? "상품 예치 완료"
-                                : "상품 해지 및 만기 입금"
-                              :tx.type === "TRANSFER"
-                                ?  tx.amount >0
-                                  ? `${tx.name}님에게서 받은 송금`
-                                  : `${tx.name}님에게 송금 완료`
-                              : "-"
-                        }
-                        balance={`${tx.afterBalance?.toFixed(2) ?? '-'} ${bank}`}
-                        amount={`${tx.amount.toFixed(2)} ${bank}`}
-                        krw={`${krw} KRW`}
-                        isDeposit={tx.amount < 0}
-                        showAfterBalance={tx.status === 'ACCEPTED'}
-                      />
+                          date={new Date(tx.transferredAt).toLocaleString()}
+                          type={
+                            tx.type === "EXCHANGE"
+                              ? tx.amount > 0
+                                ? "환전 입금 완료"
+                                : "환전 출금 완료"
+                              : tx.type === "SUBSCRIBE"
+                                ? tx.amount < 0
+                                  ? "상품 예치 완료"
+                                  : "상품 해지 및 만기 입금"
+                                : tx.type === "TRANSFER"
+                                  ? tx.amount > 0
+                                    ? `${tx.name}님에게서 받은 송금`
+                                    : `${tx.name}님에게 송금 완료`
+                                  : "-"
+                          }
+                          balance={`${tx.afterBalance?.toFixed(2) ?? '-'} ${bank}`}
+                          amount={`${Math.abs(tx.amount).toFixed(2)} ${bank}`}
+                          krw={`${krw} KRW`}
+                          isDeposit={tx.amount > 0}
+                          showAfterBalance={tx.status === 'ACCEPTED'}
+                          originalAmount={tx.amount}
+                          transactionType={tx.type}
+                        />
                     </div>
                   )
                 })

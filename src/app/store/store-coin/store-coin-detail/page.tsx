@@ -376,7 +376,7 @@ const getDisplayAmount = (item: PaymentHistory): number => {
                       isDeposit={isDeposit}
                       showAfterBalance={showAfterBalance}
                       originalAmount={item.amount}
-                      transactionType={item.type} // 거래 타입도 전달
+                      transactionType={item.type} 
                   />
                 </div>
               );

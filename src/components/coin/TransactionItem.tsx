@@ -7,7 +7,7 @@ interface TransactionItemProps {
   isDeposit: boolean;
   showAfterBalance: boolean;
   originalAmount: number;
-  transactionType: string; // 거래 타입 추가
+  transactionType: string;
 }
 
 export default function TransactionItem({
