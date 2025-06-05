@@ -98,7 +98,7 @@ export default function WelcomePage() {
       {/* 하단 버튼 및 텍스트 - 애니메이션 추가 */}
       <div className="w-full mt-15 mb-10 px-5 relative z-10">
         <div className="flex flex-col space-y-4 animate-fade-in-up" style={{animationDelay: '1s'}}>
-          <div className="text-center text-sm bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-gray-100/50 hover:bg-white/80 hover:border-gray-200/70 transition-all duration-300">
+          <div className="text-center text-base bg-white/60 backdrop-blur-sm rounded-xl p-1  hover:bg-white/80 hover:border-gray-200/70 transition-all duration-300">
             <span className="text-gray-600">이미 가입하셨나요? </span>
             <button className="text-[#4B5EED] font-semibold hover:text-blue-700 transition-all duration-300 hover:scale-105" onClick={() => navigate("/login")}>
               로그인 하기
@@ -116,7 +116,7 @@ export default function WelcomePage() {
           </div>
 
           {/* 가맹점 회원가입 */}
-          <div className="text-center text-sm bg-gradient-to-r from-blue-50/80 to-indigo-50/80 rounded-xl p-3 border border-blue-100/30 hover:from-blue-100/90 hover:to-indigo-100/90 hover:border-blue-200/50 transition-all duration-300">
+          <div className="text-center text-base bg-gradient-to-r from-blue-50/80 to-indigo-50/80 rounded-xl p-1 hover:from-blue-100/90 hover:to-indigo-100/90 hover:border-blue-200/50 transition-all duration-300">
             <span className="text-gray-600">사장님이신가요? </span>
             <button className="text-[#4B5EED] font-semibold hover:text-blue-700 transition-all duration-300 hover:scale-105" onClick={() => navigate("/store/terms")}>
               가맹점 회원가입하기

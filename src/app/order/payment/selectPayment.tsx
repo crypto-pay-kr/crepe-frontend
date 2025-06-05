@@ -29,7 +29,6 @@ interface PortfolioData {
 export default function SelectPaymentPage() {
   const navigate = useNavigate();
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
-
   const tickerData = useTickerData();
   const [balances, setBalances] = useState<{ [key: string]: number }>({});
   const [totalPrice, setTotalPrice] = useState<number>(0);
@@ -163,61 +162,85 @@ export default function SelectPaymentPage() {
     }
   }, [portfolioData, tickerData]);
 
+  // 코인 결제 옵션 생성
   useEffect(() => {
-    // 3-1. 코인 결제
-    const coinOptions = ["XRP", "SOL", "USDT"]
-      .filter((symbol) => availableCurrencies.includes(symbol)) // 사용 가능한 currency만 필터링
-      .map((symbol) => {
-        const tradePrice = tickerData[`KRW-${symbol}`]?.trade_price;
-        const balance = balances[symbol] ?? 0; // 코인 잔액 가져오기
-        return {
-          id: symbol,
-          label: symbol,
-          amount: tradePrice
-            ? `${(totalPrice / tradePrice).toFixed(2)} ${symbol}`
-            : "Loading...", // amount에 환산된 금액 표시
-          balance: `${balance.toFixed(2)} ${symbol}`, // balance에 코인 잔액 표시
-          insufficientBalance: !tradePrice || balance < totalPrice / tradePrice,
-          type: "COIN",
-        };
-      });
+  const coinOptions = ["XRP", "SOL", "USDT"]
+  .filter((symbol) => availableCurrencies.includes(symbol))
+  .map((symbol) => {
+    const tradePrice = tickerData[`KRW-${symbol}`]?.trade_price;
+    const balance = balances[symbol] ?? 0;
+    return {
+      id: symbol,
+      label: symbol,
+      amount: tradePrice
+        ? `${(totalPrice / tradePrice).toFixed(2)} ${symbol}`
+        : "Loading...",
+      balance: `${balance.toFixed(2)} ${symbol}`,
+      insufficientBalance: !tradePrice || balance < totalPrice / tradePrice,
+      type: "COIN",
+    };
+  });
 
-    // 3-2. 바우처 결제
-    const voucherOptions = vouchers
-      .filter((v) => availableCurrencies.includes(v.bankTokenSymbol)) // 사용 가능한 currency만 필터링
-      .map((v) => {
-        let convertedTokenValue = "0";
-        let exchangeRate = 0;
+setPaymentOptions((prevOptions) => {
+  const allOptions = [
+    ...prevOptions.filter((opt) => opt.type === "VOUCHER"),
+    ...coinOptions,
+  ];
+  return allOptions.sort((a, b) => {
+    if (a.type === b.type) {
+      return a.id.localeCompare(b.id); // 같은 타입일 경우 id로 정렬
+    }
+    return a.type === "VOUCHER" ? -1 : 1; // VOUCHER가 COIN보다 먼저 오도록 정렬
+  });
+});
+}, [balances, tickerData, totalPrice, availableCurrencies]);
 
-        if (totalTokenValue > 0 && v.tokenBalance) {
-          exchangeRate = v.tokenBalance / totalTokenValue;
-          const adjustedValue = totalPrice * exchangeRate; ;
-          convertedTokenValue = `${adjustedValue.toFixed(2)} ${v.bankTokenSymbol}`;
-        }
+useEffect(() => {
+const voucherOptions = vouchers
+  .filter((v) => availableCurrencies.includes(v.bankTokenSymbol))
+  .map((v) => {
+    let convertedTokenValue = "Loading...";
+    let exchangeRate = 0;
 
-        return {
-          id: `VOUCHER-${v.id}`,
-          label: `${v.productName}`,
-          bankTokenSymbol: v.bankTokenSymbol,
-          amount: convertedTokenValue, // amount에 환산된 금액 표시
-          balance: `${v.balance.toFixed(2)} ${v.bankTokenSymbol}`, // balance에 바우처 잔액 표시
-          insufficientBalance: v.balance < totalPrice, // 잔액 부족 여부 계산
-          type: "VOUCHER",
-          voucherId: v.id,
-          exchangeRate,
-        };
-      });
+    if (totalTokenValue > 0 && v.tokenBalance) {
+      exchangeRate = v.tokenBalance / totalTokenValue;
+      const adjustedValue = totalPrice * exchangeRate;
+      convertedTokenValue = `${adjustedValue.toFixed(2)} ${v.bankTokenSymbol}`;
+    }
 
-    setPaymentOptions([...coinOptions, ...voucherOptions]);
-  }, [balances, tickerData, totalPrice, vouchers, totalTokenValue, availableCurrencies]);
+    return {
+      id: `VOUCHER-${v.id}`,
+      label: `${v.productName}`,
+      bankTokenSymbol: v.bankTokenSymbol,
+      amount: convertedTokenValue,
+      balance: `${v.balance.toFixed(2)} ${v.bankTokenSymbol}`,
+      insufficientBalance: v.balance < totalPrice,
+      type: "VOUCHER",
+      voucherId: v.id,
+      exchangeRate,
+    };
+  });
 
+setPaymentOptions((prevOptions) => {
+  const allOptions = [
+    ...prevOptions.filter((opt) => opt.type === "COIN"),
+    ...voucherOptions,
+  ];
+  return allOptions.sort((a, b) => {
+    if (a.type === b.type) {
+      return a.id.localeCompare(b.id); // 같은 타입일 경우 id로 정렬
+    }
+    return a.type === "VOUCHER" ? -1 : 1; // VOUCHER가 COIN보다 먼저 오도록 정렬
+  });
+});
+}, [vouchers, totalTokenValue, totalPrice, availableCurrencies]);
 
-  // 6. 결제 수단 선택 핸들러
+  // 결제 수단 선택 핸들러
   const handlePaymentSelect = (method: string) => {
     setSelectedPayment(method);
   };
 
-  // 7. 주문 생성 핸들러
+  // 주문 생성 핸들러
   const handlePayment = async () => {
     if (!selectedPayment) {
       return;
@@ -279,7 +302,7 @@ export default function SelectPaymentPage() {
         paymentType: "VOUCHER",
         currency: selectedOption.bankTokenSymbol,
         voucherSubscribeId: selectedOption.voucherId,
-        exchangeRate:selectedOption.exchangeRate, 
+        exchangeRate: selectedOption.exchangeRate,
       };
     } else {
       alert("유효한 결제 방식이 아닙니다.");
@@ -339,6 +362,6 @@ export default function SelectPaymentPage() {
       </div>
 
       <BottomNav />
-    </div >
+    </div>
   );
 }

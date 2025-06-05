@@ -37,6 +37,7 @@ export default function OrderStatusPage() {
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false)
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
   const [previousOrderIds, setPreviousOrderIds] = useState<Set<string>>(new Set())
+  const [updatedAtMap, setUpdatedAtMap] = useState<Map<string, string>>(new Map())
   const [audioPlayCount, setAudioPlayCount] = useState<Map<string, number>>(new Map())
   const [audioEnabled, setAudioEnabled] = useState(false) // 오디오 활성화 상태
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
@@ -108,11 +109,18 @@ export default function OrderStatusPage() {
 
   // 오디오 초기화
   useEffect(() => {
-    // new Audio를 사용한 오디오 파일 재생
-    audioRef.current = new Audio('/new-order.mp3');
-    audioRef.current.preload = 'auto';
-    setAudioEnabled(true); // mp3 파일 사용 시 즉시 활성화
-  }, [])
+    const enableAudio = () => {
+      audioRef.current = new Audio('/new-order.mp3');
+      audioRef.current.preload = 'auto';
+      setAudioEnabled(true); // 오디오 활성화
+    };
+
+    document.addEventListener('click', enableAudio, { once: true }); // 첫 클릭 시 오디오 활성화
+
+    return () => {
+      document.removeEventListener('click', enableAudio);
+    };
+  }, []);
 
   // 새 주문 알림 사운드 재생 (WAITING 상태의 신규 주문만, 주문당 최대 3번)
   const playNewOrderSound = (orderId: string) => {
@@ -127,12 +135,15 @@ export default function OrderStatusPage() {
   }
 
   // 남은 시간 계산 함수
-  const calculateTimeRemaining = (readyAt?: string) => {
-    if (!readyAt) return null;
+  const calculateTimeRemaining = (readyAt?: string, orderId?: string) => {
+    if (!readyAt || !orderId) return null;
 
-    const now = new Date();
+    const updatedAt = updatedAtMap.get(orderId); // 상태에서 updatedAt 가져오기
+    if (!updatedAt) return null;
+
+    const updatedTime = new Date(updatedAt);
     const readyTime = new Date(readyAt);
-    const diffInMs = readyTime.getTime() - now.getTime();
+    const diffInMs = readyTime.getTime() - updatedTime.getTime();
     const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
 
     if (diffInMinutes > 0) {
@@ -175,10 +186,11 @@ export default function OrderStatusPage() {
     "EXPIRED": "종료",
   };
 
-  // 주문 데이터 로드 함수
+  // 주문 데이터 로드 함수// 주문 데이터 로드 함수
   const loadOrders = async () => {
     try {
       const data = await fetchOrders();
+
       const mappedOrders: Order[] = data.map((order: any) => ({
         id: order.orderId,
         number: order.orderId,
@@ -247,6 +259,12 @@ export default function OrderStatusPage() {
 
       setPreviousOrderIds(currentOrderIds);
 
+      // updatedAt 상태를 서버에서 불러온 값으로 동기화
+      const updatedAtFromServer = new Map(
+        mappedOrders.map((order) => [order.id, order.updatedAt || new Date().toISOString()])
+      );
+      setUpdatedAtMap(updatedAtFromServer);
+
     } catch (error) {
       console.error("Failed to fetch orders:", error);
     }
@@ -293,9 +311,12 @@ export default function OrderStatusPage() {
   const handleAccept = async (time: string) => {
     if (!selectedOrderId) return;
     try {
+      const updatedAt = new Date().toISOString();
       const readyAt = new Date(Date.now() + parseInt(time) * 60 * 1000).toISOString();
 
       await handleOrderAction(selectedOrderId, "accept", { preparationTime: time });
+
+      setUpdatedAtMap((prev) => new Map(prev).set(selectedOrderId, updatedAt));
 
       // 주문 상태 업데이트
       setOrders((prevOrders) =>
@@ -383,7 +404,7 @@ export default function OrderStatusPage() {
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
           order.id === id
-            ? { ...order, status: "수락 완료", readyAt: finalMinutes } 
+            ? { ...order, status: "수락 완료", readyAt: finalMinutes }
             : order
         )
       );
@@ -446,7 +467,7 @@ export default function OrderStatusPage() {
               <div className="flex justify-between items-start mb-2">
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="font-bold">주문 id #{order.number}</h2>
+                    <h2 className="font-bold">주문 번호 #{order.number}</h2>
                     {order.isNew && (
                       <div className="flex items-center gap-1">
                         <span className="px-2 py-1 bg-red-500 text-white text-xs rounded-full animate-bounce">
@@ -522,7 +543,7 @@ export default function OrderStatusPage() {
                       ? 'bg-red-100 text-red-600'
                       : 'bg-yellow-100 text-yellow-600'
                       }`}>
-                      {calculateTimeRemaining(order.readyAt) || "시간 정보 없음"}
+                      {calculateTimeRemaining(order.readyAt, order.id) || "시간 정보 없음"}
                     </div>
                     <button
                       onClick={() => handlePrepareComplete(order.id)}
