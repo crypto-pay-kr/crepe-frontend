@@ -61,7 +61,7 @@ export default function CoinTransaction() {
 
       <div className="flex-1 px-5 py-6 overflow-auto">
         <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-8">거래 ID 입력</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-8">거래 ID</h2>
           
           <TransactionIdInput 
             value={transactionId}
