@@ -71,8 +71,6 @@ export default function TokenGroupDetailPage() {
 
     };
     fetchAllData();
-    const interval = setInterval(fetchAllData, 5000);
-    return () => clearInterval(interval);
   }, [bank]);
 
 
@@ -153,10 +151,12 @@ export default function TokenGroupDetailPage() {
               </div>
               <div className="text-right">
                 <p className="text-lg font-bold sm:text-xl md:text-2xl">
-                  {balance.toFixed(2)} {bank}
+                  {balance.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {bank}
                 </p>
                 <p className="text-sm text-gray-500 sm:text-base">
-                  {(tokenPrice * balance).toLocaleString()} KRW
+                  {tokenPrice > 0
+                    ? `${(tokenPrice * balance).toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KRW`
+                    : '- KRW'}
                 </p>
               </div>
             </div>
@@ -190,10 +190,7 @@ export default function TokenGroupDetailPage() {
                     tokenCapital,
                     tokenInfo?.totalSupply ?? 0
                   )
-                  const krw = Math.floor(
-                    tx.amount * tokenPrice
-                  ).toLocaleString()
-
+                  const krw = tx.amount * tokenPrice
                   return (
                     <div
                       key={
@@ -221,7 +218,7 @@ export default function TokenGroupDetailPage() {
                         }
                         balance={`${tx.afterBalance?.toFixed(2) ?? '-'} ${bank}`}
                         amount={`${tx.amount.toFixed(2)} ${bank}`}
-                        krw={`${krw} KRW`}
+                        krw={krw}
                         isDeposit={tx.amount < 0}
                         showAfterBalance={tx.status === 'ACCEPTED'}
                       />
