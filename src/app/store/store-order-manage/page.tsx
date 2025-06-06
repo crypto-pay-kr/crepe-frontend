@@ -17,6 +17,7 @@ interface OrderItem {
 interface Order {
   id: string
   number: string
+  clientOrderNumber?: string 
   type: string
   status: string
   items: OrderItem[]
@@ -193,6 +194,7 @@ export default function OrderStatusPage() {
 
       const mappedOrders: Order[] = data.map((order: any) => ({
         id: order.orderId,
+        clientOrderNumber: order.clientOrderNumber, // 클라이언트 주문 번호
         number: order.orderId,
         type: order.orderType,
         status: statusMap[order.status as keyof typeof statusMap] || order.status,
@@ -467,7 +469,7 @@ export default function OrderStatusPage() {
               <div className="flex justify-between items-start mb-2">
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="font-bold">주문 번호 #{order.number}</h2>
+                    <h2 className="font-bold">{order.clientOrderNumber}번</h2>
                     {order.isNew && (
                       <div className="flex items-center gap-1">
                         <span className="px-2 py-1 bg-red-500 text-white text-xs rounded-full animate-bounce">
@@ -487,6 +489,9 @@ export default function OrderStatusPage() {
                       {order.status}
                     </span>
                   </div>
+                  <p className="text-gray-400 text-xs mt-1">
+                      주문 번호 #{order.number}
+                    </p>
                   {order.createdAt && (
                     <p className="text-gray-400 text-xs mt-1">
                       {new Date(order.createdAt).toLocaleString('ko-KR')}

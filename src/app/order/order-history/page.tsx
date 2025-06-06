@@ -27,10 +27,17 @@ export default function MyOrderHistoryPage() {
     }[];
   }
 
+  interface LocalOrder extends Order {
+    orderDateRaw: string; // ISO 날짜 문자열
+  }
+
   // 서버 응답 → 프런트 Order 형식으로 변환
-  function mapToLocalOrder(data: ServerOrderResponse[]): Order[] {
+  function mapToLocalOrder(data: ServerOrderResponse[]): LocalOrder[] {
     return data.map((item) => {
-      // createdAt 날짜 포맷
+      // createdAt 은 ISO 날짜 문자열
+      const rawDate = item.createdAt; // eg) "2025-05-10T01:31:57.886928"
+
+      // 사람이 보기에 좋은 형식으로 변환 (예: "2025년 6월 7일 오후 12:31")
       const dateObj = new Date(item.createdAt);
       const formattedDate = dateObj.toLocaleString("ko-KR", {
         year: "numeric",
@@ -54,6 +61,8 @@ export default function MyOrderHistoryPage() {
         orderNumber: item.orderId,
         totalPrice: item.totalPrice.toString(),
         storeLocation: item.storeAddress,
+        // 새로 추가한 필드 (정렬용)
+        orderDateRaw: rawDate,
       };
     });
   }
@@ -61,13 +70,24 @@ export default function MyOrderHistoryPage() {
   useEffect(() => {
     (async () => {
       try {
-        const response = await getOrderHistory(); 
-        setOrders(mapToLocalOrder(response));
+        const response = await getOrderHistory();
+        // 1) 서버 응답을 로컬 Order 형식으로 변환
+        let localOrders = mapToLocalOrder(response);
+
+        // 2) orderDate를 기반으로 최신순(내림차순) 정렬
+        localOrders = localOrders.sort(
+          (a, b) =>
+            new Date(b.orderDateRaw).getTime() - new Date(a.orderDateRaw).getTime()
+        );
+
+        // 3) 정렬된 결과를 setOrders
+        setOrders(localOrders);
       } catch (err) {
         console.error("Failed to fetch order history:", err);
       }
     })();
   }, []);
+
 
   return (
     <div className="flex h-full flex-col bg-gray-50">

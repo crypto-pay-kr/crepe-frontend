@@ -7,6 +7,7 @@ interface OrderDetail {
 }
 
 interface OrderSummaryCardProps {
+  clientOrderNumber?: string;
   orderId: string;
   totalPrice: number;
   orderStatus: string;
@@ -33,6 +34,7 @@ const getOrderStatusLabel = (status: string, reason?: string) => {
 
 const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({
   orderId,
+  clientOrderNumber,
   totalPrice,
   orderStatus,
   orderType,
@@ -46,7 +48,7 @@ const OrderSummaryCard: React.FC<OrderSummaryCardProps> = ({
           <ShoppingCartIcon />
         </div>
         <div>
-          <div className="font-bold">Order #{orderId}</div>
+          <div className="font-bold">픽업번호 {clientOrderNumber}번</div>
           {getOrderStatusLabel(orderStatus, reason)}
         </div>
       </div>

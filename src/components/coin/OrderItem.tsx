@@ -73,7 +73,7 @@ export function OrderItem({ order }: OrderItemProps) {
               )}
             </div>
           </div>
-          <p className="text-xl font-medium">주문번호 {id}</p>
+          <p className="text-xl font-medium">주문 번호 {id}</p>
         </div>
         <div className="text-base text-gray-500">
           <p>{statusLabel}</p>

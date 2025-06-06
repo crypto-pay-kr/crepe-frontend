@@ -40,8 +40,8 @@ export const createOrder = async (orderRequest: OrderRequest) => {
     console.error("주문 실패 응답 (text):", res.status, body);
     throw new ApiError('UNKNOWN', res.status, '요청 실패');
   }
-
-  return res.text();
+  const data = await res.json(); 
+  return data; // { orderId, clientOrderNumber }
 };
 
 

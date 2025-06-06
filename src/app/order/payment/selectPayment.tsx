@@ -314,7 +314,7 @@ setPaymentOptions((prevOptions) => {
         alert("유효한 결제 요청이 생성되지 않았습니다.");
         return;
       }
-      const orderId = await createOrder(orderRequest);
+      const { orderId } = await createOrder(orderRequest);
       navigate("/mall/store/order-pending", { state: { orderId } });
     } catch (e: any) {
       console.error("Order creation failed:", e);

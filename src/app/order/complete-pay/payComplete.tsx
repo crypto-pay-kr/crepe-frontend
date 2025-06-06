@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import Header from "@/components/common/Header";
 import BottomNav from "@/components/common/BottomNavigate";
@@ -12,6 +12,8 @@ import { getOrderDetails } from "@/api/order";
 export default function PayCompletePage() {
   const navigate = useNavigate();
   const { orderId } = useParams<{ orderId: string }>();
+  const { state } = useLocation();
+  const clientOrderNumber = state?.clientOrderNumber;
   const [orderDetails, setOrderDetails] = useState<any>(null);
 
   const getCurrentStep = (status: string): number => {
@@ -95,6 +97,7 @@ export default function PayCompletePage() {
           <motion.div variants={itemVariants} className="my-8 transition-all duration-300 hover:shadow-lg rounded-xl">
             {orderDetails ? (
               <OrderSummaryCard
+                clientOrderNumber={orderDetails.clientOrderNumber}
                 orderId={orderDetails.orderId}
                 totalPrice={orderDetails.totalPrice}
                 orderStatus={orderDetails.orderStatus}
