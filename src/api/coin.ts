@@ -150,6 +150,8 @@ export const requestWithdraw = async (currency: string, amount: string) => {
 //코인 내역조회
 export const getCoinHistory = async ({ pageParam = 0, queryKey }: { pageParam?: number; queryKey: any }) => {
   const token = sessionStorage.getItem("accessToken");
+    console.log('API 호출 시 토큰 존재:', !!token);
+
   const symbol = queryKey[1];
   const res = await fetch(`${BASE_URL}/api/history/coin?currency=${symbol}&page=${pageParam}&size=5`, {
     headers: {

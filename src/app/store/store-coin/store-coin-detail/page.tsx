@@ -29,7 +29,6 @@ export default function CoinDetailPage() {
   document.head.appendChild(styleSheet);
   const { symbol } = useParams()
   const location = useLocation()
-  const isUser = location.state?.isUser ?? false
   const tickerData = useTickerData();
   const [addressStatus, setAddressStatus] = useState<'ACTIVE' | 'REGISTERING' | 'NOT_REGISTERED' |'UNREGISTERED'|'UNREGISTERED_AND_REGISTERING'|'REJECTED'| null>(null);
   const [showModal, setShowModal] = useState(false)
@@ -44,7 +43,10 @@ export default function CoinDetailPage() {
   const coinMeta = coinList.find(c => c.currency === symbol);
   const livePrice = tickerData[`KRW-${symbol}`]?.trade_price ?? 0;
 
+  const isUser = sessionStorage.getItem("userRole") === "USER"
+  
   const getTransactionDirection = (item: PaymentHistory, isUser: boolean): 'deposit' | 'withdraw' => {
+    
   switch (item.type) {
     case 'DEPOSIT':
       return 'deposit'; // 입금 (양쪽 동일)
