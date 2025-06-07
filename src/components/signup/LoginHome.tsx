@@ -26,7 +26,7 @@ export default function LoginHome({ onSignup, onStoreSignup, buttonClassName }: 
   useEffect(() => {
     fetchCaptcha();
     
-    // 이미 로그인된 상태라면 리다이렉트
+    // 이미 로그인된 상태라면 ㄴ리다이렉트
     if (isAuthenticated) {
       navigate("/my/coin");
     }

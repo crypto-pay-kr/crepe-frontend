@@ -11,6 +11,7 @@ export default function TransactionIdInput({ value, onChange }: TransactionIdInp
       <div className="relative">
        <textarea
          value={value}
+         data-testid="txid-input"
          onChange={(e) => onChange(e.target.value)}
          placeholder="예:upbit7196e61de85a4dfc94b634e4b7627431241217006284108bc87987e38b"
          className="w-full max-w-[700px] border border-gray-300 rounded-lg py-3 px-4 text-base font-mono resize-none overflow-y-auto focus:outline-none focus:ring-2 focus:ring-blue-500"
