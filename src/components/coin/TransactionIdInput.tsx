@@ -8,6 +8,7 @@ interface TransactionIdInputProps {
 export default function TransactionIdInput({ value, onChange }: TransactionIdInputProps) {
   return (
     <div className="mb-6">
+      <p className="mb-3 text-lg font-semibold text-gray-700">거래 ID</p>
       <div className="relative">
        <textarea
          value={value}

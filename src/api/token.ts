@@ -27,13 +27,12 @@ export const terminateSubscription = async (subscribeId: string) => {
 
 
 // 상품 예치
-export const depositToken = async (subscribeId: string, amount: number,traceId:string) => {
+export const depositToken = async (subscribeId: string, amount: number) => {
   const accessToken = sessionStorage.getItem("accessToken");
 
   const res = await fetch(`${API_BASE_URL}/api/deposit/token`, {
     method: "POST",
     headers: {
-      'Trace-Id': traceId,
       "Content-Type": "application/json",
       "Authorization": `Bearer ${accessToken}`,
     },
@@ -152,7 +151,6 @@ export const requestExchange = async (
     coinRates: Record<string, number>;
     tokenAmount: number;
     coinAmount: number;
-    traceId: string;
   }
 ) => {
   const token = sessionStorage.getItem("accessToken");
@@ -161,7 +159,6 @@ export const requestExchange = async (
   const res = await fetch(`${BASE_URL}${endpoint}`, {
     method: 'POST',
     headers: {
-      'Trace-Id': requestData.traceId,
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json'
     },
@@ -228,14 +225,13 @@ export async function fetchTokenBalance(currency: string): Promise<number> {
   return await res.json();
 };
 
-export const requestTransfer = async (email: string, currency: string, amount: number,traceId:string) => {
+export const requestTransfer = async (email: string, currency: string, amount: number) => {
   const token = sessionStorage.getItem("accessToken");
 
   const response = await fetch(`${BASE_URL}/api/transfer`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      'Trace-Id': traceId,
       "Authorization": `Bearer ${token}`,
     },
     body: JSON.stringify({
