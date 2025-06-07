@@ -17,11 +17,11 @@ const PaymentOptionsList: React.FC<PaymentOptionsListProps> = ({
     <div className="space-y-4">
       {options.map((option, index) => (
         <PaymentOptionCard
-          key={option.id}
-          option={option}
-          isSelected={selectedPaymentId === option.id}
-          onSelect={onSelectPayment}
-          animationDelay={index * 0.1} // 애니메이션 딜레이 추가
+        key={`${option.type}-${option.id}`} // 고유한 key 설정
+        option={option}
+        isSelected={selectedPaymentId === option.id}
+        onSelect={onSelectPayment}
+        animationDelay={index * 0.1} // 애니메이션 딜레이 추가
         />
       ))}
     </div>

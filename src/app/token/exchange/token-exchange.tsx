@@ -82,17 +82,17 @@ export default function TokenExchangePage() {
 
     const result = calculateConversion(isCoinToToken, coinAmount, tokenAmount, rate, tokenPrice);
     if (isCoinToToken) {
-      setTokenAmount(Number(result.toFixed(2)));
+      setTokenAmount(Number(result.toFixed(8)));
     } else {
-      setCoinAmount(Number(result.toFixed(2)));
+      setCoinAmount(Number(result.toFixed(8)));
     }
   }, [tokenInfo, selectedCurrency, coinAmount, tokenAmount, isCoinToToken,tickerData]);
 
 
 
   const tokenPrice = useMemo(() => {
-    return calculateTokenPrice(tokenCapital, tokenInfo?.tokenAmount ?? 0);
-  }, [tokenCapital, tokenInfo?.tokenAmount]);
+    return calculateTokenPrice(tokenCapital, tokenInfo?.tokenBalance ?? 0);
+  }, [tokenCapital, tokenInfo?.tokenBalance]);
 
   //최대로 교환 가능한 토큰 수량
   const maxExchangeToken = useMemo(() =>
@@ -285,22 +285,19 @@ export default function TokenExchangePage() {
             </div>
           </div>
 
-          {/* 빠른 금액 선택 - 새로운 버전 */}
           <div className="mt-4 flex justify-end gap-2">
             {[25, 50, 75, 100].map(percent => {
               const maxBalance = isCoinToToken ? myCoinBalance : myTokenBalance
-              const expectedAmount = Math.floor((maxBalance * percent) / 100)
-              const currentAmount = isCoinToToken ? coinAmount : tokenAmount
-              const isSelected = currentAmount === expectedAmount
+
 
               return (
                 <button
                   key={percent}
                   onClick={() => {
-                    const amount = Math.floor((maxBalance * percent) / 100)
+                    const amount =((maxBalance * percent) / 100).toFixed(2)
                     isCoinToToken
-                      ? setCoinAmount(amount)
-                      : setTokenAmount(amount)
+                      ? setCoinAmount(Number(amount))
+                      : setTokenAmount(Number(amount))
                   }}
                   className={`rounded-full px-4 py-2 text-sm text-black font-medium transition-colors bg-gray-100`}
                 >
@@ -460,7 +457,7 @@ export default function TokenExchangePage() {
                     {p.currency}
                   </span>
                   <span className="text-sm text-gray-600">
-                    교환됨 {swappedRatio.toFixed(2)}%
+                    교환됨 {swappedRatio}%
                   </span>
                 </div>
                 <div className="flex h-3 w-full overflow-hidden rounded-full bg-gray-200">

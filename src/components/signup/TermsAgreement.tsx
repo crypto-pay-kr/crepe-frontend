@@ -1,12 +1,13 @@
-import { useState } from 'react'
-import Header from '../common/Header'
-import Button from '../common/Button'
-import CheckCircle from '../common/CheckCircle'
-import ChevronRight from '../common/ChevronRight'
+import { useState } from "react";
+import Header from "../common/Header";
+import Button from "../common/Button";
+import CheckCircle from "../common/CheckCircle";
+import ChevronRight from "../common/ChevronRight";
+import { TermsAgreementModal, TermsType } from "./TermsAgreementModal";
 
 interface TermsAgreementProps {
-  onNext: () => void
-  isStore?: boolean
+  onNext: () => void;
+  isStore?: boolean;
 }
 
 export default function TermsAgreement({
@@ -17,30 +18,40 @@ export default function TermsAgreement({
     all: false,
     terms: false,
     privacy: false,
-  })
+  });
+
+  const [openModal, setOpenModal] = useState<TermsType | null>(null); // 모달 상태 추가
 
   const handleToggleAll = () => {
-    const newValue = !agreements.all
+    const newValue = !agreements.all;
     setAgreements({
       all: newValue,
       terms: newValue,
       privacy: newValue,
-    })
-  }
+    });
+  };
 
-  const handleToggleItem = (key: 'terms' | 'privacy') => {
+  const handleToggleItem = (key: "terms" | "privacy") => {
     const newAgreements = {
       ...agreements,
       [key]: !agreements[key],
-    }
+    };
 
     // Update "all" checkbox based on individual items
-    newAgreements.all = newAgreements.terms && newAgreements.privacy
+    newAgreements.all = newAgreements.terms && newAgreements.privacy;
 
-    setAgreements(newAgreements)
-  }
+    setAgreements(newAgreements);
+  };
 
-  const isButtonActive = agreements.terms && agreements.privacy
+  const handleOpenModal = (type: TermsType) => {
+    setOpenModal(type); // 모달 열기
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(null); // 모달 닫기
+  };
+
+  const isButtonActive = agreements.terms && agreements.privacy;
 
   return (
     <div className="flex h-full flex-col bg-white">
@@ -48,7 +59,7 @@ export default function TermsAgreement({
 
       <main className="flex flex-1 flex-col overflow-auto px-5 pb-24 pt-8">
         <div className="mb-8 flex flex-1 flex-col items-center justify-center">
-          <div className=" text-center">
+          <div className="text-center">
             <h2 className="mb-2 text-2xl font-bold text-gray-800">
               서비스 이용을 위해
             </h2>
@@ -75,12 +86,12 @@ export default function TermsAgreement({
           {/* Terms of Service */}
           <div
             className="flex cursor-pointer items-center justify-between rounded-lg px-3 py-4 transition-colors hover:bg-gray-100"
-            onClick={() => handleToggleItem('terms')}
+            onClick={() => handleOpenModal("serviceTerms")} // 모달 열기
           >
             <div className="flex items-center">
               <CheckCircle checked={agreements.terms} />
               <span className="ml-3 text-base text-gray-800">
-                이용약관{' '}
+                이용약관{" "}
                 <span className="font-medium text-gray-500">(필수)</span>
               </span>
             </div>
@@ -90,12 +101,12 @@ export default function TermsAgreement({
           {/* Privacy Policy */}
           <div
             className="flex cursor-pointer items-center justify-between rounded-lg px-3 py-4 transition-colors hover:bg-gray-100"
-            onClick={() => handleToggleItem('privacy')}
+            onClick={() => handleOpenModal("personalInfo")} // 모달 열기
           >
             <div className="flex items-center">
               <CheckCircle checked={agreements.privacy} />
               <span className="ml-3 text-base text-gray-800">
-                개인정보 처리방침{' '}
+                개인정보 처리방침{" "}
                 <span className="font-medium text-gray-500">(필수)</span>
               </span>
             </div>
@@ -110,12 +121,21 @@ export default function TermsAgreement({
           onClick={onNext}
           className={`w-full rounded-lg py-3.5 font-medium text-white ${
             isButtonActive
-              ? 'bg-blue-600 hover:bg-blue-700'
-              : 'cursor-not-allowed bg-gray-300'
+              ? "bg-blue-600 hover:bg-blue-700"
+              : "cursor-not-allowed bg-gray-300"
           }`}
           disabled={!isButtonActive}
         />
       </div>
+
+      {/* 약관 모달 */}
+      {openModal && (
+        <TermsAgreementModal
+          isOpen={true}
+          onClose={handleCloseModal}
+          type={openModal}
+        />
+      )}
     </div>
-  )
+  );
 }

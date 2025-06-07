@@ -1,8 +1,28 @@
 import { ApiError } from '@/error/ApiError'
-
+import { OrderRequest } from "@/types/order";
 const API_BASE_URL = import.meta.env.VITE_API_SERVER_URL || "http://localhost:8080";
 
-import { OrderRequest } from "@/types/order";
+
+
+export async function getAvailableCurrency(storeId: number): Promise<string[]> {
+  const token = sessionStorage.getItem("accessToken");
+  if (!token) throw new Error("인증 토큰이 없습니다.");
+
+  const res = await fetch(`${API_BASE_URL}/api/orders/available-currency?storeId=${storeId}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(body.code || "UNKNOWN", res.status, body.message || "요청 실패");
+  }
+
+  return res.json();
+}
 
 export const createOrder = async (orderRequest: OrderRequest) => {
   const token = sessionStorage.getItem("accessToken");

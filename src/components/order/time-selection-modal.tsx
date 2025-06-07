@@ -38,7 +38,7 @@ export function TimeSelectionModal({ isOpen, onClose, onAccept }: TimeSelectionM
         <button
           onClick={handleAccept}
           disabled={selectedTime === null}
-          className={`w-full mt-6 py-3 rounded-md text-white font-medium ${selectedTime === null ? "bg-blue-300" : "bg-[#0a2e65]"
+          className={`w-full mt-6 py-3 rounded-md text-white font-medium ${selectedTime === null ? "bg-blue-300" : "bg-[#4B5EED]"
             }`}
         >
           수락

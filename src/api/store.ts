@@ -216,6 +216,30 @@ export async function patchStoreCoin(supportedCoins: string[]) {
   return await response.json();
 }
 
+
+/**
+ * 가맹점에서 지원하는 결제수단 목록 조회
+ */
+export async function getSupportedCoins(): Promise<string[]> {
+  const token = sessionStorage.getItem("accessToken");
+  if (!token) throw new Error("인증 토큰이 없습니다.");
+
+  const response = await fetch(`${API_BASE_URL}/api/store/supported/coins`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(body.code || "UNKNOWN", response.status, body.message || "요청 실패");
+  }
+
+  return await response.json();
+}
+
 // ------------------------------------
 //   STORE ORDER MANAGE API
 // ------------------------------------

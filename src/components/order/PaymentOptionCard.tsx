@@ -19,9 +19,8 @@ export default function PaymentOptionCard({
 }: PaymentOptionCardProps) {
   return (
     <motion.div
-      className={`p-4 rounded-lg border ${
-        isSelected ? "border-[#4B5EED]" : "border-gray-200"
-      } ${option.insufficientBalance ? "opacity-50 cursor-not-allowed" : ""}`}
+      className={`p-4 rounded-lg border ${isSelected ? "border-[#4B5EED]" : "border-gray-200"
+        } ${option.insufficientBalance ? "opacity-50 cursor-not-allowed" : ""}`}
       onClick={() => {
         if (!option.insufficientBalance) {
           onSelect(option.id);
@@ -34,7 +33,15 @@ export default function PaymentOptionCard({
       whileTap={!option.insufficientBalance ? { scale: 0.98 } : {}}
     >
       <div className="flex justify-between items-center">
-        <PaymentInfo option={option} />
+        <div>
+          <PaymentInfo option={option} />
+          {/* balance 표시 */}
+          {option.balance && (
+            <p className="text-sm text-gray-500 mt-1">
+              잔액: {option.balance}
+            </p>
+          )}
+        </div>
         <RadioButton isSelected={isSelected} />
       </div>
     </motion.div>
