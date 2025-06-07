@@ -106,12 +106,13 @@ export const getCoinBalanceByCurrency = async (currency: string) => {
 };
 
 //코인 입금 요청
-export const requestDeposit = async (currency: string, txid: string) => {
+export const requestDeposit = async (currency: string, txid: string, traceId:string) => {
   const token = sessionStorage.getItem("accessToken");
 
   const res = await fetch(`${BASE_URL}/api/deposit`, {
     method: 'POST',
     headers: {
+      'Trace-Id': traceId,
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
@@ -128,11 +129,12 @@ export const requestDeposit = async (currency: string, txid: string) => {
 
 
 // 코인 출금 요청
-export const requestWithdraw = async (currency: string, amount: string) => {
+export const requestWithdraw = async (currency: string, amount: string, traceId:string) => {
   const token = sessionStorage.getItem("accessToken");
   const res = await fetch(`${BASE_URL}/api/withdraw`, {
     method: 'POST',
     headers: {
+      'Trace-Id': traceId,
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
