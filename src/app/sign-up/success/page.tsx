@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const AnimationStyles = () => (
   <style>
@@ -100,6 +101,7 @@ export default function SignupCompletePage() {
   const [showButton, setShowButton] = useState(false);
   type Sparkle = { id: number; left: number; top: number; delay: number };
   const [sparkles, setSparkles] = useState<Sparkle[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const t1 = setTimeout(() => setShowGreeting(true), 300);
@@ -131,7 +133,7 @@ export default function SignupCompletePage() {
   }, []);
 
   const handleNext = () => {
-    // navigate("/login"); // 실제 구현에서는 이 라인을 사용
+    navigate("/login"); 
     console.log("로그인 페이지로 이동");
   };
 
