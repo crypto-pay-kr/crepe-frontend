@@ -33,13 +33,13 @@ export const depositToken = async (subscribeId: string, amount: number,traceId:s
   const res = await fetch(`${API_BASE_URL}/api/deposit/token`, {
     method: "POST",
     headers: {
-      'Trace-Id': traceId,
       "Content-Type": "application/json",
       "Authorization": `Bearer ${accessToken}`,
     },
     body: JSON.stringify({
       subscribeId,
       amount,
+      traceId,
     }),
   });
 
@@ -161,7 +161,6 @@ export const requestExchange = async (
   const res = await fetch(`${BASE_URL}${endpoint}`, {
     method: 'POST',
     headers: {
-      'Trace-Id': requestData.traceId,
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json'
     },
@@ -235,13 +234,13 @@ export const requestTransfer = async (email: string, currency: string, amount: n
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      'Trace-Id': traceId,
       "Authorization": `Bearer ${token}`,
     },
     body: JSON.stringify({
       receiverEmail: email,
       currency,
       amount,
+      traceId
     }),
   });
 

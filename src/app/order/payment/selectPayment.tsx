@@ -279,7 +279,7 @@ setPaymentOptions((prevOptions) => {
       menuCount: item.quantity,
     }));
     const baseRequest = { storeId, orderDetails };
-
+    const traceId =uuidv4();
     let orderRequest: OrderRequest;
 
     if (selectedOption.type === "COIN") {
@@ -293,6 +293,7 @@ setPaymentOptions((prevOptions) => {
         paymentType: "COIN",
         currency: selectedOption.id,
         exchangeRate: selectedPrice,
+        traceId:traceId
       };
     } else if (
       selectedOption.type === "VOUCHER" &&
@@ -304,6 +305,7 @@ setPaymentOptions((prevOptions) => {
         currency: selectedOption.bankTokenSymbol,
         voucherSubscribeId: selectedOption.voucherId,
         exchangeRate: selectedOption.exchangeRate,
+        traceId:traceId
       };
     } else {
       alert("유효한 결제 방식이 아닙니다.");
@@ -318,8 +320,7 @@ setPaymentOptions((prevOptions) => {
         alert("유효한 결제 요청이 생성되지 않았습니다.");
         return;
       }
-      const traceId =uuidv4();
-      const orderId = await createOrder(orderRequest,traceId);
+      const orderId = await createOrder(orderRequest);
       navigate("/mall/store/order-pending", { state: { orderId } });
     } catch (e: any) {
       console.error("Order creation failed:", e);
@@ -358,7 +359,7 @@ setPaymentOptions((prevOptions) => {
             text="주문하기"
             onClick={handlePayment}
             color="primary"
-            disabled={isLoading||
+            disabled={
               !selectedPayment ||
               paymentOptions.find((opt) => opt.id === selectedPayment)
                 ?.insufficientBalance

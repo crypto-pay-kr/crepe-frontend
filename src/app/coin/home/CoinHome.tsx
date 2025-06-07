@@ -46,6 +46,14 @@ export default function CoinHome() {
   const [enrichedTokenBalance, setEnrichedTokenBalance] = useState<Token[]>([]);
   const tokenInfosFetched = useRef(false);
 
+  const isTickerReady = useMemo(() => {
+    return coinBalance.every(coin => {
+      const ticker = tickerData[`KRW-${coin.currency}`];
+      return ticker && ticker.trade_price;
+    });
+  }, [coinBalance, tickerData]);
+
+
 // 1. 최초 한 번만 서버 호출
   useEffect(() => {
 

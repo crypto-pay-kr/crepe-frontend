@@ -21,6 +21,7 @@ export default function TransferPage() {
   const [isLoadingRecipient, setIsLoadingRecipient] = useState(false);
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
   const [traceId, setTraceId] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
   const coinOptions = [
     ...coins.map((coin) => ({
       type: 'coin',
@@ -90,11 +91,15 @@ export default function TransferPage() {
       toast('모든 필드를 입력하세요.');
       return;
     }
-    setTraceId(uuidv4());
+    const newTraceId = uuidv4();   // 새 ID를 변수로 먼저 생성
+    setTraceId(newTraceId);
     setShowModal(true);
   };
 
   const confirmTransfer = async () => {
+    if (isLoading) return; // 중복 클릭 방지
+
+    setIsLoading(true);
     try {
       await requestTransfer(recipient, selectedCoin, parseFloat(amount), traceId);
       toast.success('송금이 완료되었습니다');
@@ -106,6 +111,8 @@ export default function TransferPage() {
     } catch (error: any) {
       toast.error(error.message || '송금 실패');
       setShowModal(false);
+    }finally{
+      setIsLoadingRecipient(false);
     }
   };
 
