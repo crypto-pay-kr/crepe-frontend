@@ -113,10 +113,10 @@ export default function PhoneChangeForm({ onSuccess, onSubmit, }: PhoneChangeFor
           />
           <button
             onClick={sendVerificationCode}
-            className={`ml-2 border text-sm px-3 py-2 rounded ${
+            className={`ml-2 border px-3 py-2 rounded ${
               isVerified
                 ? "bg-gray-100 text-gray-500 border-gray-300"
-                : "bg-white text-[#4B5EED] bg-[#4B5EED] border border-[#4B5EED]"
+                : "bg-white border-[#0a2e65] text-[#0a2e65]"
             }`}
             disabled={isVerified}
           >
@@ -143,7 +143,7 @@ export default function PhoneChangeForm({ onSuccess, onSubmit, }: PhoneChangeFor
               className={`ml-2 border px-3 py-2 rounded ${
                 isVerified
                   ? "bg-gray-100 text-gray-500 border-gray-300"
-                  : "bg-white text-[#4B5EED] bg-[#4B5EED] border border-[#4B5EED]"
+                  : "bg-white border-[#0a2e65] text-[#0a2e65]"
               }`}
               disabled={isVerified}
             >
@@ -160,9 +160,9 @@ export default function PhoneChangeForm({ onSuccess, onSubmit, }: PhoneChangeFor
 
       <button
         onClick={handlePhoneChange}
-        className={`w-full py-2 rounded ${
+        className={`w-full py-3 rounded ${
           isVerified
-            ? "bg-[#4B5EED] text-white"
+            ? "bg-[#0a2e65] text-white"
             : "bg-gray-300 text-gray-500"
         }`}
         disabled={!isVerified}

@@ -106,7 +106,9 @@ export const getCoinBalanceByCurrency = async (currency: string) => {
 };
 
 //코인 입금 요청
+
 export const requestDeposit = async (currency: string, txid: string,traceId:string) => {
+
   const token = sessionStorage.getItem("accessToken");
 
   const res = await fetch(`${BASE_URL}/api/deposit`, {
@@ -128,7 +130,7 @@ export const requestDeposit = async (currency: string, txid: string,traceId:stri
 
 
 // 코인 출금 요청
-export const requestWithdraw = async (currency: string, amount: string, traceId:string) => {
+export const requestWithdraw = async (currency: string, amount: string) => {
   const token = sessionStorage.getItem("accessToken");
   const res = await fetch(`${BASE_URL}/api/withdraw`, {
     method: 'POST',
@@ -150,6 +152,8 @@ export const requestWithdraw = async (currency: string, amount: string, traceId:
 //코인 내역조회
 export const getCoinHistory = async ({ pageParam = 0, queryKey }: { pageParam?: number; queryKey: any }) => {
   const token = sessionStorage.getItem("accessToken");
+    console.log('API 호출 시 토큰 존재:', !!token);
+
   const symbol = queryKey[1];
   const res = await fetch(`${BASE_URL}/api/history/coin?currency=${symbol}&page=${pageParam}&size=5`, {
     headers: {
@@ -171,7 +175,7 @@ export const getCoinHistory = async ({ pageParam = 0, queryKey }: { pageParam?: 
 export async function unRegisterAccountAddress(currency: string): Promise<void> {
   const token = sessionStorage.getItem("accessToken");
 
-  const response = await fetch(`${BASE_URL}/api/unregister/address?currency=${currency}`, {
+  const response = await fetch(`/api/unregister/address?currency=${currency}`, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${token}`,

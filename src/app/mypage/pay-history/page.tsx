@@ -1,5 +1,3 @@
-import { ArrowLeft, Badge, Filter, Search } from 'lucide-react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/common/select"
 import BottomNav from '@/components/common/BottomNavigate'
 import React, { useEffect, useState } from 'react'
 import Header from '@/components/common/Header'

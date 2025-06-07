@@ -7,7 +7,6 @@ import { motion } from 'framer-motion';
 import { requestTransfer, fetchReceiverName } from '@/api/token';
 import { useCoinStore } from '@/constants/useCoin'
 import { useTokenStore } from '@/constants/useToken'
-import { v4 as uuidv4 } from 'uuid';
 
 export default function TransferPage() {
   const [recipient, setRecipient] = useState('');
@@ -20,8 +19,10 @@ export default function TransferPage() {
   const { tokens, fetchTokens } = useTokenStore();
   const [isLoadingRecipient, setIsLoadingRecipient] = useState(false);
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
+
   const [traceId, setTraceId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
+
   const coinOptions = [
     ...coins.map((coin) => ({
       type: 'coin',
@@ -101,7 +102,7 @@ export default function TransferPage() {
 
     setIsLoading(true);
     try {
-      await requestTransfer(recipient, selectedCoin, parseFloat(amount), traceId);
+      await requestTransfer(recipient, selectedCoin, parseFloat(amount));
       toast.success('송금이 완료되었습니다');
       setRecipient('');
       setAmount('');
@@ -194,10 +195,7 @@ export default function TransferPage() {
                 placeholder="0.00"
               />
                 <p className="mt-2 text-sm text-gray-500">
-                  보유 잔액: <span className="font-semibold">{selectedCoinInfo.balance.toLocaleString('ko-KR', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
-                })}</span> {selectedCoin}
+                  보유 잔액: <span className="font-semibold">{selectedCoinInfo.balance}</span> {selectedCoin}
                 </p>
             </motion.div>
           )}

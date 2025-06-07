@@ -65,14 +65,14 @@ export default function PasswordChangeForm({ onSuccess, onSubmit, }: PasswordCha
           />
           <button
             onClick={verifyCurrentPassword}
-            className={`ml-2 border text-sm px-3 py-2 rounded ${
+            className={`ml-2 border px-3 py-2 rounded ${
               isCurrentPasswordVerified
                 ? "bg-gray-100 text-gray-500 border-gray-300"
-                : "bg-white text-[#4B5EED] border-[#4B5EED] "
+                : "bg-white border-[#0a2e65] text-[#0a2e65]"
             }`}
             disabled={isCurrentPasswordVerified}
           >
-            비밀번호 확인
+            비밀번호확인
           </button>
         </div>
       </div>
@@ -109,9 +109,9 @@ export default function PasswordChangeForm({ onSuccess, onSubmit, }: PasswordCha
 
       <button
         onClick={handlePasswordChange}
-        className={`w-full py-2 rounded ${
+        className={`w-full py-3 rounded ${
           isCurrentPasswordVerified
-            ? "bg-[#4B5EED] text-white"
+            ? "bg-[#0a2e65] text-white"
             : "bg-gray-300 text-gray-500"
         }`}
         disabled={!isCurrentPasswordVerified}
