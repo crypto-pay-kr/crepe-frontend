@@ -2,32 +2,31 @@ import Header from '@/components/common/Header'
 import Button from '@/components/common/Button'
 import { useParams, useNavigate } from 'react-router-dom'
 import BottomNav from '@/components/common/BottomNavigate'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import TransactionIdInput from '@/components/coin/TransactionIdInput'
 import InstructionGuide from '@/components/coin/InstructionGuide'
 import {requestDeposit } from '@/api/coin'
 import { ApiError } from '@/error/ApiError'
 import { toast } from 'react-toastify';
-
+import { v4 as uuidv4 } from 'uuid';
 type RouteParams = {
   symbol: string;
 }
 
-interface NavigationState {
-  isUser: boolean;
-  symbol?: string;
-  transactionId: string;
-}
 
 export default function CoinTransaction() {
   const navigate = useNavigate();
   const params = useParams<keyof RouteParams>();
   const symbol = params.symbol;
   const [transactionId, setTransactionId] = useState<string>("")
+  const [isLoading, setIsLoading] = useState(false);
 
   const isButtonDisabled = !transactionId
 
   const handleNext = async () => {
+    if (isLoading) return;
+
+    setIsLoading(true);
     if (!symbol) {
       toast("코인 심볼이 없습니다.");
       return;
@@ -38,7 +37,8 @@ export default function CoinTransaction() {
       return;
     }
     try {
-      await requestDeposit(symbol, transactionId);
+      const traceId=uuidv4();
+      await requestDeposit(symbol, transactionId,traceId);
       navigate(`/coin-detail/${symbol}`, {
         state: {
           isUser: true,
@@ -53,6 +53,9 @@ export default function CoinTransaction() {
         toast('예기치 못한 오류가 발생했습니다.');
       }
     }
+   finally {
+    setIsLoading(false);
+  }
   };
 
   return (
@@ -80,6 +83,7 @@ export default function CoinTransaction() {
           onClick={handleNext}
           color={isButtonDisabled ? "gray" : "blue"}
           className="rounded-lg h-14 text-lg font-medium"
+          disabled={isLoading}
         />
       </div>
       <BottomNav />

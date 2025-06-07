@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Header from "@/components/common/Header"
-import { useLocation, useNavigate } from 'react-router-dom'
+import { createRoutesFromElements, useLocation, useNavigate } from 'react-router-dom'
 import BottomNav from '@/components/common/BottomNavigate'
 import AmountInput from '@/components/coin/AmountInput'
 import PercentageSelector from '@/components/coin/PercentageSelector'
@@ -10,6 +10,7 @@ import {  getCoinBalanceByCurrency, requestWithdraw } from '@/api/coin'
 import { useTickerData } from '@/hooks/useTickerData'
 import { toast } from "react-toastify";
 import { ApiError } from '@/error/ApiError'
+import { v4 as uuidv4 } from 'uuid';
 
 export default function SettlementCoin() {
   const [amount, setAmount] = useState("3.45")
@@ -19,6 +20,7 @@ export default function SettlementCoin() {
   const symbol = location.state?.symbol || 'XRP'
   const tickerData = useTickerData();
   const livePrice = tickerData[`KRW-${symbol}`]?.trade_price ?? 0;
+  const [isLoading, setIsLoading] = useState(false);
   const handleAmountChange = (value: string) => {
     setAmount(value)
   }
@@ -44,6 +46,7 @@ export default function SettlementCoin() {
     const fetchBalance = async () => {
       if (!symbol) return;
 
+
       try {
         const data = await getCoinBalanceByCurrency(symbol);
         setAvailableAmount(data.balance ?? 0);
@@ -58,8 +61,11 @@ export default function SettlementCoin() {
   }, [symbol]);
 
   const handleSubmit = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
     try {
-      await requestWithdraw(symbol, amount);
+      const traceId=uuidv4();
+      await requestWithdraw(symbol, amount,traceId);
       toast.success('정산 요청이 완료되었습니다.');
       navigate(`/coin-detail/${symbol}`, {
         state: { symbol }
@@ -70,6 +76,8 @@ export default function SettlementCoin() {
       } else {
         toast('예기치 못한 오류가 발생했습니다.');
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -140,6 +148,7 @@ export default function SettlementCoin() {
           onClick={handleSubmit}
           color="primary"
           className="py-4 text-lg font-medium rounded-xl shadow-md"
+          disabled={isLoading}
         />
       </div>
 
