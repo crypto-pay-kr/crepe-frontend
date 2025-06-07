@@ -10,7 +10,6 @@ import {
 } from '@/api/token'
 import { useTokenStore } from '@/constants/useToken';
 import { useTickerData } from '@/hooks/useTickerData'
-import { PaymentHistory } from '@/app/store/store-coin/store-coin-detail/page'
 
 interface Transaction {
   id: number;
@@ -72,6 +71,8 @@ export default function TokenGroupDetailPage() {
 
     };
     fetchAllData();
+    const interval = setInterval(fetchAllData, 5000);
+    return () => clearInterval(interval);
   }, [bank]);
 
 
@@ -123,6 +124,8 @@ export default function TokenGroupDetailPage() {
 
 
 
+
+
   if (!bank) return <div className="p-4">잘못된 경로입니다.</div>;
 
   return (
@@ -150,12 +153,10 @@ export default function TokenGroupDetailPage() {
               </div>
               <div className="text-right">
                 <p className="text-lg font-bold sm:text-xl md:text-2xl">
-                  {balance.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {bank}
+                  {balance.toFixed(2)} {bank}
                 </p>
                 <p className="text-sm text-gray-500 sm:text-base">
-                  {tokenPrice > 0
-                    ? `${(tokenPrice * balance).toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KRW`
-                    : '- KRW'}
+                  {(tokenPrice * balance).toLocaleString()} KRW
                 </p>
               </div>
             </div>
@@ -189,13 +190,10 @@ export default function TokenGroupDetailPage() {
                     tokenCapital,
                     tokenInfo?.totalSupply ?? 0
                   )
-                  const krw = Math.abs(tx.amount) * tokenPrice
-                  const isDeposit =
-                    tx.type === "EXCHANGE" ? tx.amount > 0 : // 토큰 매수 = 입금, 매도 = 출금
-                      tx.type === "TRANSFER" ? tx.amount > 0 :
-                        tx.type === "SUBSCRIBE" ? tx.amount > 0 :
-                          tx.type === "PAY" ? tx.status !== "PENDING" : // 정산완료만 입금 처리
-                            tx.amount > 0;
+                  const krw = Math.floor(
+                    tx.amount * tokenPrice
+                  ).toLocaleString()
+
                   return (
                     <div
                       key={
@@ -205,48 +203,30 @@ export default function TokenGroupDetailPage() {
                       className="transition-all duration-300 ease-in-out"
                     >
                       <TransactionItem
-                        date={new Date(tx.transferredAt).toLocaleString()}
-                        type={
-                          tx.type === "EXCHANGE"
-                            ? tx.amount < 0
-                              ? "토큰 매도"
-                              : "토큰 매수"
-                            : tx.type === "SUBSCRIBE"
-                              ? tx.amount < 0
-                                ? "상품 예치 완료"
-                                : "상품 해지 및 만기 입금"
-                              : tx.type === "TRANSFER"
-                                ? tx.amount > 0
-                                  ? `${tx.name ?? ''}님에게서 받은 송금`
-                                  : `${tx.name ?? ''}님에게 송금 완료`
-                                : tx.type === "PAY"
-                                  ? tx.status === "PENDING"
-                                    ? "정산 대기중"
-                                    : "정산 완료"
-                                  : "-"
-                        }
-                        balance={
-                          tx.afterBalance !== undefined && tx.afterBalance !== null
-                            ? `${Number(tx.afterBalance).toFixed(2)} ${bank}`
-                            : "-"
-                        }
-                        amount={`${Math.abs(Number(tx.amount)).toFixed(2)} ${bank}`}
-                        krw={Number(krw).toFixed(2)}
-                        isDeposit={
-                          tx.type === "EXCHANGE"
-                            ? tx.amount >0
-                            : tx.type === "TRANSFER"
+                          date={new Date(tx.transferredAt).toLocaleString()}
+                          type={
+                            tx.type === "EXCHANGE"
                               ? tx.amount > 0
+                                ? "환전 입금 완료"
+                                : "환전 출금 완료"
                               : tx.type === "SUBSCRIBE"
-                                ? tx.amount > 0
-                                : tx.type === "PAY"
-                                  ? tx.status === "PENDING"
-                                  : tx.amount < 0
-                        }
-                        showAfterBalance={tx.status === "ACCEPTED"}
-                        originalAmount={Number(tx.amount)}
-                        transactionType={tx.type}
-                      />
+                                ? tx.amount < 0
+                                  ? "상품 예치 완료"
+                                  : "상품 해지 및 만기 입금"
+                                : tx.type === "TRANSFER"
+                                  ? tx.amount > 0
+                                    ? `${tx.name}님에게서 받은 송금`
+                                    : `${tx.name}님에게 송금 완료`
+                                  : "-"
+                          }
+                          balance={`${tx.afterBalance?.toFixed(2) ?? '-'} ${bank}`}
+                          amount={`${Math.abs(tx.amount).toFixed(2)} ${bank}`}
+                          krw={`${krw} KRW`}
+                          isDeposit={tx.amount > 0}
+                          showAfterBalance={tx.status === 'ACCEPTED'}
+                          originalAmount={tx.amount}
+                          transactionType={tx.type}
+                        />
                     </div>
                   )
                 })

@@ -8,10 +8,10 @@ interface TokenCategoryTabProps {
 
 
 export default function TokenCategoryTab({
-                                            categories,
-                                            selected,
-                                            onSelect,
-                                          }: TokenCategoryTabProps) {
+  categories,
+  selected,
+  onSelect,
+}: TokenCategoryTabProps) {
   return (
     <div className="flex border-b mb-4">
       {categories.map(cat => (
@@ -19,9 +19,7 @@ export default function TokenCategoryTab({
           key={cat}
           onClick={() => onSelect(cat)}
           className={`pb-2 px-4 ${
-            selected === cat
-              ? "border-b-2 border-[#4B5EED] font-bold text-[#4B5EED]"
-              : "text-gray-500"
+            selected === cat ? "border-b-2 border-black font-bold" : "text-gray-500"
           }`}
         >
           {cat}

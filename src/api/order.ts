@@ -24,12 +24,11 @@ export async function getAvailableCurrency(storeId: number): Promise<string[]> {
   return res.json();
 }
 
-export const createOrder = async (orderRequest: OrderRequest, traceId:string) => {
+export const createOrder = async (orderRequest: OrderRequest) => {
   const token = sessionStorage.getItem("accessToken");
   const res = await fetch(`${API_BASE_URL}/api/orders/create`, {
     method: 'POST',
     headers: {
-      'Trace-Id': traceId,
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },

@@ -11,7 +11,6 @@ import { useTokenStore } from '@/constants/useToken'
 import { getCoinBalanceByCurrency } from '@/api/coin'
 import { toast } from 'react-toastify'
 import { ApiError } from '@/error/ApiError'
-import { v4 as uuidv4 } from 'uuid'
 
 
 export default function TokenDepositPage() {
@@ -25,7 +24,6 @@ export default function TokenDepositPage() {
   const getTokenImage = useTokenStore((state) => state.getTokenImage);
   const imageUrl = getTokenImage(tokenInfoState.currency);
   const [myTokenBalance, setMyTokenBalance] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState(false);
 
 
   if (!subscribeId || !productState || !tokenInfoState) {
@@ -74,11 +72,9 @@ export default function TokenDepositPage() {
       return;
     }
     console.log("product",productState.maxMonthlyPayment);
-    if (isLoading) return;
-    setIsLoading(true);
+
     try {
-      const traceId=uuidv4()
-      await depositToken(subscribeId, amount,traceId);
+      await depositToken(subscribeId, amount);
       toast("예치가 완료되었습니다.");
       navigate(`/token/product/detail/${subscribeId}`, {
         state: {
@@ -94,9 +90,6 @@ export default function TokenDepositPage() {
       else {
         toast('예기치 못한 오류가 발생했습니다.');
       }}
-    finally {
-      setIsLoading(false);
-    }
   };
   useEffect(() => {
     if (!tokenInfoState) return;
@@ -255,7 +248,6 @@ export default function TokenDepositPage() {
           text="예치 하기"
           onClick={handleDeposit}
           className="w-full rounded-lg py-3 text-lg font-semibold shadow-md"
-          disabled={isLoading}
         />
       </div>
       <BottomNav />

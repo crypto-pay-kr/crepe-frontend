@@ -11,7 +11,6 @@ import { useTickerData } from "@/hooks/useTickerData";
 import { OrderRequest } from "@/types/order";
 import { toast } from "react-toastify";
 import { ApiError } from "@/error/ApiError";
-import { v4 as uuidv4 } from 'uuid';
 
 interface SubscribeVoucherDto {
   id: number;
@@ -38,7 +37,7 @@ export default function SelectPaymentPage() {
   const [availableCurrencies, setAvailableCurrencies] = useState<string[]>([]);
   const [totalTokenValue, setTotalTokenValue] = useState<number>(0);
   const [portfolioData, setPortfolioData] = useState<PortfolioData[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+
   // 1. 로컬 스토리지에서 총 금액 가져오기
   useEffect(() => {
     const storedTotalPrice = localStorage.getItem("totalPrice");
@@ -310,16 +309,12 @@ setPaymentOptions((prevOptions) => {
       return;
     }
 
-    if (isLoading) return;
-    setIsLoading(true);
-
     try {
       if (!orderRequest) {
         alert("유효한 결제 요청이 생성되지 않았습니다.");
         return;
       }
-      const traceId =uuidv4();
-      const orderId = await createOrder(orderRequest,traceId);
+      const orderId = await createOrder(orderRequest);
       navigate("/mall/store/order-pending", { state: { orderId } });
     } catch (e: any) {
       console.error("Order creation failed:", e);
@@ -328,8 +323,6 @@ setPaymentOptions((prevOptions) => {
       } else {
         toast.error("예기치 못한 오류가 발생했습니다.");
       }
-    }finally {
-      setIsLoading(false);
     }
   };
 
@@ -358,7 +351,7 @@ setPaymentOptions((prevOptions) => {
             text="주문하기"
             onClick={handlePayment}
             color="primary"
-            disabled={isLoading||
+            disabled={
               !selectedPayment ||
               paymentOptions.find((opt) => opt.id === selectedPayment)
                 ?.insufficientBalance
