@@ -18,6 +18,7 @@ import { useTickerData } from '@/hooks/useTickerData'
 import { ChevronDown } from 'lucide-react';
 import { ApiError } from '@/error/ApiError'
 import { toast } from 'react-toastify' // 아이콘 import 추가
+import { v4 as uuidv4 } from 'uuid';
 interface Portfolio {
   currency: string;
   amount: number;
@@ -43,6 +44,7 @@ export default function TokenExchangePage() {
   const tokenMeta = tokenList.find(t => t.currency === bank);
   const tickerData = useTickerData();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleCurrencyClick = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -132,14 +134,17 @@ export default function TokenExchangePage() {
        toast(` ${currency} 시세를 찾을 수 없습니다.`);
       }
     });
-
+    if (isLoading) return;
+    setIsLoading(true);
     try {
+      const traceId=uuidv4();
       await requestExchange(isCoinToToken, {
         fromCurrency: isCoinToToken ? selectedCurrency : tokenInfo.currency,
         toCurrency: isCoinToToken ? tokenInfo.currency : selectedCurrency,
         coinRates: filteredCoinRates,
         tokenAmount: tokenAmount ?? 0,
-        coinAmount: coinAmount ?? 0
+        coinAmount: coinAmount ?? 0,
+        traceId
       });
       navigate("/token/exchange/complete", {
         state: {
@@ -157,6 +162,9 @@ export default function TokenExchangePage() {
       } else {
         toast('예기치 못한 오류가 발생했습니다.');
       }
+    }
+    finally {
+      setIsLoading(false);
     }
   };
 
@@ -182,8 +190,16 @@ export default function TokenExchangePage() {
       });
   }, [bank, selectedCurrency]);
 
+  const isExchangeable = useMemo(() => {
+    if (!tokenInfo || !selectedCurrency) return false;
 
+    const portfolio = tokenInfo.portfolios.find((p: any) => p.currency === selectedCurrency);
+    if (!portfolio) return false;
 
+    const available = (portfolio.amount ?? 0) - (portfolio.nonAvailableAmount ?? 0);
+
+    return available > 0;
+  }, [tokenInfo, selectedCurrency]);
 
   return (
     <div className="flex h-full flex-col bg-gray-50">
@@ -402,26 +418,6 @@ export default function TokenExchangePage() {
                     maximumFractionDigits: 2
                   })} ${selectedCurrency}`
                   : '-'}
-
-              {isCoinToToken &&
-                selectedPortfolio &&
-                (() => {
-                  const totalAmount = selectedPortfolio.amount ?? 0
-                  const nonAvailable = selectedPortfolio.nonAvailableAmount ?? 0
-                  const remainingPercent =
-                    totalAmount > 0
-                      ? ((totalAmount - nonAvailable) / totalAmount) * 100
-                      : 100
-                  const isLowLiquidity = remainingPercent <= 30
-
-                  {
-                    isLowLiquidity && (
-                      <div className="mt-2 whitespace-nowrap text-xs font-semibold text-red-500">
-                        현재 {selectedCurrency} 잔여금액이 전체의 30% 이하입니다
-                      </div>
-                    )
-                  }
-                })()}
             </div>
           </div>
         </div>
@@ -440,6 +436,11 @@ export default function TokenExchangePage() {
                 maximumFractionDigits: 2
               })} ${selectedCurrency}`}
           </p>
+          {isCoinToToken && !isExchangeable && (
+            <p className="text-red-500 text-sm mt-2">
+              교환 가능한 수량이 없습니다.
+            </p>
+          )}
         </div>
 
         <div className="mb-20 border-none p-5">
@@ -492,6 +493,7 @@ export default function TokenExchangePage() {
           text="환전 요청"
           onClick={handleExchangeClick}
           className="w-full rounded-lg py-3 text-lg font-semibold shadow-md"
+          disabled={isLoading || (isCoinToToken && !isExchangeable)}
         />
       </main>
       <BottomNav />

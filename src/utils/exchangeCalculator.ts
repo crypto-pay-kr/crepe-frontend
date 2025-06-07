@@ -54,7 +54,7 @@ export function calculateMaxExchangeCoin({
   );
   if (!portfolio) return '-';
 
-  const result = portfolio.nonAvailableAmount;
+  const result = Math.max(0,portfolio.nonAvailableAmount);
   return result.toFixed(2);
 }
 
@@ -80,7 +80,6 @@ export function calculateMaxExchangeToken({
 
   if (coinRate === 0 || tokenPrice === 0) return '-';
 
-  const availableCapital = available * coinRate;
-
+  const availableCapital = Math.max(0, available * coinRate);
   return availableCapital.toFixed(2);
 }
