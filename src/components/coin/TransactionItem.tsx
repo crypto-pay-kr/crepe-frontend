@@ -3,7 +3,7 @@ interface TransactionItemProps {
   type: string;
   balance: string;
   amount: string;
-  krw: string;
+  krw: number|string;
   isDeposit: boolean;
   showAfterBalance: boolean;
   originalAmount: number;
@@ -27,7 +27,7 @@ export default function TransactionItem({
   const displayAmount = parseFloat(amountValue);
   
   // 입금/출금에 따른 +/- 기호 결정
-  const formattedAmount = `${isDeposit ? '+' : '-'}${displayAmount.toFixed(2)} ${symbol}`;
+  const formattedAmount = `${isDeposit ? '+' : '-'}${displayAmount.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${symbol}`;
 
   // 잔액 포맷팅
   const [balanceValue, rawBalanceSymbol] = balance.split(" ");
@@ -35,11 +35,8 @@ export default function TransactionItem({
   const balanceSymbol = rawBalanceSymbol?.toUpperCase() ?? rawBalanceSymbol;
 
   const formattedBalance = isNaN(parsedBalance)
-    ? balance
-    : `${parsedBalance.toFixed(2)} ${balanceSymbol}`;
-
-  // 디버깅용 로그
-  console.log(`거래: ${transactionType}, 원본금액: ${originalAmount}, 표시방향: ${isDeposit ? '입금' : '출금'}, 표시금액: ${formattedAmount}`);
+    ? Number(balance).toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : `${Number(parsedBalance).toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${balanceSymbol}`;
 
   return (
     <div className="space-y-2 border-b border-gray-300 pb-4">
@@ -48,7 +45,7 @@ export default function TransactionItem({
         <div>
           <p
             className={`text-base font-bold ${
-              isDeposit ? "text-indigo-800" : "text-red-500"
+              isDeposit ? "text-red-500":"text-indigo-800"
             } mb-2`}
           >
             {type}
@@ -60,12 +57,15 @@ export default function TransactionItem({
         <div className="text-right">
           <p>
             <span className={`text-base font-bold ${
-              isDeposit ? "text-indigo-800" : "text-red-500"
+              isDeposit ? "text-red-500" : "text-indigo-800"
             } mb-2`}>
               {formattedAmount}
             </span>
           </p>
-          <p className="text-sm text-gray-600">= {krw}</p>
+          <p className="text-sm text-gray-600">= {Number(krw).toLocaleString('ko-KR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          })} KRW</p>
         </div>
       </div>
     </div>

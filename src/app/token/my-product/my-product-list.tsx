@@ -161,7 +161,7 @@ export default function TokenProductListPage() {
               </div>
               <div className="text-right">
                 <p className="text-xl mt-1 font-bold">
-                  {products.balance} {tokenInfoState.currency}
+                  {products.balance.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {tokenInfoState.currency}
                 </p>
                 <p className="text-lg mt-2 font-semibold text-indigo-800">연 <span className="text-lg font-semibold text-indigo-800">{productState.rate}</span></p>
               </div>

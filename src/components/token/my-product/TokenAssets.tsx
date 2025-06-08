@@ -28,11 +28,11 @@ export default function TokenAssets({
       <div className="space-y-3">
         {tokens.map(token => (
           <div key={token.currency}>
-            <div
-              className="flex cursor-pointer items-center justify-between rounded-lg p-3 hover:bg-gray-50"
-            >
-              <div className="flex items-center"
-                   onClick={() => navigate(`/token/detail/${token.currency}`)}>
+            <div className="flex cursor-pointer items-center justify-between rounded-lg p-3 hover:bg-gray-50">
+              <div
+                className="flex items-center"
+                onClick={() => navigate(`/token/detail/${token.currency}`)}
+              >
                 <div className="flex h-10 w-10 items-center justify-center rounded-full">
                   <img
                     src={token.bankImageUrl}
@@ -43,17 +43,31 @@ export default function TokenAssets({
                 <div className="ml-3">
                   <h4 className="font-medium text-gray-900">
                     {token.name}{' '}
-                    <span className="text-sm text-gray-500">{token.currency}</span>
+                    <span className="text-sm text-gray-500">
+                      {token.currency}
+                    </span>
                   </h4>
                 </div>
               </div>
-              <div className="flex items-center gap-2"
-                   onClick={() => toggle(token.currency)}>
+              <div
+                className="flex items-center gap-2"
+                onClick={() => toggle(token.currency)}
+              >
                 <div className="text-right">
                   <div className="font-medium text-gray-900">
-                    {token.balance.toLocaleString()} {token.currency}
+                    {token.balance.toLocaleString('ko-KR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}{' '}
+                    {token.currency}
                   </div>
-                  <div className="text-sm text-gray-500">{token.krw}</div>
+                  <div className="text-sm text-gray-500">
+                    {Number(token.krw).toLocaleString('ko-KR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}{' '}
+                    KRW
+                  </div>
                 </div>
                 {expanded[token.currency] ? (
                   <ChevronDown size={16} className="text-gray-500" />
@@ -64,7 +78,7 @@ export default function TokenAssets({
             </div>
 
             {expanded[token.currency] &&
-              token.product?.map((products) => (
+              token.product?.map(products => (
                 <div
                   key={products.subscribeId}
                   onClick={() =>
@@ -80,9 +94,15 @@ export default function TokenAssets({
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200">
                       {products.imageUrl ? (
-                        <img src={products.imageUrl} alt={products.name} className="h-8 w-8 rounded-full" />
+                        <img
+                          src={products.imageUrl}
+                          alt={products.name}
+                          className="h-8 w-8 rounded-full"
+                        />
                       ) : (
-                        <span className="whitespace-pre text-xs font-medium">?</span>
+                        <span className="whitespace-pre text-xs font-medium">
+                          ?
+                        </span>
                       )}
                     </div>
                     <div>
@@ -90,9 +110,11 @@ export default function TokenAssets({
                     </div>
                   </div>
                   <div className="flex items-center gap-2 text-right">
-                    <div className="flex flex-col items-end">
-                      <p className="text-blue-600 font-medium">{products.balance}</p>
-                      <p className="text-xs text-gray-500">{token.currency}</p>
+                    <div className="flex items-end">
+                      <p className="text-blue-600 font-medium">{products.balance.toLocaleString('ko-KR', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      })} {token.currency}</p>
                     </div>
                     <ChevronRight size={16} className="text-gray-500" />
                   </div>
@@ -102,5 +124,5 @@ export default function TokenAssets({
         ))}
       </div>
     </div>
-  );
+  )
 }

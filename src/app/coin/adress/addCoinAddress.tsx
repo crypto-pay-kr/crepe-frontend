@@ -54,9 +54,9 @@ export default function AddCoinAddress() {
         })
         .catch((err) => {
           if (err instanceof ApiError) {
-            toast.error(`${err.message}`); // ApiError의 메시지를 toast로 표시
+            toast.error(`${err.message}`);
           } else {
-            toast.error("등록된 주소를 불러오는 중 오류가 발생했습니다."); // 일반 오류 처리
+            toast.error("등록된 주소를 불러오는 중 오류가 발생했습니다.");
           }
           setAddressStatus("NOT_REGISTERED");
           setAddressInfo(null);
@@ -134,125 +134,100 @@ export default function AddCoinAddress() {
 
   return (
     <div className="flex h-screen flex-col bg-white">
-      <Header title="코인 입금" />
+      <Header title={existingAddress ? '계좌 재등록' : '계좌 등록'} />
       <div className="flex-1 overflow-auto px-6 py-6">
         <div className="mb-8">
-          <div className="mb-8 rounded-lg bg-gray-50 p-4 shadow-sm">
-            <div className="flex items-center">
-              <div className="bg-blue-100 mr-3 flex h-10 w-10 items-center justify-center rounded-full">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="text-blue-600 h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div className="flex items-start justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900">
-                    네트워크: {symbol}
-                  </h2>
-                  <p className="text-sm text-gray-600">
-                    {symbol} 토큰을 지원하는 블록체인 네트워크
-                  </p>
-                </div>
-
-                {(addressStatus === 'ACTIVE' ||
-                  addressStatus === 'UNREGISTERED_AND_REGISTERING' ||
-                  addressStatus === 'UNREGISTERED') && (
-                    <button
-                      onClick={handleDeactivateClick}
-                      disabled={addressStatus === 'UNREGISTERED'}
-                      className="ml-32 mt-1.5 min-w-[140px] whitespace-nowrap rounded px-4 py-1 text-sm font-bold text-red-600 hover:bg-red-200 disabled:opacity-50"
-                    >
-                      {renderDeactivateButtonText()}
-                    </button>
-                  )}
-              </div>
-            </div>
-          </div>
-
-          <div className="mb-8 rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
-            <AddressInput
-              label={`고객님의 ${symbol} 주소`}
-              value={address!}
-              onChange={e => setAddress(e.target.value)}
-              placeholder={`고객님의 ${symbol} 주소를 입력해주세요.`}
-            />
-
-            {symbol === 'XRP' && (
-              <AddressInput
-                label="고객님의 XRP Tag 주소"
-                value={tagAddress!}
-                onChange={e => setTagAddress(e.target.value)}
-                placeholder="고객님의 XRP 태그를 입력해주세요."
-                className="mt-6"
-              />
+          <div className="relative rp-4">
+            {(addressStatus === 'ACTIVE' ||
+              addressStatus === 'UNREGISTERED_AND_REGISTERING' ||
+              addressStatus === 'UNREGISTERED') && (
+              <button
+                onClick={handleDeactivateClick}
+                disabled={addressStatus === 'UNREGISTERED'}
+                className="absolute right-4 top-4 min-w-[140px] whitespace-nowrap rounded px-4 py-1 text-sm font-bold text-red-600 hover:bg-red-200 disabled:opacity-50"
+              >  {renderDeactivateButtonText()}
+              </button>
             )}
           </div>
 
-          {addressInfo?.address && (
-            <>
-              <div className="mb-6">
-                <p className="mb-1 text-sm font-medium text-gray-600">
-                  {symbol} 출금 주소
-                </p>
-                <div className="text-blue-900 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold">
-                  {addressInfo.address}
+                <div className="mb-8 rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
+                  <AddressInput
+                    label={`고객님의 ${symbol} 주소`}
+                    value={address!}
+                    onChange={e => setAddress(e.target.value)}
+                    placeholder={`고객님의 ${symbol} 주소를 입력해주세요.`}
+                  />
+
+
+                  {symbol === 'XRP' && (
+                    <AddressInput
+                      label="고객님의 XRP Tag 주소"
+                      value={tagAddress!}
+                      onChange={e => setTagAddress(e.target.value)}
+                      placeholder="고객님의 XRP 태그를 입력해주세요."
+                      className="mt-6"
+                    />
+                  )}
+                </div>
+
+                {addressInfo?.address && (
+                  <>
+                    <div className="mb-6">
+                      <p className="mb-1 text-sm font-medium text-gray-600">
+                        등록된 {symbol} 출금 주소
+                      </p>
+                      <div
+                        className="text-blue-900 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold">
+                        {addressInfo.address}
+                      </div>
+                    </div>
+
+                    {symbol === 'XRP' && (
+                      <div className="mb-6">
+                        <p className="mb-1 text-sm font-medium text-gray-600">
+                          등록된 {symbol} 태그 주소
+                        </p>
+                        <div
+                          className="text-blue-900 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold">
+                          {addressInfo.tag}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                <div className="rounded-lg border border-yellow-100 bg-yellow-50 p-4">
+                  <h3 className="mb-2 flex items-center text-sm font-medium text-yellow-800">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="mr-1 h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    안내사항
+                  </h3>
+                  <AddressInstructions />
                 </div>
               </div>
+              </div>
 
-              {symbol === 'XRP' && (
-                <div className="mb-6">
-                  <p className="mb-1 text-sm font-medium text-gray-600">
-                    태그 주소
-                  </p>
-                  <div className="text-blue-900 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold">
-                    {addressInfo.tag}
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-
-          <div className="rounded-lg border border-yellow-100 bg-yellow-50 p-4">
-            <h3 className="mb-2 flex items-center text-sm font-medium text-yellow-800">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="mr-1 h-5 w-5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              안내사항
-            </h3>
-            <AddressInstructions />
-          </div>
+              <div className="bg-white p-5">
+              <Button
+              text={existingAddress ? '계좌 재등록 요청' : '계좌 등록 요청'}
+               onClick={handleNext}
+               disabled={isButtonDisabled}
+               color={isButtonDisabled ? 'gray' : 'blue'}
+               className="w-full rounded-lg py-3 text-lg font-medium shadow-md"
+          />
         </div>
-      </div>
 
-      <div className="bg-white p-5">
-        <Button
-          text={existingAddress ? '계좌 재등록 요청' : '계좌 등록 요청'}
-          onClick={handleNext}
-          disabled={isButtonDisabled}
-          color={isButtonDisabled ? 'gray' : 'blue'}
-          className="w-full rounded-lg py-3 text-lg font-medium shadow-md"
-        />
+        <BottomNav />
       </div>
-
-      <BottomNav />
-    </div>
-  )
-}
+      )
+      }

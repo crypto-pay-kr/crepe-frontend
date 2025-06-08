@@ -13,5 +13,5 @@ export interface Token {
   name: string;
   balance: number;
   product: BankProduct[] | null;
-  krw :string;
+  krw :string|number;
 }

@@ -33,7 +33,13 @@ export default function CoinAssets({ coins, onClick }: { coins: Coin[], onClick:
             </div>
             <div className="text-right">
               <div className="font-medium text-gray-900">{coin.balance}</div>
-              <div className="text-sm text-gray-500">{coin.krw}</div>
+              <div className="text-sm text-gray-500">
+                {Number(coin.krw).toLocaleString('ko-KR', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}{' '}
+                KRW
+              </div>
             </div>
           </div>
         ))}
