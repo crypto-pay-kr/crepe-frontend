@@ -5,6 +5,7 @@ import CryptocurrencyTags from "@/components/common/CryptocurrencyTags";
 import BottomNav from "@/components/common/BottomNavigate";
 import { getStoreList } from "@/api/shop";
 import { Store } from "@/types/store";
+import { Heart } from 'lucide-react'
 
 const ShoppingMall: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -139,7 +140,7 @@ const ShoppingMall: React.FC = () => {
               {["전체", "음식점", "카페"].map((tab) => (
                 <button
                   key={`tab-${tab}`}
-                  className={`px-5 py-3 text-sm font-medium relative transition-all ${
+                  className={`px-5 py-3 text-base font-medium relative transition-all ${
                     activeTab === tab
                       ? "text-[#4B5EED] font-semibold"
                       : "text-gray-500 hover:text-gray-700"
@@ -212,24 +213,11 @@ const ShoppingMall: React.FC = () => {
 
                     <div className="flex justify-between items-center mt-2">
                       <CryptocurrencyTags coins={store.coinList || []} />
-                      <div className="flex items-center text-gray-500 bg-gray-50 px-2 py-1 rounded-full">
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="mr-1"
-                        >
-                          <path
-                            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                        <span className="text-sm font-medium">{store.likeCount || 0}</span>
+                      <div>
+                        <div className="bg-white/20 backdrop-blur rounded-full px-3 py-1 flex items-center">
+                          <Heart size={16} className="mr-1 fill-red-500 stroke-red-500" />
+                          <span className="text-black text-sm">{store.likeCount || 0}</span>
+                        </div>
                       </div>
                     </div>
 
