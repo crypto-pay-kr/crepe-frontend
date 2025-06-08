@@ -18,6 +18,7 @@ import { useTickerData } from '@/hooks/useTickerData'
 import { ChevronDown } from 'lucide-react';
 import { ApiError } from '@/error/ApiError'
 import { toast } from 'react-toastify' // 아이콘 import 추가
+import { v4 } from 'uuid';
 interface Portfolio {
   currency: string;
   amount: number;
@@ -43,7 +44,7 @@ export default function TokenExchangePage() {
   const tokenMeta = tokenList.find(t => t.currency === bank);
   const tickerData = useTickerData();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(false);
   const handleCurrencyClick = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
@@ -121,7 +122,11 @@ export default function TokenExchangePage() {
 
 
   const handleExchangeClick = async () => {
-    if (!tokenInfo)return console.error('Exchange error');
+    if (!tokenInfo)return;
+
+    const traceId = v4();
+    setIsLoading(true); // 로딩 시작
+
     const filteredCoinRates: Record<string, number> = {};
     tokenInfo.portfolios.forEach((p: any) => {
       const currency = p.currency;
@@ -139,7 +144,8 @@ export default function TokenExchangePage() {
         toCurrency: isCoinToToken ? tokenInfo.currency : selectedCurrency,
         coinRates: filteredCoinRates,
         tokenAmount: tokenAmount ?? 0,
-        coinAmount: coinAmount ?? 0
+        coinAmount: coinAmount ?? 0,
+        traceId
       });
       navigate("/token/exchange/complete", {
         state: {
@@ -157,6 +163,8 @@ export default function TokenExchangePage() {
       } else {
         toast('예기치 못한 오류가 발생했습니다.');
       }
+    }finally {
+      setIsLoading(false); // 로딩 종료
     }
   };
 
@@ -476,7 +484,8 @@ export default function TokenExchangePage() {
         </div>
 
         <Button
-          text="환전 요청"
+          text={isLoading ? "환전 중..." : "환전 요청"}
+          disabled={isLoading}
           onClick={handleExchangeClick}
           className="w-full rounded-lg py-3 text-lg font-semibold shadow-md"
         />
