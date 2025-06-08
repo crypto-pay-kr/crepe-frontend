@@ -194,7 +194,10 @@ export default function TransferPage() {
                 placeholder="0.00"
               />
                 <p className="mt-2 text-sm text-gray-500">
-                  보유 잔액: <span className="font-semibold">{selectedCoinInfo.balance}</span> {selectedCoin}
+                  보유 잔액: <span className="font-semibold">{selectedCoinInfo.balance.toLocaleString('ko-KR', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                })}</span> {selectedCoin}
                 </p>
             </motion.div>
           )}

@@ -28,7 +28,7 @@ export interface GetAllBalanceResponse {
     currency: string;
     name: string;
     balance: number;
-    krw: string;
+    krw: string| number;
     product:BankProduct[];
   }[];
 
@@ -70,7 +70,11 @@ export default function CoinHome() {
 // 2. tickerData 바뀔 때만 가격 계산
   useEffect(() => {
     if (!tokenInfos.length || !tickerData) return;
-    if (tokenBalance.some(token => token.krw && token.krw !== "- KRW")) return;
+
+    const isAllInfosReady = tokenBalance.every(token =>
+      tokenInfos.some(info => info.currency === token.currency)
+    );
+    if (!isAllInfosReady) return;
 
     let total = 0;
     const enriched = tokenBalance.map(token => {
@@ -79,21 +83,21 @@ export default function CoinHome() {
 
       const unitPrice = info.portfolios.reduce((sum: number, p: any) => {
         const price = tickerData[`KRW-${p.currency}`]?.trade_price ?? 0;
-        return sum + (p.amount ?? 0) * price;
+        return sum + ((p.amount ?? 0)-(p.nonAvailableAmount)) * price;
       }, 0) / (info.tokenBalance || 1);
 
-      const totalKRW = Math.floor(token.balance * unitPrice);
+      const totalKRW =token.balance * unitPrice;
       total += totalKRW;
 
       return {
         ...token,
-        krw: `${totalKRW.toLocaleString()} KRW`,
+        krw: totalKRW,
       };
     });
 
     setEnrichedTokenBalance(enriched);
     setTotalTokenBalanceKRW(total);
-  }, [tokenInfos, tickerData]);
+  }, [tokenInfos, tickerData,tokenBalance]);
 
   // 잔액 - 초기 1회만 로딩
   useEffect(() => {
@@ -122,10 +126,10 @@ export default function CoinHome() {
       const rate = data?.signed_change_rate ?? 0;
       const direction = data?.change ?? 'EVEN';
 
-      const balanceText = `${amount} ${item.currency}`;
-      const krwText = amount && krwRate
-        ? `${Math.floor(amount * krwRate).toLocaleString()} KRW`
-        : `- KRW`;
+      const balanceText = `${amount.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${item.currency}`;
+      const krw = amount && krwRate
+        ? `${amount * krwRate}`
+        : 0;
 
       const formattedRate =
         direction === "EVEN" ? "-" :
@@ -136,7 +140,7 @@ export default function CoinHome() {
         coinName: item.coinName,
         icon: item.coinImageUrl,
         balance: balanceText,
-        krw: krwText,
+        krw: krw,
         change: formattedRate,
         changeDirection: direction,
       };
@@ -152,8 +156,8 @@ export default function CoinHome() {
   };
 
   const totalBalanceKRW = coins.reduce((sum, coin) => {
-    const n = Number(coin.krw.replace(/[^0-9]/g, ''));
-    return sum + (isNaN(n) ? 0 : n);
+    const n= Number(coin.krw);
+    return sum + n;
   }, 0);
 
   return (
@@ -164,26 +168,34 @@ export default function CoinHome() {
           <div className="overflow-hidden rounded-2xl bg-white px-6 py-8 shadow-sm transition hover:shadow-md">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center">
-                <Wallet className="mr-2 h-6 w-6 text-[#4B5EED] drop-shadow-sm relative -top-2" />
-                <span className="text-lg font-bold text-[#4B5EED] relative -top-2">
+                <Wallet className="relative -top-2 mr-2 h-6 w-6 text-[#4B5EED] drop-shadow-sm" />
+                <span className="relative -top-2 text-lg font-bold text-[#4B5EED]">
                   내 자산
                 </span>
               </div>
-
             </div>
             {/* 금액과 버튼을 나란히 정렬 */}
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold tracking-tight text-gray-800">
-                {(totalTokenBalanceKRW + totalBalanceKRW).toLocaleString()} KRW
+                <h2 className="text-2xl font-bold tracking-tight text-gray-800">
+                  {totalBalanceKRW === 0 || totalTokenBalanceKRW === 0
+                    ? '- KRW'
+                    : (totalBalanceKRW + totalTokenBalanceKRW).toLocaleString(
+                        'ko-KR',
+                        {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        }
+                      )} KRW
+                </h2>
               </h2>
               <button
-                onClick={() => navigate("/transfer")}
-                className="flex items-center gap-1 text-sm font-medium  text-gray-500 bg-gray-200 px-3 py-1.5 rounded-md"
+                onClick={() => navigate('/transfer')}
+                className="flex items-center gap-1 rounded-md bg-gray-200 px-3 py-1.5 text-sm font-medium text-gray-500"
               >
                 송금
               </button>
             </div>
-
           </div>
 
           <div className="mt-5 w-full">
