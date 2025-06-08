@@ -109,6 +109,7 @@ export const getCoinBalanceByCurrency = async (currency: string) => {
 export const requestDeposit = async (currency: string, txid: string, traceId:string) => {
   const token = sessionStorage.getItem("accessToken");
 
+
   const res = await fetch(`${BASE_URL}/api/deposit`, {
     method: 'POST',
     headers: {
