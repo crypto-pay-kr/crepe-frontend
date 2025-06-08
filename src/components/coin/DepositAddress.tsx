@@ -37,6 +37,7 @@ export default function DepositAddress({
       </span>
             <button
               onClick={() => onCopy(tag)}
+              data-testid="copy-button"
               className="rounded-lg bg-gray-100 p-2 text-gray-600 transition-colors hover:bg-gray-200"
             >
               <Copy size={18} />
@@ -45,7 +46,7 @@ export default function DepositAddress({
         </>
       )}
       {copied && (
-        <div className="mt-2 flex items-center text-sm text-green-500">
+        <div data-testid="copy-toast" className="mt-2 flex items-center text-sm text-green-500">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="mr-1 h-4 w-4"
