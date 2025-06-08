@@ -27,7 +27,7 @@ export const terminateSubscription = async (subscribeId: string) => {
 
 
 // 상품 예치
-export const depositToken = async (subscribeId: string, amount: number) => {
+export const depositToken = async (subscribeId: string, amount: number,traceId:string) => {
   const accessToken = sessionStorage.getItem("accessToken");
 
   const res = await fetch(`${API_BASE_URL}/api/deposit/token`, {
@@ -39,6 +39,7 @@ export const depositToken = async (subscribeId: string, amount: number) => {
     body: JSON.stringify({
       subscribeId,
       amount,
+      traceId
     }),
   });
 
