@@ -19,7 +19,7 @@ const NavButton: React.FC<NavButtonProps> = ({ icon, label, isActive, onClick })
       relative py-2 px-4 rounded-xl
       transition-all duration-200 ease-out
       flex-1 min-w-0
-      focus:outline-none focus:ring-0
+      focus:outline-none focus:ring-0 focus:border-0
       ${isActive
       ? "bg-blue-50 shadow-sm transform scale-105"
       : "hover:bg-gray-50 active:scale-95"
@@ -79,7 +79,7 @@ const BottomNav: React.FC = () => {
     <nav className={`
       bg-white/95 
       flex items-center
-      py-3 px-4
+      py-1.5 px-4
       relative
       focus:outline-none 
       before:absolute before:inset-0 before:bg-gradient-to-t before:from-gray-50/30 before:to-transparent before:pointer-events-none

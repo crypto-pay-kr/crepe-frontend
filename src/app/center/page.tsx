@@ -97,7 +97,7 @@ export default function CustomerSupportPage(): React.ReactElement {
         <div className="mb-6">
           <div className="bg-white rounded-xl p-4 border border-gray-200">
             <div className="flex items-center space-x-3 mb-3">
-              <div className="p-2 bg-blue rounded-full">
+              <div className="p-2 bg-[#4B5EED] rounded-full">
                 <Mail size={20} className="text-blue-600 text-white" />
               </div>
               <div>

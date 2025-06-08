@@ -164,9 +164,9 @@ export default function CoinHome() {
           <div className="overflow-hidden rounded-2xl bg-white px-6 py-8 shadow-sm transition hover:shadow-md">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center">
-                <Wallet className="mr-2 h-6 w-6 text-[#4B5EED] drop-shadow-sm" />
-                <span className="text-base font-bold text-[#4B5EED]">
-                  총 자산
+                <Wallet className="mr-2 h-6 w-6 text-[#4B5EED] drop-shadow-sm relative -top-2" />
+                <span className="text-lg font-bold text-[#4B5EED] relative -top-2">
+                  내 자산
                 </span>
               </div>
 
