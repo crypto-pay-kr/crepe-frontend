@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { requestTransfer, fetchReceiverName } from '@/api/token';
 import { useCoinStore } from '@/constants/useCoin'
 import { useTokenStore } from '@/constants/useToken'
-
+import {v4} from 'uuid'
 export default function TransferPage() {
   const [recipient, setRecipient] = useState('');
   const [recipientName, setRecipientName] = useState('');
@@ -19,6 +19,8 @@ export default function TransferPage() {
   const { tokens, fetchTokens } = useTokenStore();
   const [isLoadingRecipient, setIsLoadingRecipient] = useState(false);
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [traceId, setTraceId] = useState<string | null>(null);
   const coinOptions = [
     ...coins.map((coin) => ({
       type: 'coin',
@@ -88,12 +90,17 @@ export default function TransferPage() {
       toast('모든 필드를 입력하세요.');
       return;
     }
+
+    setTraceId(v4());
     setShowModal(true);
   };
 
   const confirmTransfer = async () => {
+    if (isLoading || !traceId) return;
+    setIsLoading(true);
     try {
-      await requestTransfer(recipient, selectedCoin, parseFloat(amount));
+
+      await requestTransfer(recipient, selectedCoin, parseFloat(amount), traceId);
       toast.success('송금이 완료되었습니다');
       setRecipient('');
       setAmount('');
@@ -103,6 +110,9 @@ export default function TransferPage() {
     } catch (error: any) {
       toast.error(error.message || '송금 실패');
       setShowModal(false);
+    } finally {
+      setIsLoading(false);
+      setTraceId(null);
     }
   };
 
@@ -239,7 +249,7 @@ export default function TransferPage() {
                   onClick={confirmTransfer}
                   className="flex-1 py-3 px-4 bg-[#4B5EED] text-white rounded-lg font-medium hover:bg-[#3D4ED8] transition-colors"
                 >
-                  송금 확인
+                  {isLoading?"송금 중..":"송금 확인"}
                 </button>
               </div>
             </div>

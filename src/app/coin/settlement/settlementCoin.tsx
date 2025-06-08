@@ -10,7 +10,7 @@ import {  getCoinBalanceByCurrency, requestWithdraw } from '@/api/coin'
 import { useTickerData } from '@/hooks/useTickerData'
 import { toast } from "react-toastify";
 import { ApiError } from '@/error/ApiError'
-
+import { v4 } from 'uuid'
 export default function SettlementCoin() {
   const [amount, setAmount] = useState("3.45")
   const [selectedPercentage, setSelectedPercentage] = useState(70)
@@ -19,6 +19,7 @@ export default function SettlementCoin() {
   const symbol = location.state?.symbol || 'XRP'
   const tickerData = useTickerData();
   const livePrice = tickerData[`KRW-${symbol}`]?.trade_price ?? 0;
+  const [isLoading, setIsLoading] = useState(false)
   const handleAmountChange = (value: string) => {
     setAmount(value)
   }
@@ -57,21 +58,28 @@ export default function SettlementCoin() {
     fetchBalance();
   }, [symbol]);
 
+
   const handleSubmit = async () => {
+    if (isLoading) return
+    setIsLoading(true)
+
     try {
-      await requestWithdraw(symbol, amount);
-      toast.success('정산 요청이 완료되었습니다.');
+      const traceId = v4()
+      await requestWithdraw(symbol, amount, traceId)
+      toast.success('정산 요청이 완료되었습니다.')
       navigate(`/coin-detail/${symbol}`, {
         state: { symbol }
-      });
+      })
     } catch (e) {
       if (e instanceof ApiError) {
-        toast(`${e.message}`);
+        toast(`${e.message}`)
       } else {
-        toast('예기치 못한 오류가 발생했습니다.');
+        toast('예기치 못한 오류가 발생했습니다.')
       }
+    } finally {
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <div className="h-full flex flex-col bg-gray-50">
@@ -136,10 +144,11 @@ export default function SettlementCoin() {
 
       <div className="p-5 bg-white">
         <Button 
-          text="정산 요청"
+          text={isLoading? "출금 중..": "출금 하기" }
           onClick={handleSubmit}
           color="primary"
           className="py-4 text-lg font-medium rounded-xl shadow-md"
+          disabled={isLoading}
         />
       </div>
 

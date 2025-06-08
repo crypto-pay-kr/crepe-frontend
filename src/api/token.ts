@@ -151,6 +151,7 @@ export const requestExchange = async (
     coinRates: Record<string, number>;
     tokenAmount: number;
     coinAmount: number;
+    traceId:string
   }
 ) => {
   const token = sessionStorage.getItem("accessToken");
@@ -225,7 +226,7 @@ export async function fetchTokenBalance(currency: string): Promise<number> {
   return await res.json();
 };
 
-export const requestTransfer = async (email: string, currency: string, amount: number) => {
+export const requestTransfer = async (email: string, currency: string, amount: number, traceId:string) => {
   const token = sessionStorage.getItem("accessToken");
 
   const response = await fetch(`${BASE_URL}/api/transfer`, {
@@ -238,6 +239,7 @@ export const requestTransfer = async (email: string, currency: string, amount: n
       receiverEmail: email,
       currency,
       amount,
+      traceId,
     }),
   });
 
