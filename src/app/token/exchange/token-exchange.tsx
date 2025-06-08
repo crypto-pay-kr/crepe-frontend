@@ -494,12 +494,16 @@ export default function TokenExchangePage() {
           })}
         </div>
 
-        <Button
-          text={isLoading ? "환전 중..." : "환전 요청"}
-          disabled={isLoading}
-          onClick={handleExchangeClick}
-          className="w-full rounded-lg py-3 text-lg font-semibold shadow-md"
-        />
+
+
+        <div className="fixed bottom-[80px] left-0 w-full px-5">
+          <Button
+            text={isLoading ? "환전 중..." : "환전 요청"}
+            disabled={isLoading}
+            onClick={handleExchangeClick}
+            className="w-full rounded-lg py-3 text-lg font-semibold shadow-md"
+          />
+        </div>
       </main>
       <BottomNav />
     </div>
