@@ -572,19 +572,6 @@ export default function TokenProductSignup() {
                 />
 
 
-                {/* 상품권 수량 (VOUCHER일 때만 표시) */}
-                {productType === "VOUCHER" && (
-                  <div>
-                    <label className="block text-gray-500 text-sm mb-1">상품권 수량</label>
-                    <input
-                      type="number"
-                      className="w-full p-2 border border-gray-300 rounded"
-                      value={voucherQuantity}
-                      onChange={(e) => setVoucherQuantity(e.target.value)}
-                      placeholder="상품권 수량을 입력해주세요"
-                    />
-                  </div>
-                )}
 
                 {/* 최초 납입액 (SAVING일 때만 표시) */}
                 {productType === "SAVING" && (
