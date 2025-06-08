@@ -172,7 +172,7 @@ export const getCoinHistory = async ({ pageParam = 0, queryKey }: { pageParam?: 
 export async function unRegisterAccountAddress(currency: string): Promise<void> {
   const token = sessionStorage.getItem("accessToken");
 
-  const response = await fetch(`/api/unregister/address?currency=${currency}`, {
+  const response = await fetch(`${BASE_URL}/api/unregister/address?currency=${currency}`, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${token}`,
