@@ -11,7 +11,7 @@ import { useTokenStore } from '@/constants/useToken'
 import { getCoinBalanceByCurrency } from '@/api/coin'
 import { toast } from 'react-toastify'
 import { ApiError } from '@/error/ApiError'
-
+import {v4} from 'uuid'
 
 export default function TokenDepositPage() {
   const navigate = useNavigate();
@@ -24,6 +24,7 @@ export default function TokenDepositPage() {
   const getTokenImage = useTokenStore((state) => state.getTokenImage);
   const imageUrl = getTokenImage(tokenInfoState.currency);
   const [myTokenBalance, setMyTokenBalance] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
 
   if (!subscribeId || !productState || !tokenInfoState) {
@@ -71,10 +72,12 @@ export default function TokenDepositPage() {
       toast("예치할 금액을 입력해주세요.");
       return;
     }
-    console.log("product",productState.maxMonthlyPayment);
+    if (isLoading) return; // ✅ 중복 방지
+    setIsLoading(true);
 
     try {
-      await depositToken(subscribeId, amount);
+      const traceId=v4()
+      await depositToken(subscribeId, amount, traceId);
       toast("예치가 완료되었습니다.");
       navigate(`/token/product/detail/${subscribeId}`, {
         state: {
@@ -89,8 +92,11 @@ export default function TokenDepositPage() {
         toast(`${e.message}`);  }
       else {
         toast('예기치 못한 오류가 발생했습니다.');
-      }}
+      }}finally {
+      setIsLoading(false);
+    }
   };
+
   useEffect(() => {
     if (!tokenInfoState) return;
     //현재 사용자의 토큰 잔액 불러오기
@@ -245,9 +251,10 @@ export default function TokenDepositPage() {
 
       <div className="border-t border-gray-50 bg-gray-50 p-5 shadow-lg">
         <Button
-          text="예치 하기"
+          text={isLoading ? "예치 중..." : "예치 하기"}
           onClick={handleDeposit}
           className="w-full rounded-lg py-3 text-lg font-semibold shadow-md"
+          disabled={isLoading}
         />
       </div>
       <BottomNav />
