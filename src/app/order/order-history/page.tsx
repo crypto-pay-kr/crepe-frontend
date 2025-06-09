@@ -54,6 +54,7 @@ export default function MyOrderHistoryPage() {
         orderNumber: item.orderId,
         totalPrice: item.totalPrice.toString(),
         storeLocation: item.storeAddress,
+        createdAt: dateObj, // 정렬을 위해 Date 객체 추가
       };
     });
   }
@@ -61,8 +62,13 @@ export default function MyOrderHistoryPage() {
   useEffect(() => {
     (async () => {
       try {
-        const response = await getOrderHistory(); 
-        setOrders(mapToLocalOrder(response));
+        const response = await getOrderHistory();
+        const mappedOrders = mapToLocalOrder(response);
+
+        // createdAt 기준으로 내림차순 정렬
+        const sortedOrders = mappedOrders.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+        setOrders(sortedOrders);
       } catch (err) {
         console.error("Failed to fetch order history:", err);
       }

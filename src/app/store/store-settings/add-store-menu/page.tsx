@@ -7,16 +7,10 @@ import ImageUploader from "@/components/common/ImageUploader";
 import Input from "@/components/common/Input";
 import { storeMenuAdd } from "@/api/store";
 
-interface CryptoCurrency {
-  code: string;
-  amount: number;
-}
-
 interface MenuItemData {
   id?: string;
   name: string;
   price: string;
-  cryptoPrices: CryptoCurrency[];
   image?: File | null;
 }
 
@@ -33,10 +27,6 @@ export default function MenuAddPage(): React.ReactElement {
   const [menuItem, setMenuItem] = useState<MenuItemData>({
     name: "",
     price: "",
-    cryptoPrices: [
-      { code: "XRP", amount: 3.3 },
-      { code: "SOL", amount: 3.3 },
-    ],
     image: null,
   });
 
@@ -47,10 +37,6 @@ export default function MenuAddPage(): React.ReactElement {
         id: id,
         name: "불고기 버거",
         price: "8000",
-        cryptoPrices: [
-          { code: "XRP", amount: 3.2 },
-          { code: "SOL", amount: 3.2 },
-        ],
         image: null,
       });
     }
@@ -176,27 +162,6 @@ export default function MenuAddPage(): React.ReactElement {
             placeholder="가격을 입력해주세요."
             type="text"
           />
-        </div>
-
-        <div className="mb-6">
-          <label className="block text-lg font-medium mb-2">각 코인 금액</label>
-          <div className="space-y-3">
-            {menuItem.cryptoPrices.map((crypto) => (
-              <div key={crypto.code} className="flex items-center justify-between border-b border-gray-100 pb-2">
-                <span
-                  className={`px-3 py-1.5 rounded text-sm font-medium ${
-                    crypto.code === "XRP" ? "bg-gray-200 text-blue-700" : "bg-purple-100 text-purple-700"
-                  }`}
-                >
-                  {crypto.code}
-                </span>
-                <span className="font-medium">
-                  {menuItem.price ? (parseFloat(menuItem.price) / 2500).toFixed(2) : "0.00"} {crypto.code}
-                </span>
-              </div>
-            ))}
-            <p className="text-xs text-gray-500 mt-2">* 원화 가격 입력 시 자동으로 코인 가격이 계산됩니다.</p>
-          </div>
         </div>
 
         <div className="mb-6">
