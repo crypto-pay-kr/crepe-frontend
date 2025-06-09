@@ -179,7 +179,7 @@ export default function CoinHome() {
               <h2 className="text-2xl font-bold tracking-tight text-gray-800">
                 <h2 className="text-2xl font-bold tracking-tight text-gray-800">
                   {totalBalanceKRW === 0 || totalTokenBalanceKRW === 0
-                    ? '- KRW'
+                    ? '-'
                     : (totalBalanceKRW + totalTokenBalanceKRW).toLocaleString(
                         'ko-KR',
                         {
