@@ -12,6 +12,7 @@ export interface coin {
   currency: string,
   address: string,
   tag?: string
+  minAmount: string
 }
 
 

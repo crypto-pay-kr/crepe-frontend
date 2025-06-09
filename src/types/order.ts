@@ -9,6 +9,7 @@ export interface Order {
   orderNumber: string;
   storeLocation: string;
   totalPrice: string;
+  createdAt: Date;
 }
 
 

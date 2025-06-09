@@ -53,7 +53,7 @@ export default function CoinAddressModal({ symbol, coinName, onClose,address, ta
         </p>
 
         <button
-          className="bg-[#0a2e64] text-white w-full py-3 rounded-xl text-base font-semibold"
+          className="bg-[#4B5EED] text-white w-full py-3 rounded-xl text-base font-semibold"
           onClick={onClose}
         >
           닫기

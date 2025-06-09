@@ -6,11 +6,12 @@ import AmountInput from '@/components/coin/AmountInput'
 import PercentageSelector from '@/components/coin/PercentageSelector'
 import AvailableAmount from '@/components/coin/AvailableAmount'
 import Button from '@/components/common/Button'
-import {  getCoinBalanceByCurrency, requestWithdraw } from '@/api/coin'
+import { getCoinBalanceByCurrency, getCoinInfo, requestWithdraw } from '@/api/coin'
 import { useTickerData } from '@/hooks/useTickerData'
 import { toast } from "react-toastify";
 import { ApiError } from '@/error/ApiError'
 import { v4 } from 'uuid'
+import { coin } from '@/app/coin/deposit/depositCoin'
 export default function SettlementCoin() {
   const [amount, setAmount] = useState("3.45")
   const [selectedPercentage, setSelectedPercentage] = useState(70)
@@ -20,6 +21,8 @@ export default function SettlementCoin() {
   const tickerData = useTickerData();
   const livePrice = tickerData[`KRW-${symbol}`]?.trade_price ?? 0;
   const [isLoading, setIsLoading] = useState(false)
+  const [availableAmount, setAvailableAmount] = useState<number>(0);
+  const [coinInfo, setCoinInfo] = useState<coin| null>(null);
   const handleAmountChange = (value: string) => {
     setAmount(value)
   }
@@ -31,7 +34,20 @@ export default function SettlementCoin() {
   }
 
 
-  const [availableAmount, setAvailableAmount] = useState<number>(0);
+  useEffect(() => {
+    const fetchCoinInfo = async () => {
+      if (!symbol) return;
+
+      try {
+        const data = await getCoinInfo(symbol);
+        setCoinInfo(data)
+      } catch (e) {
+        toast("코인 정보조회 오류");
+      }
+    };
+
+    fetchCoinInfo();
+  }, [symbol]);
 
 
 
@@ -131,9 +147,9 @@ export default function SettlementCoin() {
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z" clipRule="evenodd" />
             </svg>
             <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-1">정산 안내</h3>
+              <h3 className="text-sm font-medium text-gray-900 mb-1">출금 안내</h3>
               <p className="text-sm text-gray-600">
-                정산 요청 후 영업일 기준 1-2일 내에 처리됩니다. 정산 최소 금액은 0.4 {symbol}입니다.
+                출금 요청 후 약 5분 이내에 처리됩니다. 최소 출금 금액은 {coinInfo?.minAmount} {symbol}입니다.
               </p>
             </div>
           </div>
