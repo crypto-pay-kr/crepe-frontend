@@ -39,8 +39,14 @@ export default function TokenExchangeCompletePage() {
           <div className="flex flex-col items-center gap-4">
             <p className="text-3xl font-bold">
               {isCoinToToken
-                ? `${fromAmount} ${fromCurrency}`
-                : `${toAmount} ${toCurrency}`}
+                ? `${fromAmount.toLocaleString('ko-KR', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                })} ${fromCurrency}`
+                : `${toAmount.toLocaleString('ko-KR', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                })} ${toCurrency}`}
             </p>
 
             <div className="w-10 h-10 flex items-center justify-center">
@@ -60,8 +66,14 @@ export default function TokenExchangeCompletePage() {
 
             <p className="text-3xl font-bold">
               {isCoinToToken
-                ? `${toAmount} ${toCurrency}`
-                : `${fromAmount} ${fromCurrency}`}
+                ? `${toAmount.toLocaleString('ko-KR', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                })} ${toCurrency}`
+                : `${fromAmount.toLocaleString('ko-KR', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                })} ${fromCurrency}`}
             </p>
           </div>
         </div>

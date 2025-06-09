@@ -26,7 +26,7 @@ export default function LoginHome({ onSignup, onStoreSignup, buttonClassName }: 
   useEffect(() => {
     fetchCaptcha();
     
-    // 이미 로그인된 상태라면 리다이렉트
+    // 이미 로그인된 상태라면 ㄴ리다이렉트
     if (isAuthenticated) {
       navigate("/my/coin");
     }
@@ -47,51 +47,121 @@ export default function LoginHome({ onSignup, onStoreSignup, buttonClassName }: 
     }
   };
 
-  // 로그인 요청 처리 함수
-  const handleLogin = async () => {
-    if (!userId || !password || !captchaInput) {
-      alert("아이디와 비밀번호를 입력해 주세요.");
+const handleLogin = async () => {
+  if (!userId || !password || !captchaInput) {
+    alert("아이디와 비밀번호를 입력해 주세요.");
+    return;
+  }
+
+  try {
+    const res = await loginUser({
+      email: userId,
+      password,
+      captchaKey,
+      captchaValue: captchaInput,
+    });
+
+    if (!res.ok) {
+      const errData = await res.json();
+      alert(errData.message || "로그인에 실패했습니다.");
+      fetchCaptcha();
       return;
     }
 
+    const { accessToken, refreshToken, email, role } = await res.json();
+    console.log('✅ 로그인 성공:', { email: email || userId, role });
+    
+    // OTP 설정 상태 확인 (기존 작동하는 로직과 동일하게)
+    const API_BASE_URL = import.meta.env.VITE_API_SERVER_URL || 'http://localhost:8080';
+    
+    console.log('🔍 OTP 상태 확인 시작:', { 
+      email: email || userId, 
+      BASE_URL: API_BASE_URL,
+      token: accessToken ? `${accessToken.substring(0, 20)}...` : 'null'
+    });
+    
     try {
-      const res = await loginUser({
-        email: userId,
-        password,
-        captchaKey,
-        captchaValue: captchaInput,
+      const otpStatusRes = await fetch(`${API_BASE_URL}/api/otp/status`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email: email || userId })
       });
-
-      if (!res.ok) {
-        const errData = await res.json();
-        alert(errData.message || "로그인에 실패했습니다.");
-        fetchCaptcha(); // 실패 시 새 캡차
+      
+      console.log('📨 OTP 상태 응답:', {
+        status: otpStatusRes.status,
+        statusText: otpStatusRes.statusText,
+        url: otpStatusRes.url,
+        headers: Object.fromEntries(otpStatusRes.headers.entries())
+      });
+      
+      if (otpStatusRes.status === 401) {
+        console.error('❌ 인증 실패 (401): 토큰이 유효하지 않거나 만료되었습니다.');
+        // 토큰 문제시 일단 로그인 처리 (로그인 직후라서 토큰은 유효할 것)
+        loginToContext(accessToken, refreshToken, email || userId, role);
+        setTimeout(() => navigate("/my/coin"), 1000);
         return;
       }
-
-      const { accessToken, refreshToken,email,role } = await res.json();
-      console.log('✅ 로그인 응답 데이터:', { 
-            email, 
-            role, 
-            hasAccessToken: !!accessToken, 
-            hasRefreshToken: !!refreshToken 
+      
+      if (!otpStatusRes.ok) {
+        const errorText = await otpStatusRes.text();
+        console.error('❌ OTP 상태 조회 HTTP 오류:', {
+          status: otpStatusRes.status,
+          statusText: otpStatusRes.statusText,
+          errorText
+        });
+        // HTTP 오류시 일단 로그인 처리
+        loginToContext(accessToken, refreshToken, email || userId, role);
+        setTimeout(() => navigate("/my/coin"), 1000);
+        return;
+      }
+      
+      const result = await otpStatusRes.json();
+      console.log('✅ OTP 상태 응답 데이터:', result);
+      
+      // 백엔드 응답 구조에 맞게 처리 (기존 로직과 동일)
+      if (result.status === "success") {
+        // result.data가 있고 enabled가 true이면 OTP 검증 필요
+        if (result.data && result.data.enabled) {
+          console.log('🛡️ OTP 활성화됨 - OTP 검증 페이지로 이동');
+          navigate('/otp-verify', {
+            state: {
+              email: email || userId,
+              tempAccessToken: accessToken,
+              tempRefreshToken: refreshToken,
+              role
+            }
           });
-      // AuthContext를 통해 로그인 처리 (이메일도 함께 저장)
-     loginToContext(accessToken, refreshToken, email || userId, role);
-
-      console.log('✅ 로그인 성공 - 이메일 저장됨:', userId);
-
-      // 약간의 지연 후 리다이렉트 (SSE 연결 시간 제공)
-      setTimeout(() => {
-        navigate("/my/coin");
-      }, 1000);
-
-    } catch (err) {
-      console.error("로그인 오류:", err);
-      alert("로그인 중 오류가 발생했습니다.");
-      fetchCaptcha(); // 에러 시에도 새 캡차
+          return;
+        } else {
+          console.log('🔓 OTP 비활성화 또는 미설정 - 바로 로그인');
+        }
+      } else {
+        console.warn('⚠️ OTP 상태 조회 실패:', result.message);
+        console.log('ℹ️ 실패했지만 바로 로그인 처리');
+      }
+      
+    } catch (otpError) {
+      console.error('❌ OTP 상태 조회 네트워크 오류:', otpError);
+      // 네트워크 오류시에도 로그인은 진행
     }
-  };
+    
+    // OTP 미설정이거나 비활성화된 사용자 - 바로 로그인
+    console.log('✅ 일반 로그인 처리');
+    loginToContext(accessToken, refreshToken, email || userId, role);
+    setTimeout(() => {
+      navigate("/my/coin");
+    }, 1000);
+
+  } catch (err) {
+    console.error("로그인 오류:", err);
+    alert("로그인 중 오류가 발생했습니다.");
+    fetchCaptcha();
+  }
+};
+
 
   return (
     <div className="min-h-screen flex flex-col px-5 pt-12 pb-10">
@@ -111,14 +181,14 @@ export default function LoginHome({ onSignup, onStoreSignup, buttonClassName }: 
               placeholder="아이디 (이메일)"
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none"
             />
             <input
               type="password"
               placeholder="비밀번호"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none"
             />
           </div>
         </LoginForm>

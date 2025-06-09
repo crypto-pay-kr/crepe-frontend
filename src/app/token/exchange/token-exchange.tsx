@@ -18,6 +18,7 @@ import { useTickerData } from '@/hooks/useTickerData'
 import { ChevronDown } from 'lucide-react';
 import { ApiError } from '@/error/ApiError'
 import { toast } from 'react-toastify' // 아이콘 import 추가
+import { v4 } from 'uuid';
 interface Portfolio {
   currency: string;
   amount: number;
@@ -43,7 +44,7 @@ export default function TokenExchangePage() {
   const tokenMeta = tokenList.find(t => t.currency === bank);
   const tickerData = useTickerData();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(false);
   const handleCurrencyClick = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
@@ -110,18 +111,22 @@ export default function TokenExchangePage() {
   const coinToKRW = useMemo(() => {
     if (!coinAmount || !selectedCurrency || !tickerData) return 0;
     const rate = tickerData[`KRW-${selectedCurrency}`]?.trade_price ?? 0;
-    return (coinAmount * rate).toFixed(2);
+    return coinAmount * rate;
   }, [coinAmount, selectedCurrency, tickerData]);
 
   //토큰을 원화로 환산한 값
   const tokenToKRW = useMemo(() => {
     if (!tokenAmount || !tokenPrice) return 0;
-    return (tokenAmount * tokenPrice).toFixed(2);
+    return tokenAmount * tokenPrice;
   }, [tokenAmount, tokenPrice]);
 
 
   const handleExchangeClick = async () => {
-    if (!tokenInfo)return console.error('Exchange error');
+    if (!tokenInfo)return;
+
+    const traceId = v4();
+    setIsLoading(true); // 로딩 시작
+
     const filteredCoinRates: Record<string, number> = {};
     tokenInfo.portfolios.forEach((p: any) => {
       const currency = p.currency;
@@ -129,7 +134,7 @@ export default function TokenExchangePage() {
       if (rate !== undefined && rate !== null) {
         filteredCoinRates[currency] = Number(rate.toFixed(2));
       } else {
-        console.warn(` ${currency} 시세를 찾을 수 없습니다.`);
+       toast(` ${currency} 시세를 찾을 수 없습니다.`);
       }
     });
 
@@ -139,7 +144,8 @@ export default function TokenExchangePage() {
         toCurrency: isCoinToToken ? tokenInfo.currency : selectedCurrency,
         coinRates: filteredCoinRates,
         tokenAmount: tokenAmount ?? 0,
-        coinAmount: coinAmount ?? 0
+        coinAmount: coinAmount ?? 0,
+        traceId
       });
       navigate("/token/exchange/complete", {
         state: {
@@ -157,6 +163,8 @@ export default function TokenExchangePage() {
       } else {
         toast('예기치 못한 오류가 발생했습니다.');
       }
+    }finally {
+      setIsLoading(false); // 로딩 종료
     }
   };
 
@@ -182,6 +190,16 @@ export default function TokenExchangePage() {
       });
   }, [bank, selectedCurrency]);
 
+  const isExchangeable = useMemo(() => {
+    if (!tokenInfo || !selectedCurrency) return false;
+
+    const portfolio = tokenInfo.portfolios.find((p: any) => p.currency === selectedCurrency);
+    if (!portfolio) return false;
+
+    const available = (portfolio.amount ?? 0) - (portfolio.nonAvailableAmount ?? 0);
+
+    return available > 0;
+  }, [tokenInfo, selectedCurrency]);
 
 
 
@@ -256,8 +274,14 @@ export default function TokenExchangePage() {
               <p className="text-xs text-gray-400">
                 보유:{' '}
                 {isCoinToToken
-                  ? `${myCoinBalance} ${selectedCurrency}`
-                  : `${myTokenBalance} ${bank}`}
+                  ? `${myCoinBalance.toLocaleString('ko-KR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  })} ${selectedCurrency}`
+                  : `${myTokenBalance.toLocaleString('ko-KR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  })} ${bank}`}
               </p>
             </div>
 
@@ -268,7 +292,9 @@ export default function TokenExchangePage() {
                 step="1"
                 min="0"
                 className="w-full border-none bg-transparent text-right text-xl font-bold outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                value={isCoinToToken ? coinAmount : tokenAmount}
+                value={isCoinToToken
+                  ? coinAmount.toFixed(2)
+                  : tokenAmount.toFixed(2)}
                 onChange={e => {
                   const value = Number(e.target.value)
                   const max = isCoinToToken ? myCoinBalance : myTokenBalance
@@ -280,7 +306,8 @@ export default function TokenExchangePage() {
                 placeholder="0"
               />
               <p className="text-sm text-gray-500">
-                ≈ {isCoinToToken ? `${coinToKRW} KRW` : `${tokenToKRW} KRW`}
+                ≈ {isCoinToToken ? `${coinToKRW.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KRW` :
+                `${tokenToKRW.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} KRW`}
               </p>
             </div>
           </div>
@@ -294,7 +321,7 @@ export default function TokenExchangePage() {
                 <button
                   key={percent}
                   onClick={() => {
-                    const amount =((maxBalance * percent) / 100).toFixed(2)
+                    const amount =((maxBalance * percent) / 100)
                     isCoinToToken
                       ? setCoinAmount(Number(amount))
                       : setTokenAmount(Number(amount))
@@ -320,7 +347,7 @@ export default function TokenExchangePage() {
 
         {/* 아래 결과 박스 */}
         <div className="mb-6 min-h-[110px] rounded-2xl border-2 border-gray-200 bg-white p-9 shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between">
             {/* 좌측: 로고 + 이름 */}
             <div className="flex items-center gap-0.5">
               {!isCoinToToken
@@ -385,43 +412,17 @@ export default function TokenExchangePage() {
 
             {/* 우측: 환전 결과 */}
             <div className="text-blue-600 min-w-[100px] text-right text-xl font-bold">
-              {isCoinToToken ? (
-                tokenAmount !== null ? (
-                  <>
-                    {tokenAmount}
-                    <span className="ml-5">{tokenInfo?.currency}</span>
-                  </>
-                ) : (
-                  '-'
-                )
-              ) : coinAmount !== null ? (
-                <>
-                  {coinAmount}
-                  <span className="ml-5">{selectedCurrency}</span>
-                </>
-              ) : (
-                '-'
-              )}
-
-              {isCoinToToken &&
-                selectedPortfolio &&
-                (() => {
-                  const totalAmount = selectedPortfolio.amount ?? 0
-                  const nonAvailable = selectedPortfolio.nonAvailableAmount ?? 0
-                  const remainingPercent =
-                    totalAmount > 0
-                      ? ((totalAmount - nonAvailable) / totalAmount) * 100
-                      : 100
-                  const isLowLiquidity = remainingPercent <= 30
-
-                  {
-                    isLowLiquidity && (
-                      <div className="mt-2 whitespace-nowrap text-xs font-semibold text-red-500">
-                        현재 {selectedCurrency} 잔여금액이 전체의 30% 이하입니다
-                      </div>
-                    )
-                  }
-                })()}
+              {isCoinToToken && tokenAmount !== null
+                ? `${tokenAmount.toLocaleString('ko-KR', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                })} ${tokenInfo?.currency}`
+                : coinAmount !== null
+                  ? `${coinAmount.toLocaleString('ko-KR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  })} ${selectedCurrency}`
+                  : '-'}
             </div>
           </div>
         </div>
@@ -431,16 +432,31 @@ export default function TokenExchangePage() {
           <p>
             * 잔여 교환 가능{' '}
             {isCoinToToken
-              ? `${selectedCurrency} → ${tokenInfo?.currency} : ${maxExchangeToken} ${tokenInfo?.currency}`
-              : `${tokenInfo?.currency} → ${selectedCurrency} : ${maxExchangeCoin} ${selectedCurrency}`}
+              ? `${selectedCurrency} → ${tokenInfo?.currency} : ${Number(maxExchangeToken).toLocaleString('ko-KR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              })} ${tokenInfo?.currency}`
+              : `${tokenInfo?.currency} → ${selectedCurrency} : ${Number(maxExchangeCoin).toLocaleString('ko-KR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              })} ${selectedCurrency}`}
           </p>
+          {isCoinToToken && !isExchangeable && (
+            <p className="text-red-500 text-sm mt-2">
+              교환 가능한 수량이 없습니다.
+            </p>
+          )}
         </div>
 
         <div className="mb-20 border-none p-5">
           <div className="mb-3 flex items-end justify-between">
             <h2 className="text-xl font-bold">토큰 구성</h2>
             <p className="text-sm text-gray-500">
-              총 자본금 {tokenCapital?.toFixed(2).toLocaleString()} KRW
+              총 자본금 {tokenCapital?.toLocaleString('ko-KR', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}{' '}
+              KRW
             </p>
           </div>
 
@@ -457,7 +473,10 @@ export default function TokenExchangePage() {
                     {p.currency}
                   </span>
                   <span className="text-sm text-gray-600">
-                    교환됨 {swappedRatio}%
+                      교환됨 {swappedRatio.toLocaleString('ko-KR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  })}%
                   </span>
                 </div>
                 <div className="flex h-3 w-full overflow-hidden rounded-full bg-gray-200">
@@ -475,11 +494,16 @@ export default function TokenExchangePage() {
           })}
         </div>
 
-        <Button
-          text="환전 요청"
-          onClick={handleExchangeClick}
-          className="w-full rounded-lg py-3 text-lg font-semibold shadow-md"
-        />
+
+
+        <div className="fixed bottom-[80px] left-0 w-full px-5">
+          <Button
+            text={isLoading ? "환전 중..." : "환전 요청"}
+            disabled={isLoading}
+            onClick={handleExchangeClick}
+            className="w-full rounded-lg py-3 text-lg font-semibold shadow-md"
+          />
+        </div>
       </main>
       <BottomNav />
     </div>

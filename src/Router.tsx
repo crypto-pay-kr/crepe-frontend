@@ -53,6 +53,7 @@ import OtpSetup from "./app/mypage/otp/page";
 import { SellerOnlyRoute, UserOnlyRoute } from '@/routes/RoleProtectedRoute';
 import CustomerSupportPage from "./app/center/page";
 import TransferPage from '@/app/coin/transfer/TransferPage'
+import OtpVerificationPage from "./components/signup/OtpVerification";
 
 function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gray"; toggleButtonColor: () => void }) {
   useEffect(() => {
@@ -82,6 +83,7 @@ function Router({ buttonColor, toggleButtonColor }: { buttonColor: "blue" | "gra
           <Route path="/phone/verification" element={<PhoneVerificationPage />} />
           <Route path="/additional/info" element={<AdditionalUserInfoPage />} />
           <Route path="/signup-complete" element={<SignupCompletePage />} />
+          <Route path="/otp-verify" element={<OtpVerificationPage />} />
           
           {/* 신분증 인증 */}
           <Route path="/id/verification" element={<IDVerificationStep1 />} />

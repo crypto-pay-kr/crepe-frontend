@@ -17,6 +17,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "types": ["cypress"],
     "plugins": [
       {
         "name": "next"
@@ -30,7 +31,9 @@
     ".next/types/**/*.ts",
     "src/types",
     "node_modules/eslint-plugin-react/lib/types.d.ts",
-    "node_modules/eslint-plugin-react/lib/types.d.ts"
+    "node_modules/eslint-plugin-react/lib/types.d.ts",
+    "cypress/**/*.ts",
+    "cypress/**/*.d.ts"
   ],
   "exclude": ["node_modules"]
 }

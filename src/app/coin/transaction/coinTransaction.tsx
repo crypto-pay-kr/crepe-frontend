@@ -9,6 +9,7 @@ import {requestDeposit } from '@/api/coin'
 import { ApiError } from '@/error/ApiError'
 import { toast } from 'react-toastify';
 
+import {v4} from 'uuid';
 type RouteParams = {
   symbol: string;
 }
@@ -24,8 +25,8 @@ export default function CoinTransaction() {
   const params = useParams<keyof RouteParams>();
   const symbol = params.symbol;
   const [transactionId, setTransactionId] = useState<string>("")
-
-  const isButtonDisabled = !transactionId
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const isButtonDisabled = !transactionId || isLoading;
 
   const handleNext = async () => {
     if (!symbol) {
@@ -37,8 +38,11 @@ export default function CoinTransaction() {
       toast("거래 ID를 입력해주세요.");
       return;
     }
+
+    setIsLoading(true); // ⬅️ 로딩 시작
     try {
-      await requestDeposit(symbol, transactionId);
+      const traceId = v4();
+      await requestDeposit(symbol, transactionId, traceId);
       navigate(`/coin-detail/${symbol}`, {
         state: {
           isUser: true,
@@ -52,6 +56,8 @@ export default function CoinTransaction() {
       } else {
         toast('예기치 못한 오류가 발생했습니다.');
       }
+    } finally {
+      setIsLoading(false); // ⬅️ 요청 완료 후 로딩 해제
     }
   };
 
@@ -76,10 +82,11 @@ export default function CoinTransaction() {
 
       <div className="p-5 bg-white border-t border-gray-100 shadow-sm">
         <Button
-          text="확인"
+          text={isLoading? "입금 중.." : "확인"}
           onClick={handleNext}
           color={isButtonDisabled ? "gray" : "blue"}
           className="rounded-lg h-14 text-lg font-medium"
+          disabled={isButtonDisabled}
         />
       </div>
       <BottomNav />

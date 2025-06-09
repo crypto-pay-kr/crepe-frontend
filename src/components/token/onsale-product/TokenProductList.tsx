@@ -7,7 +7,7 @@ interface TokenProductListProps {
 
 export default function TokenProductList({ items }: TokenProductListProps) {
   return (
-    <div className="space-y-6 p-3">
+    <div className="space-y-6 p-2">
       {items.map((item) => (
         <TokenProductItem key={item.productId} {...item} />
       ))}

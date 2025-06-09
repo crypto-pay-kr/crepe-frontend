@@ -13,6 +13,7 @@ import {
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useCoinStore } from '@/constants/useCoin';
 import { useTickerData } from '@/hooks/useTickerData'
+import { toast } from 'react-toastify'
 
 // 수정된 PaymentHistory 인터페이스 - Backend enum과 일치
 export interface PaymentHistory {
@@ -20,7 +21,7 @@ export interface PaymentHistory {
   amount: number;
   transferredAt: string;
   afterBalance: number;
-  type: 'DEPOSIT' | 'WITHDRAW' | 'INTEREST' | 'SETTLEMENT' | 'REFUND' | 'PAY' | 'CANCEL' | 'TRANSFER' | 'EXCHANGE';
+  type: 'DEPOSIT' | 'WITHDRAW' | 'INTEREST' | 'SETTLEMENT' | 'REFUND' | 'PAY' | 'CANCEL' | 'TRANSFER' | 'EXCHANGE' |'SUBSCRIBE';
   name?: string; // optional로 변경
 }
 
@@ -30,7 +31,7 @@ export default function CoinDetailPage() {
   const { symbol } = useParams()
   const location = useLocation()
   const tickerData = useTickerData();
-  const [addressStatus, setAddressStatus] = useState<'ACTIVE' | 'REGISTERING' | 'NOT_REGISTERED' |'UNREGISTERED'|'UNREGISTERED_AND_REGISTERING'|'REJECTED'| null>(null);
+  const [addressStatus, setAddressStatus] = useState<'ACTIVE' | 'REGISTERING' | 'NOT_REGISTERED' |'UNREGISTERED'|'UNREGISTERED_AND_REGISTERING'|'REJECTED'|'HOLD'| null>(null);
   const [showModal, setShowModal] = useState(false)
   const [addressInfo, setAddressInfo] = useState<{
     address: string;
@@ -83,8 +84,7 @@ export default function CoinDetailPage() {
 };
 
 const getTransactionTypeDisplay = (item: PaymentHistory, isUser: boolean): string => {
-  console.log('Processing transaction:', item.type, item.status, item.amount, 'isUser:', isUser);
-  
+
   switch (item.type) {
     case 'DEPOSIT':
       return item.status === 'ACCEPTED' ? '입금 완료' : '입금 대기중';
@@ -173,7 +173,7 @@ const getDisplayAmount = (item: PaymentHistory): number => {
           setAddressInfo({ address: res.address, tag: res.tag, addressStatus: res.addressRegistryStatus });
         })
         .catch((err) => {
-          console.error("등록된 주소없음", err);
+          toast("등록된 주소없음", err);
           setAddressStatus('NOT_REGISTERED');
           setAddressInfo(null);
         });
@@ -189,7 +189,7 @@ const getDisplayAmount = (item: PaymentHistory): number => {
         const data = await getCoinBalanceByCurrency(symbol);
         setBalance(data.balance ?? 0);
       } catch (e) {
-        console.warn("잔액 조회 실패:", e);
+        toast("잔액 조회 실패:");
       }
     };
 
@@ -252,7 +252,12 @@ const getDisplayAmount = (item: PaymentHistory): number => {
                   {balance.toFixed(2)} {symbol}
                 </p>
                 <p className="text-sm text-gray-500 sm:text-base">
-                  = {(balance * livePrice).toLocaleString()} KRW
+                  ={' '}
+                  {(balance * livePrice).toLocaleString('ko-KR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}{' '}
+                  KRW
                 </p>
               </div>
             </div>
@@ -325,12 +330,15 @@ const getDisplayAmount = (item: PaymentHistory): number => {
               }}
             >
               <span className="text-white font-medium text-base ">
-                {addressStatus === 'ACTIVE' && '계좌 변경'}
-                {addressStatus === 'REGISTERING' && '계좌가 등록중입니다.'}
-                {addressStatus === 'UNREGISTERED' && '계좌가 등록 해제 중입니다...'}
-                {addressStatus === 'UNREGISTERED_AND_REGISTERING' && '계좌 등록 해제 후 변경 중입니다...'}
-                {addressStatus === 'NOT_REGISTERED' && '출금계좌 등록하기'}
-                {addressStatus === 'REJECTED' && '거절 되었습니다 다시 등록하기'}
+                    {{
+                      ACTIVE: '계좌 변경',
+                      REGISTERING: '계좌가 등록 중 입니다.',
+                      UNREGISTERED: '계좌가 등록 해제 중 입니다...',
+                      UNREGISTERED_AND_REGISTERING: '계좌 등록 해제 후 변경 중 입니다...',
+                      NOT_REGISTERED: '출금계좌 등록하기',
+                      REJECTED: '거절 되었습니다 다시 등록하기',
+                      HOLD: '계좌가 정지당했습니다',
+                    }[addressStatus as string] || ''}
               </span>
             </div>
           </div>
@@ -356,14 +364,13 @@ const getDisplayAmount = (item: PaymentHistory): number => {
           <div className="mb-0 space-y-4 pb-16 text-sm sm:space-y-5 sm:pb-10 sm:text-base md:space-y-6 md:text-lg lg:text-xl">
             {data?.pages.map((page, pageIndex) =>
               page.content.map((item: PaymentHistory, idx: number) => {
-                console.log('거래내역 item:', item);
-                
-                const rate = tickerData[`KRW-${symbol}`]?.trade_price ?? 0;
-                const displayAmount = getDisplayAmount(item);
-                const krw = Math.floor(displayAmount * rate).toLocaleString();
-                const showAfterBalance = item.status === 'ACCEPTED';
-                const isDeposit = getTransactionDirection(item, isUser) === 'deposit';
 
+                const rate = tickerData[`KRW-${symbol}`]?.trade_price ?? 0
+                const displayAmount = getDisplayAmount(item)
+                const krw = displayAmount * rate
+                const showAfterBalance = item.status === 'ACCEPTED'
+                const isDeposit =
+                  getTransactionDirection(item, isUser) === 'deposit'
                 return (
                   <div
                     key={`${pageIndex}-${idx}`}
@@ -374,7 +381,7 @@ const getDisplayAmount = (item: PaymentHistory): number => {
                       type={getTransactionTypeDisplay(item, isUser)}
                       balance={`${item.afterBalance ?? '-'} ${symbol}`}
                       amount={`${displayAmount.toFixed(2)} ${symbol}`}
-                      krw={`${krw} KRW`}
+                      krw={`${krw}`}
                       isDeposit={isDeposit}
                       showAfterBalance={showAfterBalance}
                       originalAmount={item.amount}

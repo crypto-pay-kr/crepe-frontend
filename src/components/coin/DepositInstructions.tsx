@@ -30,8 +30,8 @@ const DepositInstructions: React.FC<CoinLinkProps> = ({currency}) => {
           불가능합니다.
         </p>
         <p className="text-sm font-bold text-red-700">
-          * 입금 방식을 바로입금으로 설정해주세요 일부 코인에서는 수수료가 발생
-          할수 있습니다 *
+           입금 방식을 바로입금으로 설정해주세요 일부 코인에서는 수수료가 발생
+          할수 있습니다
         </p>
       </div>
 
