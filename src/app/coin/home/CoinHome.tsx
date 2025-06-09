@@ -174,7 +174,7 @@ export default function CoinHome() {
                 </span>
               </div>
             </div>
-            {/* 금액과 버튼을 나란히 정렬 */}
+
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold tracking-tight text-gray-800">
                 <h2 className="text-2xl font-bold tracking-tight text-gray-800">
